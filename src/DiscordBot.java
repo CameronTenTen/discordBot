@@ -34,6 +34,7 @@ public class DiscordBot
 		cmdHandler.registerCommand(new CommandPing());
 		cmdHandler.registerCommand(new CommandAdd());
 		cmdHandler.registerCommand(new CommandRem());
+		cmdHandler.registerCommand(new CommandList());
 	}
 	
 	
