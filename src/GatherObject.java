@@ -66,4 +66,9 @@ public class GatherObject
 		}
 		return returnString;
 	}
+	
+	public String queueString()
+	{
+		return queue.toString();
+	}
 }

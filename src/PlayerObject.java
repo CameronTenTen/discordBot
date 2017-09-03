@@ -51,4 +51,9 @@ public class PlayerObject
 	public void setInQueue(boolean inQueue) {
 		this.inQueue = inQueue;
 	}
+	
+	public String toString()
+	{
+		return discordUserInfo.getName()+"#"+discordUserInfo.getDiscriminator();
+	}
 }

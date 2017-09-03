@@ -41,4 +41,15 @@ public class GatherQueueObject extends Vector<PlayerObject>
 	{
 		return this.numPlayersInQueue()>=maxQueueSize;
 	}
+	
+	public String toString()
+	{
+		String returnString="";
+		for(PlayerObject player : this)
+		{
+			returnString+=player.toString();
+			returnString+=", ";
+		}
+		return returnString.substring(0, returnString.length()-2);
+	}
 }
