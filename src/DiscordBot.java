@@ -7,12 +7,11 @@ import sx.blah.discord.util.DiscordException;
 public class DiscordBot
 {
 	
-	public IDiscordClient client; // The instance of the discord client.
+	public static IDiscordClient client; // The instance of the discord client.
 	
 	public static DiscordBot bot;
 	
 	public static GatherObject gatherInfo;
-	
 	
 	public void startBot(String token)
 	{
@@ -28,6 +27,7 @@ public class DiscordBot
 			e.printStackTrace();
 			return;
 		}
+		DiscordBot.setPlayingText("("+gatherInfo.numPlayersInQueue()+"/"+gatherInfo.maxQueueSize()+")");
 
 		CommandHandler cmdHandler = new Discord4JHandler(client);
 		
@@ -46,7 +46,7 @@ public class DiscordBot
 		bot.startBot(args[0]);
 	}
 	
-	public void setPlayingText(String newText)
+	public static void setPlayingText(String newText)
 	{
 		client.changePlayingText(newText);
 	}

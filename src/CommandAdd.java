@@ -8,7 +8,7 @@ public class CommandAdd implements CommandExecutor
 	public String onCommand(IMessage message)
 	{
 		int addReturnVal = DiscordBot.gatherInfo.addToQueue(new PlayerObject(message.getAuthor(), false));
-		//DiscordBot.setPlayingText(DiscordBot.gatherInfo.numPlayersInQueue()+"/"+DiscordBot.gatherInfo.maxQueueSize()+" in queue");
+		DiscordBot.setPlayingText(DiscordBot.gatherInfo.numPlayersInQueue()+"/"+DiscordBot.gatherInfo.maxQueueSize()+" in queue");
 		//DiscordBot.setChannel("("+DiscordBot.gatherInfo.numPlayersInQueue()+"/"+DiscordBot.gatherInfo.maxQueueSize()+")");
 		switch(addReturnVal)
 		{
