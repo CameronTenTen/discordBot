@@ -24,8 +24,9 @@ public class DiscordBot
 			client = builder.login(); // Builds the IDiscordClient instance and logs it in
 			System.out.println("logged in");
 		} catch (DiscordException e) { // Error occurred logging in
-			System.err.println("Error occurred while logging in!");
+			System.err.println("Error occurred while logging in with token: "+token);
 			e.printStackTrace();
+			return;
 		}
 
 		CommandHandler cmdHandler = new Discord4JHandler(client);
