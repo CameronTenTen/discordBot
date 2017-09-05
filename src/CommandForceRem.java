@@ -10,7 +10,9 @@ public class CommandForceRem implements CommandExecutor
 	@Command(aliases = {"!forcerem"}, description = "Admin only - remove a user from the queue")
 	public void onCommand(IMessage message)
 	{
+		if(message.getGuild() == null) return;
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
+		if(message.getChannel() != gather.getCommandChannel()) return;
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
@@ -24,7 +26,7 @@ public class CommandForceRem implements CommandExecutor
 		{
 			if(1==gather.remFromQueue(new PlayerObject(user, false)))
 			{
-				gather.getCommandChannel().sendMessage(user.getDisplayName(gather.getGuild())+" ("+user.getName()+"#"+user.getDiscriminator()+") was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+				gather.getCommandChannel().sendMessage(gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
 			}
 		}
 		

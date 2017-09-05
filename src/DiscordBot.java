@@ -113,7 +113,7 @@ public class DiscordBot
 		{
 			if(object.remFromQueue(new PlayerObject(user, false))==1)
 			{
-				object.getCommandChannel().sendMessage(user.getDisplayName(object.getGuild())+ " ("+user.getName()+"#"+user.getDiscriminator()+" has been **removed** from the queue (disconnected) ("+DiscordBot.getGatherObjectForGuild(object.getGuild()).numPlayersInQueue()+"/"+DiscordBot.getGatherObjectForGuild(object.getGuild()).maxQueueSize()+")");
+				object.getCommandChannel().sendMessage(object.fullUserString(user)+" has been **removed** from the queue (disconnected) ("+DiscordBot.getGatherObjectForGuild(object.getGuild()).numPlayersInQueue()+"/"+DiscordBot.getGatherObjectForGuild(object.getGuild()).maxQueueSize()+")");
 				DiscordBot.setPlayingText(object.numPlayersInQueue()+"/"+object.maxQueueSize()+" in queue");
 				DiscordBot.setChannelCaption(object.getGuild() , object.numPlayersInQueue()+"-in-q");
 			}

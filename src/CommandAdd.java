@@ -5,9 +5,12 @@ import sx.blah.discord.handle.obj.IMessage;
 public class CommandAdd implements CommandExecutor
 {
 	@Command(aliases = {"!add"}, description = "Add yourself to the queue")
-	public String onCommand(IMessage message)
+	public void onCommand(IMessage message)
 	{
+		if(message.getGuild() == null) return;
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
+		if(message.getChannel() != gather.getCommandChannel()) return;
+		
 		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
 		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
@@ -15,14 +18,17 @@ public class CommandAdd implements CommandExecutor
 		switch(addReturnVal)
 		{
 		case 1:
-			return message.getAuthor().getDisplayName(message.getGuild())+" ("+message.getAuthor().getName()+"#"+message.getAuthor().getDiscriminator()+")"+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")";
+			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+			return;
 		case 2:
-			message.getChannel().sendMessage(message.getAuthor().getDisplayName(message.getGuild())+" ("+message.getAuthor().getName()+"#"+message.getAuthor().getDiscriminator()+")"+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
 			gather.startGame();
-			return "";
+			return;
 		case 0:
-			return "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!";
+			gather.getCommandChannel().sendMessage("You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+			return;
 		}
-		return "An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue";
+		gather.getCommandChannel().sendMessage("An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue");
+		return;
 	}
 }
