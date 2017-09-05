@@ -1,8 +1,15 @@
+import java.util.HashSet;
+import java.util.Set;
+
 import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.Discord4JHandler;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
 
 public class DiscordBot
 {
@@ -11,7 +18,22 @@ public class DiscordBot
 	
 	public static DiscordBot bot;
 	
-	public static GatherObject gatherInfo;
+	public static Set<GatherObject> gatherObjects;
+	
+	public static void addGuild(IGuild guild)
+	{
+		gatherObjects.add(new GatherObject(guild));
+	}
+	
+	public static GatherObject getGatherObjectForGuild(IGuild guild)
+	{
+		for(GatherObject object : gatherObjects)
+		{
+			if(object.getGuild()==guild)
+				return object;
+		}
+		return null;
+	}
 	
 	public void startBot(String token)
 	{
@@ -27,8 +49,17 @@ public class DiscordBot
 			e.printStackTrace();
 			return;
 		}
-		DiscordBot.setPlayingText("("+gatherInfo.numPlayersInQueue()+"/"+gatherInfo.maxQueueSize()+")");
-
+		
+		//event listeners
+		EventDispatcher dispatcher = client.getDispatcher();
+	        dispatcher.registerListener(new ReadyEventListener());
+		
+		
+		//load the queue object
+		
+		//delete the saved object so we don't load it next time
+		
+		//command listeners
 		CommandHandler cmdHandler = new Discord4JHandler(client);
 		
 		//add all the commands
@@ -41,13 +72,48 @@ public class DiscordBot
 	
 	public static void main(String[] args)
 	{
-		gatherInfo = new GatherObject();
 		bot = new DiscordBot();
+		gatherObjects = new HashSet<GatherObject>();
 		bot.startBot(args[0]);
 	}
 	
 	public static void setPlayingText(String newText)
 	{
 		client.changePlayingText(newText);
+	}
+	
+	public static void setChannelCaption(IGuild guild, String newText)
+	{
+		GatherObject gather = getGatherObjectForGuild(guild);
+		
+		//remove spaces from the string (spaces not allowed)
+		//TODO: remove other illegal characters instead of just catching the exception
+		newText.replaceAll("\\s", "");
+		try
+		{
+			gather.getCommandChannel().changeName( newText + "_" + gather.textChannelString);
+		}
+		catch (IllegalArgumentException e)
+		{
+			System.out.println("Error renaming channel: " + e.getMessage());
+		}
+		catch (MissingPermissionsException e)
+		{
+			System.out.println("Error renaming channel: " + e.getMessage());
+		}
+	}
+	
+	
+	public static void userWentOffline(IUser user)
+	{
+		for(GatherObject object : gatherObjects)
+		{
+			if(object.remFromQueue(new PlayerObject(user, false))==1)
+			{
+				object.getCommandChannel().sendMessage(user.getDisplayName(object.getGuild())+ " ("+user.getName()+"#"+user.getDiscriminator()+" has been **removed** from the queue (disconnected) ("+DiscordBot.getGatherObjectForGuild(object.getGuild()).numPlayersInQueue()+"/"+DiscordBot.getGatherObjectForGuild(object.getGuild()).maxQueueSize()+")");
+				DiscordBot.setPlayingText(object.numPlayersInQueue()+"/"+object.maxQueueSize()+" in queue");
+				DiscordBot.setChannelCaption(object.getGuild() , object.numPlayersInQueue()+"-in-q");
+			}
+		}
 	}
 }

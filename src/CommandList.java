@@ -7,6 +7,15 @@ public class CommandList implements CommandExecutor
 	@Command(aliases = {"!list"}, description = "Check the current player list")
 	public String onCommand(IMessage message)
 	{
-		return "Current queue: "+DiscordBot.gatherInfo.queueString();
+		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
+		String currentQueue = gather.queueString();
+		if(currentQueue.length()>0)
+		{
+			return "Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+"): "+currentQueue;
+		}
+		else
+		{
+			return "Queue is **empty**";
+		}
 	}
 }
