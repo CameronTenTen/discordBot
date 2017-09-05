@@ -41,6 +41,11 @@ public class GatherObject
 		}
 	}
 	
+	public void clearQueue()
+	{
+		queue.clear();
+	}
+	
 	public int numPlayersInQueue()
 	{
 		return queue.numPlayersInQueue();
