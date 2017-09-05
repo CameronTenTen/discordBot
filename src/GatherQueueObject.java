@@ -4,6 +4,7 @@ public class GatherQueueObject extends Vector<PlayerObject>
 {
 	public static int maxQueueSize = 10;
 	
+	@Override
 	public boolean add(PlayerObject player)
 	{
 		int index = this.indexOf(player);
@@ -18,7 +19,8 @@ public class GatherQueueObject extends Vector<PlayerObject>
 		}
 	}
 	
-	public boolean rem(PlayerObject player)
+	@Override
+	public boolean remove(Object player)
 	{
 		int index = this.indexOf(player);
 		if(index!=-1)
@@ -31,6 +33,7 @@ public class GatherQueueObject extends Vector<PlayerObject>
 			return false;
 		}
 	}
+	
 	
 	public int numPlayersInQueue()
 	{
