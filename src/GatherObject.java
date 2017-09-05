@@ -1,13 +1,58 @@
+import java.util.List;
+
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 
 public class GatherObject
 {
 	private GatherQueueObject queue;
+	
+	private IGuild guild;
+	private IChannel commandChannel;
+	public String textChannelString = "gather-general";
 	
 	GatherObject()
 	{
 		queue = new GatherQueueObject();
 	}
 	
+	GatherObject(IGuild guild)
+	{
+		queue = new GatherQueueObject();
+		setGuild(guild);
+	}
+	
+	public IGuild getGuild() {
+		return guild;
+	}
+
+	public void setGuild(IGuild guild) {
+		this.guild = guild;
+		
+		//search text channels for a command channel
+		List<IChannel> channels = guild.getChannels();
+		
+		for(IChannel channel : channels)
+		{
+			if(channel.getName().contains(textChannelString))
+			{
+				commandChannel = channel;
+				return;
+			}
+		}
+		//no command channel found
+		System.out.println("Error: no command channel found for guild: "+guild.getName());
+		
+	}
+
+	public IChannel getCommandChannel() {
+		return commandChannel;
+	}
+
+	public void setCommandChannel(IChannel commandChannel) {
+		this.commandChannel = commandChannel;
+	}
+
 	/**
 	 * Adds a player to the gather queue
 	 *
@@ -75,5 +120,11 @@ public class GatherObject
 	public String queueString()
 	{
 		return queue.toString();
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		return (this.guild == ((GatherObject)obj).guild);
 	}
 }
