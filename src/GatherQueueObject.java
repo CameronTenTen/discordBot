@@ -50,6 +50,13 @@ public class GatherQueueObject extends Vector<PlayerObject>
 			returnString+=player.toString();
 			returnString+=", ";
 		}
-		return returnString.substring(0, returnString.length()-2);
+		if(returnString.length()<=2)
+		{
+			return "";
+		}
+		else
+		{
+			return returnString.substring(0, returnString.length()-2);
+		}
 	}
 }
