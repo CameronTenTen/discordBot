@@ -86,6 +86,11 @@ public class GatherObject
 		}
 		return false;
 	}
+	
+	public String fullUserString(IUser user)
+	{
+		return user.getDisplayName(getGuild()) + "(" + user.getName() + "#" + user.getDiscriminator() + ")";
+	}
 
 	/**
 	 * Adds a player to the gather queue
