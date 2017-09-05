@@ -4,46 +4,57 @@ import java.util.List;
 
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 
 public class GatherObject
 {
 	private GatherQueueObject queue;
 	
 	private IGuild guild;
-	private IChannel commandChannel;
+	private IChannel commandChannel = null;
+	private IRole adminRole;
 	public String textChannelString = "gather-general";
-	
-	GatherObject()
-	{
-		queue = new GatherQueueObject();
-	}
+	public String adminString = "Gather Admin";
 	
 	GatherObject(IGuild guild)
 	{
 		queue = new GatherQueueObject();
 		setGuild(guild);
+		
 	}
 	
 	public IGuild getGuild() {
 		return guild;
 	}
 
-	public void setGuild(IGuild guild) {
+	public void setGuild(IGuild guild)
+	{
 		this.guild = guild;
 		
 		//search text channels for a command channel
 		List<IChannel> channels = guild.getChannels();
-		
 		for(IChannel channel : channels)
 		{
 			if(channel.getName().contains(textChannelString))
 			{
 				commandChannel = channel;
-				return;
+				break;
 			}
 		}
+		
+		List<IRole> roles = guild.getRoles();
+		for(IRole role : roles)
+		{
+			if(role.getName().contains(adminString))
+			{
+				adminRole = role;
+				break;
+			}
+		}
+		
 		//no command channel found
-		System.out.println("Error: no command channel found for guild: "+guild.getName());
+		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
 		
 	}
 
@@ -53,6 +64,27 @@ public class GatherObject
 
 	public void setCommandChannel(IChannel commandChannel) {
 		this.commandChannel = commandChannel;
+	}
+	
+	public IRole getAdminRole() {
+		return adminRole;
+	}
+
+	public void setAdminRole(IRole adminRole) {
+		this.adminRole = adminRole;
+	}
+	
+	public boolean isAdmin(IUser user)
+	{
+		List<IRole> roles = user.getRolesForGuild(this.guild);
+		for(IRole role : roles)
+		{
+			if(role.equals(this.getAdminRole()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
