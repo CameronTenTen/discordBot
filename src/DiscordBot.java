@@ -53,6 +53,7 @@ public class DiscordBot
 		//event listeners
 		EventDispatcher dispatcher = client.getDispatcher();
 	        dispatcher.registerListener(new ReadyEventListener());
+	        dispatcher.registerListener(new PresenceEventListener());
 		
 		
 		//load the queue object
