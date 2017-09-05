@@ -11,14 +11,14 @@ public class CommandAdd implements CommandExecutor
 		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
 		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
+		
 		switch(addReturnVal)
 		{
 		case 1:
 			return message.getAuthor().getDisplayName(message.getGuild())+" ("+message.getAuthor().getName()+"#"+message.getAuthor().getDiscriminator()+")"+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")";
 		case 2:
 			message.getChannel().sendMessage(message.getAuthor().getDisplayName(message.getGuild())+" ("+message.getAuthor().getName()+"#"+message.getAuthor().getDiscriminator()+")"+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
-			message.getChannel().sendMessage("Gather game starting with players: "+gather.getMentionList());
-			gather.clearQueue();
+			gather.startGame();
 			return "";
 		case 0:
 			return "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!";

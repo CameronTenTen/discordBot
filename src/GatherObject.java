@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import sx.blah.discord.handle.obj.IChannel;
@@ -86,6 +88,26 @@ public class GatherObject
 		}
 	}
 	
+	public void startGame()
+	{
+
+		//set the teams
+		ArrayList<String> list = this.getMentionList();
+		Collections.shuffle(list);
+		List<String> blueTeam = list.subList(0, list.size()/2);
+		List<String> redTeam = list.subList(list.size()/2, list.size());
+		//setup the game
+		//TODO: once server communication has been implemented more game setup is needed here
+		
+		//announce the game
+		//do the team messages in seperate lines so that it highlights the players team
+		getCommandChannel().sendMessage("Gather game starting with teams:");
+		getCommandChannel().sendMessage("__**Blue**__: "+blueTeam.toString());
+		getCommandChannel().sendMessage("__**Red**__:  "+redTeam.toString());
+		//reset the queue
+		this.clearQueue();
+	}
+	
 	public void clearQueue()
 	{
 		queue.clear();
@@ -106,7 +128,7 @@ public class GatherObject
 		return GatherQueueObject.maxQueueSize;
 	}
 	
-	public String getMentionList()
+	public String getMentionString()
 	{
 		String returnString="";
 		for(PlayerObject player : queue)
@@ -115,6 +137,16 @@ public class GatherObject
 			returnString += player.getDiscordUserInfo().mention();
 		}
 		return returnString;
+	}
+	
+	public ArrayList<String> getMentionList()
+	{
+		ArrayList<String> returnList = new ArrayList<String>();
+		for(PlayerObject player : queue)
+		{
+			returnList.add(player.getDiscordUserInfo().mention());
+		}
+		return returnList;
 	}
 	
 	public String queueString()
