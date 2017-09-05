@@ -8,8 +8,9 @@ public class CommandList implements CommandExecutor
 	public String onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
+		if(gather == null) return "";
 		String currentQueue = gather.queueString();
-		if(currentQueue.length()>0)
+		if(!currentQueue.isEmpty())
 		{
 			return "Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+"): "+currentQueue;
 		}
