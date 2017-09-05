@@ -31,7 +31,7 @@ public class GatherObject
 	
 	public int remFromQueue(PlayerObject player)
 	{
-		if(queue.rem(player))
+		if(queue.remove(player))
 		{
 			return 1;
 		}
