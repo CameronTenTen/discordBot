@@ -6,6 +6,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 
 public class GatherObject
 {
@@ -14,8 +15,14 @@ public class GatherObject
 	private IGuild guild;
 	private IChannel commandChannel = null;
 	private IRole adminRole;
+	private IVoiceChannel blueVoiceChannel;
+	private IVoiceChannel redVoiceChannel;
+	private IVoiceChannel generalVoiceChannel;
 	public String textChannelString = "gather-general";
 	public String adminString = "Gather Admin";
+	public String blueVoiceString = "Gather Team BLUE";
+	public String redVoiceString = "Gather Team RED";
+	public String generalVoiceString = "Gather General";
 	
 	GatherObject(IGuild guild)
 	{
@@ -38,7 +45,7 @@ public class GatherObject
 		{
 			if(channel.getName().contains(textChannelString))
 			{
-				commandChannel = channel;
+				setCommandChannel(channel);
 				break;
 			}
 		}
@@ -48,10 +55,20 @@ public class GatherObject
 		{
 			if(role.getName().contains(adminString))
 			{
-				adminRole = role;
+				setAdminRole(role);
 				break;
 			}
 		}
+		
+		//get the first voice channel matching the right string
+		List<IVoiceChannel> voice = guild.getVoiceChannelsByName(blueVoiceString);
+		if(!voice.isEmpty()) setBlueVoiceChannel(voice.get(0));
+		
+		voice = guild.getVoiceChannelsByName(redVoiceString);
+		if(!voice.isEmpty()) setRedVoiceChannel(voice.get(0));
+		
+		voice = guild.getVoiceChannelsByName(generalVoiceString);
+		if(!voice.isEmpty()) setGeneralVoiceChannel(voice.get(0));
 		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
@@ -72,6 +89,30 @@ public class GatherObject
 
 	public void setAdminRole(IRole adminRole) {
 		this.adminRole = adminRole;
+	}
+	
+	public IVoiceChannel getBlueVoiceChannel() {
+		return blueVoiceChannel;
+	}
+
+	public void setBlueVoiceChannel(IVoiceChannel blueVoiceChannel) {
+		this.blueVoiceChannel = blueVoiceChannel;
+	}
+
+	public IVoiceChannel getRedVoiceChannel() {
+		return redVoiceChannel;
+	}
+
+	public void setRedVoiceChannel(IVoiceChannel redVoiceChannel) {
+		this.redVoiceChannel = redVoiceChannel;
+	}
+
+	public IVoiceChannel getGeneralVoiceChannel() {
+		return generalVoiceChannel;
+	}
+
+	public void setGeneralVoiceChannel(IVoiceChannel generalVoiceChannel) {
+		this.generalVoiceChannel = generalVoiceChannel;
 	}
 	
 	public boolean isAdmin(IUser user)
