@@ -4,6 +4,7 @@ public class PlayerObject
 {
 	
 	private IUser discordUserInfo;
+	private String kagName;
 	private boolean captainsVote;
 	private boolean inQueue;
 	
@@ -21,6 +22,7 @@ public class PlayerObject
 		{
 			return false;
 		}
+		//discordUserInfo has an equals override too
 		if(this.discordUserInfo.equals(((PlayerObject)player).discordUserInfo))
 		{
 			return true;
@@ -35,6 +37,15 @@ public class PlayerObject
 	public void setDiscordUserInfo(IUser author) {
 		this.discordUserInfo = author;
 	}
+	
+	public String getKagName() {
+		return kagName;
+	}
+
+	public void setKagName(String kagName) {
+		this.kagName = kagName;
+	}
+
 
 	public boolean isCaptainsVote() {
 		return captainsVote;
