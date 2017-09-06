@@ -70,6 +70,7 @@ public class DiscordBot
 		cmdHandler.registerCommand(new CommandList());
 		cmdHandler.registerCommand(new CommandClear());
 		cmdHandler.registerCommand(new CommandForceRem());
+		cmdHandler.registerCommand(new CommandEnd());
 	}
 	
 	
