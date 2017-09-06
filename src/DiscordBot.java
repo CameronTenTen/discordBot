@@ -29,7 +29,7 @@ public class DiscordBot
 	{
 		for(GatherObject object : gatherObjects)
 		{
-			if(object.getGuild()==guild)
+			if(object.getGuild().equals(guild))
 				return object;
 		}
 		return null;
