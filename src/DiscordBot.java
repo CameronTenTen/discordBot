@@ -1,12 +1,18 @@
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.Discord4JHandler;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
+import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -19,6 +25,8 @@ public class DiscordBot
 	public static DiscordBot bot;
 	
 	public static Set<GatherObject> gatherObjects;
+	
+	public static Vector<ReactWatchObject> reactWatcher;
 	
 	public static void addGuild(IGuild guild)
 	{
@@ -33,6 +41,29 @@ public class DiscordBot
 				return object;
 		}
 		return null;
+	}
+	
+	public void addMessageReactWatch(IMessage message, IEmoji reaction, GenericReactCallbackObject callback)
+	{
+		reactWatcher.add(new ReactWatchObject(message, reaction, callback));
+	}
+	
+	public void removeMessageReactWatch(IMessage message, IEmoji reaction)
+	{
+		for(ReactWatchObject obj : reactWatcher)
+		{
+			if(obj.message.equals(message) && obj.emoji.equals(reaction))
+				reactWatcher.remove(obj);
+		}
+	}
+	
+	public void onReactionAdded(ReactionAddEvent event)
+	{
+		for(ReactWatchObject obj : reactWatcher)
+		{
+			if(obj.message.equals(event.getMessage()) && obj.emoji.equals(event.getReaction().getCustomEmoji()))
+				obj.callback.execute(event.getUser(), event.getGuild());
+		}
 	}
 	
 	public void startBot(String token)
@@ -54,6 +85,7 @@ public class DiscordBot
 		EventDispatcher dispatcher = client.getDispatcher();
 	        dispatcher.registerListener(new ReadyEventListener());
 	        dispatcher.registerListener(new PresenceEventListener());
+	        dispatcher.registerListener(new ReactionAddEventListener());
 		
 		
 		//load the queue object
@@ -78,6 +110,7 @@ public class DiscordBot
 	{
 		bot = new DiscordBot();
 		gatherObjects = new HashSet<GatherObject>();
+		reactWatcher = new Vector<ReactWatchObject>();
 		bot.startBot(args[0]);
 	}
 	
@@ -99,14 +132,19 @@ public class DiscordBot
 		}
 		catch (IllegalArgumentException e)
 		{
-			System.out.println("Error renaming channel: " + e.getMessage());
+			Discord4J.LOGGER.warn("Error renaming channel: " + e.getMessage());
 		}
 		catch (MissingPermissionsException e)
 		{
-			System.out.println("Error renaming channel: " + e.getMessage());
+			Discord4J.LOGGER.warn("Error renaming channel: " + e.getMessage());
 		}
 	}
 	
+	/*public void reactionAdded(ReactionAddEvent event)
+	{
+		if()
+		return;
+	}*/
 	
 	public static void userWentOffline(IUser user)
 	{
