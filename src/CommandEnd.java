@@ -21,7 +21,7 @@ public class CommandEnd implements CommandExecutor
 			return;
 		
 		}
-		gather.getCommandChannel().sendMessage("Moving players out of team rooms");
+		//gather.getCommandChannel().sendMessage("Moving players out of team rooms");
 		
 		IVoiceChannel general = gather.getGeneralVoiceChannel();
 		IVoiceChannel blue = gather.getBlueVoiceChannel();
