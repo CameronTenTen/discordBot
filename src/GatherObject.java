@@ -231,7 +231,20 @@ public class GatherObject
 	
 	public String queueString()
 	{
-		return queue.toString();
+		String returnString="";
+		for(PlayerObject player : queue)
+		{
+			returnString+=fullUserString(player.getDiscordUserInfo());
+			returnString+=", ";
+		}
+		if(returnString.length()<=2)
+		{
+			return "";
+		}
+		else
+		{
+			return returnString.substring(0, returnString.length()-2);
+		}
 	}
 	
 	@Override
