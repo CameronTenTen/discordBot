@@ -2,14 +2,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vdurmont.emoji.Emoji;
-import com.vdurmont.emoji.EmojiManager;
-
 import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IEmoji;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IReaction;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -29,15 +23,6 @@ public class GatherObject
 	public String blueVoiceString = "Gather Team BLUE";
 	public String redVoiceString = "Gather Team RED";
 	public String generalVoiceString = "Gather General";
-	
-	public String voiceChatEmote = "teamColour";
-	public IMessage lastMatchStartMessage;
-	
-	//temporary arrays for teams
-	//TODO: move these to a game object
-	ArrayList<String> list;
-	List<String> blueTeam;
-	List<String> redTeam;
 	
 	GatherObject(IGuild guild)
 	{
@@ -181,50 +166,24 @@ public class GatherObject
 		}
 	}
 	
-	public void shuffleTeams()
-	{
-		Collections.shuffle(list);
-		blueTeam = list.subList(0, list.size()/2);
-		redTeam = list.subList(list.size()/2, list.size());
-	}
-	
 	public void startGame()
 	{
+
 		//set the teams
-		list = this.getMentionList();
-		this.shuffleTeams();
+		ArrayList<String> list = this.getMentionList();
+		Collections.shuffle(list);
+		List<String> blueTeam = list.subList(0, list.size()/2);
+		List<String> redTeam = list.subList(list.size()/2, list.size());
 		//setup the game
 		//TODO: once server communication has been implemented more game setup is needed here
 		
 		//announce the game
 		//do the team messages in seperate lines so that it highlights the players team
-
-		IEmoji emoji = guild.getEmojiByName(voiceChatEmote);
-		DiscordBot.bot.removeMessageReactWatch(lastMatchStartMessage, emoji);
-		
-		lastMatchStartMessage = getCommandChannel().sendMessage("Gather game starting with teams:");
-
-		lastMatchStartMessage.addReaction(emoji);
-		DiscordBot.bot.addMessageReactWatch(lastMatchStartMessage, emoji, (GenericReactCallbackObject) new goToTeamVoiceChannel());
-		
+		getCommandChannel().sendMessage("Gather game starting with teams:");
 		getCommandChannel().sendMessage("__**Blue**__: "+blueTeam.toString());
 		getCommandChannel().sendMessage("__**Red**__:  "+redTeam.toString());
 		//reset the queue
 		this.clearQueue();
-	}
-	
-	public IVoiceChannel getTeamVoiceChannel(IUser user)
-	{
-		if(0==getTeam(user))return getBlueVoiceChannel();
-		else if(1==getTeam(user))return getRedVoiceChannel();
-		return null;
-	}
-	
-	public int getTeam(IUser user)
-	{
-		if(blueTeam.contains(user.mention())) return 0;
-		else if(redTeam.contains(user.mention())) return 1;
-		return -1;
 	}
 	
 	public void clearQueue()
