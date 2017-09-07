@@ -179,7 +179,7 @@ public class GatherObject
 		
 		//announce the game
 		//do the team messages in seperate lines so that it highlights the players team
-		getCommandChannel().sendMessage("Gather game starting:", true);
+		getCommandChannel().sendMessage("Gather game starting: http://125.63.63.59/joingame.html", true);
 		getCommandChannel().sendMessage("__**Blue**__: "+blueTeam.toString());
 		getCommandChannel().sendMessage("__**Red**__:  "+redTeam.toString());
 		//reset the queue
