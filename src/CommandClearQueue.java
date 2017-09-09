@@ -2,7 +2,7 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
-public class CommandClear implements CommandExecutor
+public class CommandClearQueue implements CommandExecutor
 {
 	@Command(aliases = {"!clearqueue"}, description = "Admin only - clear the queue")
 	public void onCommand(IMessage message)
