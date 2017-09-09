@@ -63,6 +63,11 @@ public class PlayerObject
 		this.inQueue = inQueue;
 	}
 	
+	public String getMentionString()
+	{
+		return getDiscordUserInfo().mention();
+	}
+	
 	public String toString()
 	{
 		return discordUserInfo.getName()+"#"+discordUserInfo.getDiscriminator();
