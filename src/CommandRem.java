@@ -1,5 +1,6 @@
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandRem implements CommandExecutor
@@ -17,6 +18,7 @@ public class CommandRem implements CommandExecutor
 		switch(remReturnVal)
 		{
 		case 1:
+			Discord4J.LOGGER.info("Removing player from queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			return;
 		case 0:

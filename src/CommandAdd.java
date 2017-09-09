@@ -1,5 +1,6 @@
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandAdd implements CommandExecutor
@@ -18,9 +19,11 @@ public class CommandAdd implements CommandExecutor
 		switch(addReturnVal)
 		{
 		case 1:
+			Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			return;
 		case 2:
+			Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 			//gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
 			gather.startGame();
 			return;
