@@ -12,13 +12,13 @@ public class CommandAdd implements CommandExecutor
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
 		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+" in queue");
+		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		
 		switch(addReturnVal)
 		{
 		case 1:
-			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			return;
 		case 2:
 			//gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");

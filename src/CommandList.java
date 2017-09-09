@@ -14,7 +14,7 @@ public class CommandList implements CommandExecutor
 		String currentQueue = gather.queueString();
 		if(!currentQueue.isEmpty())
 		{
-			gather.getCommandChannel().sendMessage("Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+"): "+currentQueue);
+			gather.getCommandChannel().sendMessage("Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+"): "+currentQueue);
 			return;
 		}
 		else

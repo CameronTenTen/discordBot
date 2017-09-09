@@ -2,13 +2,21 @@ import java.util.Vector;
 
 public class GatherQueueObject extends Vector<PlayerObject>
 {
-	public static int maxQueueSize = 10;
+	private static int maxQueueSize = 10;
 	
+	public static int getMaxQueueSize() {
+		return maxQueueSize;
+	}
+
+	public static void setMaxQueueSize(int maxQueueSize) {
+		GatherQueueObject.maxQueueSize = maxQueueSize;
+	}
+
 	@Override
 	public boolean add(PlayerObject player)
 	{
 		int index = this.indexOf(player);
-		if(index==-1)
+		if(index==-1 && this.size()<getMaxQueueSize())
 		{
 			super.add(player);
 			return true;
@@ -42,7 +50,7 @@ public class GatherQueueObject extends Vector<PlayerObject>
 	
 	public boolean isFull()
 	{
-		return this.numPlayersInQueue()>=maxQueueSize;
+		return this.numPlayersInQueue()>=getMaxQueueSize();
 	}
 	
 	public String toString()

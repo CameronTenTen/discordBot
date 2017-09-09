@@ -189,7 +189,7 @@ public class GatherObject
 	public void clearQueue()
 	{
 		queue.clear();
-		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.maxQueueSize()+" in queue");
+		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(this.getGuild() , this.numPlayersInQueue()+"-in-q");
 	}
 	
@@ -203,9 +203,14 @@ public class GatherObject
 		return queue.isFull();
 	}
 	
-	public int maxQueueSize()
+	public int getMaxQueueSize()
 	{
-		return GatherQueueObject.maxQueueSize;
+		return GatherQueueObject.getMaxQueueSize();
+	}
+	
+	public void setMaxQueueSize(int size)
+	{
+		GatherQueueObject.setMaxQueueSize(size);
 	}
 	
 	public String getMentionString()

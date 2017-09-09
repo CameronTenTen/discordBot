@@ -26,11 +26,11 @@ public class CommandForceRem implements CommandExecutor
 		{
 			if(1==gather.remFromQueue(new PlayerObject(user, false)))
 			{
-				gather.getCommandChannel().sendMessage(gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+				gather.getCommandChannel().sendMessage(gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			}
 		}
 		
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+" in queue");
+		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		return;
 	}

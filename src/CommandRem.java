@@ -12,12 +12,12 @@ public class CommandRem implements CommandExecutor
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
 		int remReturnVal = gather.remFromQueue(new PlayerObject(message.getAuthor(), false));
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+" in queue");
+		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		switch(remReturnVal)
 		{
 		case 1:
-			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
+			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			return;
 		case 0:
 			gather.getCommandChannel().sendMessage("You are already not in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
