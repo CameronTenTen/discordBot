@@ -27,7 +27,7 @@ public class RconListener
 			index = msg.indexOf(" ");
 			msg = msg.substring(index+1);
 			
-			gather.getCommandChannel().sendMessage("<"+player+">"+msg);
+			gather.getCommandChannel().sendMessage("<"+player+"> "+msg);
 		}
 		else if(msg.startsWith("GAMEOVER"))
 		{
