@@ -27,6 +27,9 @@ public class CommandAdd implements CommandExecutor
 			//gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.maxQueueSize()+")");
 			gather.startGame();
 			return;
+		case 3:
+			gather.getCommandChannel().sendMessage("You cannot add to the queue when you are **already in a game** "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+			return;
 		case 0:
 			gather.getCommandChannel().sendMessage("You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 			return;
