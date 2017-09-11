@@ -1,7 +1,9 @@
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -14,30 +16,38 @@ public class GatherObject
 	
 	private IGuild guild;
 	private IChannel commandChannel = null;
-	private IRole adminRole;
-	private IVoiceChannel blueVoiceChannel;
-	private IVoiceChannel redVoiceChannel;
-	private IVoiceChannel generalVoiceChannel;
-	public String textChannelString = "gather-general";
-	public String adminString = "Gather Admin";
-	public String blueVoiceString = "Gather Team BLUE";
-	public String redVoiceString = "Gather Team RED";
-	public String generalVoiceString = "Gather General";
+	private IRole adminRole = null;
+	private IVoiceChannel blueVoiceChannel = null;
+	private IVoiceChannel redVoiceChannel = null;
+	private IVoiceChannel generalVoiceChannel = null;
+	private IChannel scoreReportChannel = null;
+	public long guildID;
+	public String textChannelString;
+	public String adminString;
+	public String blueVoiceString;
+	public String redVoiceString;
+	public String generalVoiceString;
+	public String scoreReportString;
+
+	public Set<GatherServer> servers;
 	
-	GatherObject(IGuild guild)
+	private List<GatherGame> runningGames;
+	
+	GatherObject()
 	{
 		queue = new GatherQueueObject();
-		setGuild(guild);
-		
+		servers = new HashSet<GatherServer>();
+		runningGames = new ArrayList<GatherGame>();
 	}
 	
-	public IGuild getGuild() {
-		return guild;
-	}
-
-	public void setGuild(IGuild guild)
+	public void setDiscordObjects()
 	{
-		this.guild = guild;
+		setGuild(DiscordBot.client.getGuildByID(guildID));
+		if(guild == null)
+		{
+			Discord4J.LOGGER.error("Could not find guild with id: "+guildID);
+			return;
+		}
 		
 		//search text channels for a command channel
 		List<IChannel> channels = guild.getChannels();
@@ -46,6 +56,14 @@ public class GatherObject
 			if(channel.getName().contains(textChannelString))
 			{
 				setCommandChannel(channel);
+				break;
+			}
+		}
+		for(IChannel channel : channels)
+		{
+			if(channel.getName().contains(scoreReportString))
+			{
+				setScoreReportChannel(channel);
 				break;
 			}
 		}
@@ -72,7 +90,15 @@ public class GatherObject
 		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
-		
+	}
+	
+	public IGuild getGuild() {
+		return guild;
+	}
+
+	public void setGuild(IGuild guild)
+	{
+		this.guild = guild;
 	}
 
 	public IChannel getCommandChannel() {
@@ -81,6 +107,22 @@ public class GatherObject
 
 	public void setCommandChannel(IChannel commandChannel) {
 		this.commandChannel = commandChannel;
+	}
+	
+	public IChannel getScoreReportChannel() {
+		return scoreReportChannel;
+	}
+
+	public void setScoreReportChannel(IChannel scoreReportChannel) {
+		this.scoreReportChannel = scoreReportChannel;
+	}
+
+	public String getScoreReportString() {
+		return scoreReportString;
+	}
+
+	public void setScoreReportString(String scoreReportString) {
+		this.scoreReportString = scoreReportString;
 	}
 	
 	public IRole getAdminRole() {
@@ -142,6 +184,10 @@ public class GatherObject
 	 */
 	public int addToQueue(PlayerObject player)
 	{
+		if(isInGame(player))
+		{
+			return 3;
+		}
 		if(queue.add(player))
 		{
 			if(isQueueFull())
@@ -166,24 +212,139 @@ public class GatherObject
 		}
 	}
 	
+	public boolean isInGame(PlayerObject player)
+	{
+		for(GatherGame game : runningGames)
+		{
+			if(game.isPlayerPlaying(player)) return true;
+		}
+		return false;
+	}
+	
 	public void startGame()
 	{
-
-		//set the teams
-		ArrayList<String> list = this.getMentionList();
-		Collections.shuffle(list);
-		List<String> blueTeam = list.subList(0, list.size()/2);
-		List<String> redTeam = list.subList(list.size()/2, list.size());
 		//setup the game
-		//TODO: once server communication has been implemented more game setup is needed here
+		List<PlayerObject> list = queue.asList();
+		GatherServer server = DiscordBot.bot.getFreeServer(this.guild);
+		GatherGame game = new GatherGame(-1, list, null, null, server);
+		game.shuffleTeams();
+		runningGames.add(game);
 		
 		//announce the game
-		//do the team messages in seperate lines so that it highlights the players team
-		getCommandChannel().sendMessage("Gather game starting: http://125.63.63.59/joingame.html", true);
-		getCommandChannel().sendMessage("__**Blue**__: "+blueTeam.toString());
-		getCommandChannel().sendMessage("__**Red**__:  "+redTeam.toString());
+		//do the team messages in separate lines so that it highlights the players team
+		
+		getCommandChannel().sendMessage("Gather game starting: ", true);
+		getCommandChannel().sendMessage("http://125.63.63.59/joingame.html");
+		getCommandChannel().sendMessage("__**Blue**__: "+game.blueMentionList().toString());
+		getCommandChannel().sendMessage("__**Red**__:  "+game.redMentionList().toString());
+		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
 		//reset the queue
 		this.clearQueue();
+	}
+	
+	public GatherGame getRunningGame(String serverIp, int serverPort)
+	{
+		for(GatherGame game : runningGames)
+		{
+			if(game.getServerIp().equals(serverIp) && game.getServerPort() == serverPort)
+			{
+				return game;
+			}
+		}
+		return null;
+	}
+	
+	public GatherGame getRunningGame(int id)
+	{
+		for(GatherGame game : runningGames)
+		{
+			if(game.getGameID() == id)
+			{
+				return game;
+			}
+		}
+		return null;
+	}
+	
+	public boolean endGame(GatherGame game, int winningTeam)
+	{
+		//tell everyone
+		commandChannel.sendMessage("A game has ended, "+teamString(winningTeam));
+		if(winningTeam<-1 || winningTeam>1) return true;
+		//print to score report
+		String temp1 = game.blueMentionList().toString();
+		if(winningTeam==0) temp1 += " +1";
+		else if (winningTeam==1) temp1 += " -1";
+		else temp1 += " 0";
+		String temp2 = game.redMentionList().toString();
+		if(winningTeam==1) temp2 += " +1";
+		else if (winningTeam==0) temp2 += " -1";
+		else temp2 += " 0";
+		scoreReportChannel.sendMessage(temp1);
+		scoreReportChannel.sendMessage(temp2);
+		//store stats in database
+		//TODO
+		//remove game object from list
+		if(game.getServer() == null)
+		{
+			//THIS IS A WORKAROUND FOR WHEN WE HAVE NO SERVER LIST AND THERE IS ONLY 1 GAME AT A TIME
+			Discord4J.LOGGER.warn("Server is null when giving win, clearing running games (if there is more than 1 running game this is a problem)");
+			clearGames();
+			return true;
+		}
+		runningGames.remove(game);
+		//set server unused?
+		//TODO
+		return true;
+	}
+	
+	public boolean endGame(String serverIp, int serverPort, int winningTeam)
+	{
+		GatherGame game = getRunningGame(serverIp, serverPort);
+		if(game == null) return false;
+		this.endGame(game, winningTeam);
+		return true;
+	}
+	
+	public boolean endGame(int matchid, int winningTeam)
+	{
+		GatherGame game = getRunningGame(matchid);
+		if(game == null) return false;
+		this.endGame(game, winningTeam);
+		return true;
+	}
+	
+	public GatherServer getFreeServer()
+	{
+		// TODO make some kind of server priority? in case of high/low ping servers?
+		// not important now as there should only be 1 server anyway
+		for(GatherServer server : servers)
+		{
+			if (!server.isInUse()) {
+				return server;
+			}
+		}
+		return null;
+	}
+	
+	public GatherServer getServer(String ip, int port)
+	{
+		for(GatherServer server : servers)
+		{
+			if(server.getIp().equals(ip) && server.getPort() == port)
+			{
+				return server;
+			}
+		}
+		return null;
+	}
+	
+	public void connectToKAGServers()
+	{
+		for(GatherServer server : servers)
+		{
+			server.connect();
+		}
 	}
 	
 	public void clearQueue()
@@ -191,6 +352,31 @@ public class GatherObject
 		queue.clear();
 		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(this.getGuild() , this.numPlayersInQueue()+"-in-q");
+	}
+	
+	public void clearGames()
+	{
+		runningGames.clear();
+	}
+	
+	public String teamString(int team)
+	{
+		if(team==0)
+		{
+			return "blue team won!";
+		}
+		else if(team==1)
+		{
+			return "red team won!";
+		}
+		else if(team==-1)
+		{
+			return "its a draw!";
+		}
+		else
+		{
+			return "no scores given";
+		}
 	}
 	
 	public int numPlayersInQueue()
@@ -213,7 +399,7 @@ public class GatherObject
 		GatherQueueObject.setMaxQueueSize(size);
 	}
 	
-	public String getMentionString()
+	/*public String getMentionString()
 	{
 		String returnString="";
 		for(PlayerObject player : queue)
@@ -222,9 +408,9 @@ public class GatherObject
 			returnString += player.getDiscordUserInfo().mention();
 		}
 		return returnString;
-	}
+	}*/
 	
-	public ArrayList<String> getMentionList()
+	/*public ArrayList<String> getMentionList()
 	{
 		ArrayList<String> returnList = new ArrayList<String>();
 		for(PlayerObject player : queue)
@@ -232,7 +418,7 @@ public class GatherObject
 			returnList.add(player.getDiscordUserInfo().mention());
 		}
 		return returnList;
-	}
+	}*/
 	
 	public String queueString()
 	{

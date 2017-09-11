@@ -1,0 +1,17 @@
+{
+	"guildID" : 000000000000000000,
+	"textChannelString" : "gather-general",
+	"adminString" : "Gather Admin",
+	"blueVoiceString" : "Gather Team BLUE",
+	"redVoiceString" : "Gather Team RED",
+	"generalVoiceString" : "Gather General",
+	"scoreReportString" : "gather-score-report",
+	"servers" : 
+	[{
+		"ip" : "127.0.0.1",
+		"port" : 50301,
+		"rconPassword" : "rconpassword",
+		"serverPassword" : "password",
+		"serverLink" : "kag://127.0.0.1:50301/password"
+	}]
+}
