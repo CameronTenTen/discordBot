@@ -7,10 +7,13 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.RequestBuilder;
 
 public class DiscordBot {
@@ -94,6 +97,21 @@ public class DiscordBot {
 	public static GatherServer getServer(IGuild guild, String ip, int port)
 	{
 		return getGatherObjectForGuild(guild).getServer(ip, port);
+	}
+
+	//wrappers for doing things in order to avoid rate limit exceptions
+	public void sendMessage(IChannel channel, String msg)
+	{
+		RequestBuffer.request(() -> {
+			channel.sendMessage(msg);
+		});
+	}
+	
+	public void moveToVoiceChannel(IUser user, IVoiceChannel channel)
+	{
+		RequestBuffer.request(() -> {
+			user.moveToVoiceChannel(channel);
+		});
 	}
 
 	public static void setPlayingText(String newText) {
