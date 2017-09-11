@@ -13,7 +13,7 @@ public class CommandGiveWin implements CommandExecutor
 
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			gather.getCommandChannel().sendMessage("Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
@@ -30,7 +30,7 @@ public class CommandGiveWin implements CommandExecutor
 		
 		if(!gather.endGame(-1, team))
 		{
-			gather.getCommandChannel().sendMessage("An error occured setting win, did you type the command correctly "+message.getAuthor().getNicknameForGuild(message.getGuild())+"?");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "An error occured setting win, did you type the command correctly "+message.getAuthor().getNicknameForGuild(message.getGuild())+"?");
 		}
 		
 		return;
