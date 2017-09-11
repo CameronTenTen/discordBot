@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 public class GatherQueueObject extends Vector<PlayerObject>
@@ -51,6 +53,13 @@ public class GatherQueueObject extends Vector<PlayerObject>
 	public boolean isFull()
 	{
 		return this.numPlayersInQueue()>=getMaxQueueSize();
+	}
+	
+	public List<PlayerObject> asList()
+	{
+		ArrayList<PlayerObject> list = new ArrayList<PlayerObject>();
+		list.addAll(this);
+		return list;
 	}
 	
 	public String toString()
