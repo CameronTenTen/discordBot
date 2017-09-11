@@ -19,13 +19,13 @@ public class CommandRem implements CommandExecutor
 		{
 		case 1:
 			Discord4J.LOGGER.info("Removing player from queue: "+message.getAuthor().getDisplayName(message.getGuild()));
-			gather.getCommandChannel().sendMessage(gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			return;
 		case 0:
-			gather.getCommandChannel().sendMessage("You are already not in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "You are already not in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 			return;
 		}
-		gather.getCommandChannel().sendMessage("An unexpected error occured attempting to remove "+message.getAuthor().getDisplayName(message.getGuild())+" from the queue");
+		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "An unexpected error occured attempting to remove "+message.getAuthor().getDisplayName(message.getGuild())+" from the queue");
 		return;
 	}
 }
