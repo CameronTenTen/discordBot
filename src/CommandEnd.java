@@ -31,12 +31,12 @@ public class CommandEnd implements CommandExecutor
 		users = blue.getConnectedUsers();
 		for( IUser user : users)
 		{
-			user.moveToVoiceChannel(general);
+			DiscordBot.bot.moveToVoiceChannel(user, general);
 		}
 		users = red.getConnectedUsers();
 		for( IUser user : users)
 		{
-			user.moveToVoiceChannel(general);
+			DiscordBot.bot.moveToVoiceChannel(user, general);
 		}
 		
 		return;
