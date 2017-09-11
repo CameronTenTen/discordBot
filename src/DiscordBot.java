@@ -115,7 +115,9 @@ public class DiscordBot {
 	}
 
 	public static void setPlayingText(String newText) {
-		client.changePlayingText(newText);
+		RequestBuffer.request(() -> {
+			client.changePlayingText(newText);
+		});
 	}
 
 	public static void setChannelCaption(IGuild guild, String newText) {
@@ -125,7 +127,9 @@ public class DiscordBot {
 		// TODO: remove other illegal characters instead of just catching the exception
 		newText.replaceAll("\\s", "");
 		try {
-			gather.getCommandChannel().changeName(newText + "_" + gather.textChannelString);
+			RequestBuffer.request(() -> {
+				gather.getCommandChannel().changeName(newText + "_" + gather.textChannelString);
+			});
 		} catch (IllegalArgumentException e) {
 			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());
 		} catch (MissingPermissionsException e) {
