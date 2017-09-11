@@ -128,7 +128,7 @@ public class DiscordBot {
 		newText.replaceAll("\\s", "");
 		try {
 			RequestBuffer.request(() -> {
-				gather.getCommandChannel().changeName(newText + "_" + gather.textChannelString);
+				gather.getCommandChannel().changeName(newText + "_" + gather.commandChannelString);
 			});
 		} catch (IllegalArgumentException e) {
 			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());

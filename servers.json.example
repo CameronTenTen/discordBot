@@ -1,11 +1,12 @@
 {
-	"guildID" : 000000000000000000,
-	"textChannelString" : "gather-general",
-	"adminString" : "Gather Admin",
-	"blueVoiceString" : "Gather Team BLUE",
-	"redVoiceString" : "Gather Team RED",
-	"generalVoiceString" : "Gather General",
-	"scoreReportString" : "gather-score-report",
+	"guildID" : 0000000000000000000,
+	"commandChannelString" : "gather-general",
+	"commandChannelID" : 000000000000000000,
+	"blueVoiceID" : 000000000000000000,
+	"redVoiceID" : 000000000000000000,
+	"generalVoiceID" : 000000000000000000,
+	"scoreReportID" : 000000000000000000,
+	"adminRoleID" : 000000000000000000,
 	"servers" : 
 	[{
 		"ip" : "127.0.0.1",

@@ -21,13 +21,14 @@ public class GatherObject
 	private IVoiceChannel redVoiceChannel = null;
 	private IVoiceChannel generalVoiceChannel = null;
 	private IChannel scoreReportChannel = null;
-	public long guildID;
-	public String textChannelString;
-	public String adminString;
-	public String blueVoiceString;
-	public String redVoiceString;
-	public String generalVoiceString;
-	public String scoreReportString;
+	public long guildID = 0L;
+	public String commandChannelString = "";
+	public long commandChannelID = 0L;
+	public long blueVoiceID = 0L;
+	public long redVoiceID = 0L;
+	public long generalVoiceID = 0L;
+	public long scoreReportID = 0L;
+	public long adminRoleID = 0L;
 
 	public Set<GatherServer> servers;
 	
@@ -49,44 +50,12 @@ public class GatherObject
 			return;
 		}
 		
-		//search text channels for a command channel
-		List<IChannel> channels = guild.getChannels();
-		for(IChannel channel : channels)
-		{
-			if(channel.getName().contains(textChannelString))
-			{
-				setCommandChannel(channel);
-				break;
-			}
-		}
-		for(IChannel channel : channels)
-		{
-			if(channel.getName().contains(scoreReportString))
-			{
-				setScoreReportChannel(channel);
-				break;
-			}
-		}
-		
-		List<IRole> roles = guild.getRoles();
-		for(IRole role : roles)
-		{
-			if(role.getName().contains(adminString))
-			{
-				setAdminRole(role);
-				break;
-			}
-		}
-		
-		//get the first voice channel matching the right string
-		List<IVoiceChannel> voice = guild.getVoiceChannelsByName(blueVoiceString);
-		if(!voice.isEmpty()) setBlueVoiceChannel(voice.get(0));
-		
-		voice = guild.getVoiceChannelsByName(redVoiceString);
-		if(!voice.isEmpty()) setRedVoiceChannel(voice.get(0));
-		
-		voice = guild.getVoiceChannelsByName(generalVoiceString);
-		if(!voice.isEmpty()) setGeneralVoiceChannel(voice.get(0));
+		setCommandChannel(DiscordBot.client.getChannelByID(commandChannelID));
+		setScoreReportChannel(DiscordBot.client.getChannelByID(scoreReportID));
+		setBlueVoiceChannel(DiscordBot.client.getVoiceChannelByID(blueVoiceID));
+		setRedVoiceChannel(DiscordBot.client.getVoiceChannelByID(redVoiceID));
+		setGeneralVoiceChannel(DiscordBot.client.getVoiceChannelByID(generalVoiceID));
+		setAdminRole(DiscordBot.client.getRoleByID(adminRoleID));
 		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
@@ -98,6 +67,7 @@ public class GatherObject
 
 	public void setGuild(IGuild guild)
 	{
+		if(guild == null) Discord4J.LOGGER.warn("Warning: guild is being set as null");
 		this.guild = guild;
 	}
 
@@ -106,6 +76,7 @@ public class GatherObject
 	}
 
 	public void setCommandChannel(IChannel commandChannel) {
+		if(commandChannel == null) Discord4J.LOGGER.warn("Warning: command channel is being set as null");
 		this.commandChannel = commandChannel;
 	}
 	
@@ -114,15 +85,8 @@ public class GatherObject
 	}
 
 	public void setScoreReportChannel(IChannel scoreReportChannel) {
+		if(scoreReportChannel == null) Discord4J.LOGGER.warn("Warning: score report channel is being set as null");
 		this.scoreReportChannel = scoreReportChannel;
-	}
-
-	public String getScoreReportString() {
-		return scoreReportString;
-	}
-
-	public void setScoreReportString(String scoreReportString) {
-		this.scoreReportString = scoreReportString;
 	}
 	
 	public IRole getAdminRole() {
@@ -130,6 +94,7 @@ public class GatherObject
 	}
 
 	public void setAdminRole(IRole adminRole) {
+		if(adminRole == null) Discord4J.LOGGER.warn("Warning: admin role is being set as null");
 		this.adminRole = adminRole;
 	}
 	
@@ -138,6 +103,7 @@ public class GatherObject
 	}
 
 	public void setBlueVoiceChannel(IVoiceChannel blueVoiceChannel) {
+		if(blueVoiceChannel == null) Discord4J.LOGGER.warn("Warning: blue voice channel is being set as null");
 		this.blueVoiceChannel = blueVoiceChannel;
 	}
 
@@ -146,6 +112,7 @@ public class GatherObject
 	}
 
 	public void setRedVoiceChannel(IVoiceChannel redVoiceChannel) {
+		if(redVoiceChannel == null) Discord4J.LOGGER.warn("Warning: red voice channel is being set as null");
 		this.redVoiceChannel = redVoiceChannel;
 	}
 
@@ -154,6 +121,7 @@ public class GatherObject
 	}
 
 	public void setGeneralVoiceChannel(IVoiceChannel generalVoiceChannel) {
+		if(generalVoiceChannel == null) Discord4J.LOGGER.warn("Warning: general voice channel is being set as null");
 		this.generalVoiceChannel = generalVoiceChannel;
 	}
 	
