@@ -164,6 +164,10 @@ public class GatherObject
 			}
 			return 1;
 		}
+		if(isQueueFull())
+		{	//this happens if someone adds after a queue fills but before a game has been started
+			return 4;
+		}
 		return 0;
 		
 	}
