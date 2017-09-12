@@ -82,6 +82,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandSetQueue());
 		cmdHandler.registerCommand(new CommandGiveWin());
 		cmdHandler.registerCommand(new CommandPlayers());
+		cmdHandler.registerCommand(new CommandReconnect());
 	}
 
 	public static void main(String[] args) {
