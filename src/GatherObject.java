@@ -360,12 +360,14 @@ public class GatherObject
 	
 	public void clearQueue()
 	{
-		//use remove function instead of clear so that they other remove actions are done too (e.g. removing role)
-		//queue.clear();
-		for(PlayerObject player : queue)
+		if(canSetRole(getQueueRole()))
 		{
-			this.remFromQueue(player);
+			for(PlayerObject player : queue)
+			{
+				player.getDiscordUserInfo().removeRole(getQueueRole());
+			}
 		}
+		queue.clear();
 		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(this.getGuild() , this.numPlayersInQueue()+"-in-q");
 	}
