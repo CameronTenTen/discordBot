@@ -36,6 +36,14 @@ public class GatherServer
 		}
 	}
 	
+	public void disconnect()
+	{
+		if(rconThread != null)
+		{
+			rconThread.interrupt();
+		}
+	}
+	
 	@Override
 	public boolean equals(Object obj)
 	{

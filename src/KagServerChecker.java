@@ -39,6 +39,11 @@ public class KagServerChecker implements Runnable
 	
 	protected void finalize()
 	{
+		this.disconnect();
+	}
+	
+	public void disconnect()
+	{
 		try {
 			socket.close();
 			in.close();
@@ -76,5 +81,6 @@ public class KagServerChecker implements Runnable
 				e.printStackTrace();
 			}
 		}
+		this.disconnect();
 	}
 }

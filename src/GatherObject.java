@@ -307,11 +307,19 @@ public class GatherObject
 		return null;
 	}
 	
-	public void connectToKAGServers()
+	public void connectKAGServers()
 	{
 		for(GatherServer server : servers)
 		{
 			server.connect();
+		}
+	}
+	
+	public void disconnectKAGServers()
+	{
+		for(GatherServer server : servers)
+		{
+			server.disconnect();
 		}
 	}
 	
