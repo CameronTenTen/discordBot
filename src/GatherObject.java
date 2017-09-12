@@ -201,10 +201,10 @@ public class GatherObject
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
 		
-		getCommandChannel().sendMessage("Gather game starting: ", true);
-		getCommandChannel().sendMessage("http://125.63.63.59/joingame.html");
-		getCommandChannel().sendMessage("__**Blue**__: "+game.blueMentionList().toString());
-		getCommandChannel().sendMessage("__**Red**__:  "+game.redMentionList().toString());
+		DiscordBot.bot.sendMessage(getCommandChannel(), "Gather game starting: ", true);
+		DiscordBot.bot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
+		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
+		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
 		//reset the queue
 		this.clearQueue();
