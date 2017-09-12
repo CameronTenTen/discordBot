@@ -9,6 +9,8 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.util.PermissionUtils;
 
 public class GatherObject
 {
@@ -17,6 +19,7 @@ public class GatherObject
 	private IGuild guild;
 	private IChannel commandChannel = null;
 	private IRole adminRole = null;
+	private IRole queueRole = null;
 	private IVoiceChannel blueVoiceChannel = null;
 	private IVoiceChannel redVoiceChannel = null;
 	private IVoiceChannel generalVoiceChannel = null;
@@ -29,6 +32,7 @@ public class GatherObject
 	public long generalVoiceID = 0L;
 	public long scoreReportID = 0L;
 	public long adminRoleID = 0L;
+	public long queueRoleID = 0L;
 
 	public Set<GatherServer> servers;
 	
@@ -56,6 +60,7 @@ public class GatherObject
 		setRedVoiceChannel(DiscordBot.client.getVoiceChannelByID(redVoiceID));
 		setGeneralVoiceChannel(DiscordBot.client.getVoiceChannelByID(generalVoiceID));
 		setAdminRole(DiscordBot.client.getRoleByID(adminRoleID));
+		setQueueRole(DiscordBot.client.getRoleByID(queueRoleID));
 		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
@@ -97,7 +102,16 @@ public class GatherObject
 		if(adminRole == null) Discord4J.LOGGER.warn("admin role is being set as null");
 		this.adminRole = adminRole;
 	}
-	
+
+	public IRole getQueueRole() {
+		return queueRole;
+	}
+
+	public void setQueueRole(IRole queueRole) {
+		if(queueRole == null) Discord4J.LOGGER.warn("queue role is being set as null");
+		this.queueRole = queueRole;
+	}
+
 	public IVoiceChannel getBlueVoiceChannel() {
 		return blueVoiceChannel;
 	}
@@ -138,6 +152,21 @@ public class GatherObject
 		return false;
 	}
 	
+	//check if the bot can set the role
+	public boolean canSetRole(IRole role)
+	{
+		if(role == null)
+		{
+			return false;
+		}
+		if(!PermissionUtils.hasPermissions(getGuild(), DiscordBot.client.getOurUser(), Permissions.MANAGE_ROLES))
+		{
+			Discord4J.LOGGER.warn("bot does not have MANAGE_ROLES permission, some functionality may be lost");
+			return false;
+		}
+		return true;
+	}
+	
 	public String fullUserString(IUser user)
 	{
 		return user.getDisplayName(getGuild()) + "(" + user.getName() + "#" + user.getDiscriminator() + ")";
@@ -158,6 +187,7 @@ public class GatherObject
 		}
 		if(queue.add(player))
 		{
+			if(canSetRole(getQueueRole())) player.getDiscordUserInfo().addRole(getQueueRole());
 			if(isQueueFull())
 			{
 				return 2;
@@ -176,6 +206,7 @@ public class GatherObject
 	{
 		if(queue.remove(player))
 		{
+			if(canSetRole(getQueueRole())) player.getDiscordUserInfo().removeRole(getQueueRole());
 			return 1;
 		}
 		else
@@ -329,7 +360,12 @@ public class GatherObject
 	
 	public void clearQueue()
 	{
-		queue.clear();
+		//use remove function instead of clear so that they other remove actions are done too (e.g. removing role)
+		//queue.clear();
+		for(PlayerObject player : queue)
+		{
+			this.remFromQueue(player);
+		}
 		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(this.getGuild() , this.numPlayersInQueue()+"-in-q");
 	}
