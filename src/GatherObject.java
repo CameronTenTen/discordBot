@@ -187,7 +187,7 @@ public class GatherObject
 		}
 		if(queue.add(player))
 		{
-			if(canSetRole(getQueueRole())) player.getDiscordUserInfo().addRole(getQueueRole());
+			DiscordBot.bot.addRole(player.getDiscordUserInfo(), getQueueRole());
 			if(isQueueFull())
 			{
 				return 2;
@@ -206,7 +206,7 @@ public class GatherObject
 	{
 		if(queue.remove(player))
 		{
-			if(canSetRole(getQueueRole())) player.getDiscordUserInfo().removeRole(getQueueRole());
+			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 			return 1;
 		}
 		else
@@ -360,12 +360,9 @@ public class GatherObject
 	
 	public void clearQueue()
 	{
-		if(canSetRole(getQueueRole()))
+		for(PlayerObject player : queue)
 		{
-			for(PlayerObject player : queue)
-			{
-				player.getDiscordUserInfo().removeRole(getQueueRole());
-			}
+			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 		}
 		queue.clear();
 		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
