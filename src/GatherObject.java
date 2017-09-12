@@ -388,6 +388,16 @@ public class GatherObject
 		return returnList;
 	}*/
 	
+	public String playersString()
+	{
+		String returnString = "";
+		for(GatherGame game : runningGames)
+		{
+			returnString += game.toString();
+		}
+		return returnString;
+	}
+	
 	public String queueString()
 	{
 		String returnString="";

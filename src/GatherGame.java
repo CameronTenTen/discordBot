@@ -118,4 +118,22 @@ public class GatherGame
 	{
 		return this.server.equals(((GatherGame)obj).server);
 	}
+	
+	@Override
+	public String toString()
+	{
+		if(players.isEmpty()) return "";
+		
+		String blueString = "Blue: ";
+		for(PlayerObject player : bluePlayerList)
+		{
+			blueString += player.toString();
+		}
+		String redString = "Red: ";
+		for(PlayerObject player : redPlayerList)
+		{
+			redString += player.toString();
+		}
+		return blueString + "\n" + redString;
+	}
 }
