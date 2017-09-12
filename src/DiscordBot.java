@@ -103,8 +103,13 @@ public class DiscordBot {
 	//wrappers for doing things in order to avoid rate limit exceptions
 	public void sendMessage(IChannel channel, String msg)
 	{
+		sendMessage(channel, msg, false);
+	}
+	
+	public void sendMessage(IChannel channel, String msg, boolean tts)
+	{
 		RequestBuffer.request(() -> {
-			channel.sendMessage(msg);
+			channel.sendMessage(msg, tts);
 		});
 	}
 	
