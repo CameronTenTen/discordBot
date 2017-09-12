@@ -67,7 +67,7 @@ public class GatherObject
 
 	public void setGuild(IGuild guild)
 	{
-		if(guild == null) Discord4J.LOGGER.warn("Warning: guild is being set as null");
+		if(guild == null) Discord4J.LOGGER.warn("guild is being set as null");
 		this.guild = guild;
 	}
 
@@ -76,7 +76,7 @@ public class GatherObject
 	}
 
 	public void setCommandChannel(IChannel commandChannel) {
-		if(commandChannel == null) Discord4J.LOGGER.warn("Warning: command channel is being set as null");
+		if(commandChannel == null) Discord4J.LOGGER.warn("command channel is being set as null");
 		this.commandChannel = commandChannel;
 	}
 	
@@ -85,7 +85,7 @@ public class GatherObject
 	}
 
 	public void setScoreReportChannel(IChannel scoreReportChannel) {
-		if(scoreReportChannel == null) Discord4J.LOGGER.warn("Warning: score report channel is being set as null");
+		if(scoreReportChannel == null) Discord4J.LOGGER.warn("score report channel is being set as null");
 		this.scoreReportChannel = scoreReportChannel;
 	}
 	
@@ -94,7 +94,7 @@ public class GatherObject
 	}
 
 	public void setAdminRole(IRole adminRole) {
-		if(adminRole == null) Discord4J.LOGGER.warn("Warning: admin role is being set as null");
+		if(adminRole == null) Discord4J.LOGGER.warn("admin role is being set as null");
 		this.adminRole = adminRole;
 	}
 	
@@ -103,7 +103,7 @@ public class GatherObject
 	}
 
 	public void setBlueVoiceChannel(IVoiceChannel blueVoiceChannel) {
-		if(blueVoiceChannel == null) Discord4J.LOGGER.warn("Warning: blue voice channel is being set as null");
+		if(blueVoiceChannel == null) Discord4J.LOGGER.warn("blue voice channel is being set as null");
 		this.blueVoiceChannel = blueVoiceChannel;
 	}
 
@@ -112,7 +112,7 @@ public class GatherObject
 	}
 
 	public void setRedVoiceChannel(IVoiceChannel redVoiceChannel) {
-		if(redVoiceChannel == null) Discord4J.LOGGER.warn("Warning: red voice channel is being set as null");
+		if(redVoiceChannel == null) Discord4J.LOGGER.warn("red voice channel is being set as null");
 		this.redVoiceChannel = redVoiceChannel;
 	}
 
@@ -121,7 +121,7 @@ public class GatherObject
 	}
 
 	public void setGeneralVoiceChannel(IVoiceChannel generalVoiceChannel) {
-		if(generalVoiceChannel == null) Discord4J.LOGGER.warn("Warning: general voice channel is being set as null");
+		if(generalVoiceChannel == null) Discord4J.LOGGER.warn("general voice channel is being set as null");
 		this.generalVoiceChannel = generalVoiceChannel;
 	}
 	
