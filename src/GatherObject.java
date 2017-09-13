@@ -366,6 +366,15 @@ public class GatherObject
 		}
 	}
 	
+	public void clearQueueRole()
+	{
+		List<IUser> list = getGuild().getUsersByRole(getQueueRole());
+		for(IUser user : list)
+		{
+			DiscordBot.bot.removeRole(user, getQueueRole());
+		}
+	}
+	
 	public void clearQueue()
 	{
 		for(PlayerObject player : queue)
