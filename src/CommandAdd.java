@@ -2,6 +2,7 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.StatusType;
 
 public class CommandAdd implements CommandExecutor
 {
@@ -11,6 +12,12 @@ public class CommandAdd implements CommandExecutor
 		if(message.getGuild() == null) return;
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
+		
+		if (message.getAuthor().getPresence().getStatus() == StatusType.OFFLINE)
+		{
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "You cannot add while you are offline "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+			return;
+		}
 		
 		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
 		
