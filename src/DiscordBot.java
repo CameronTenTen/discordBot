@@ -134,7 +134,14 @@ public class DiscordBot {
 	public void moveToVoiceChannel(IUser user, IVoiceChannel channel)
 	{
 		RequestBuffer.request(() -> {
-			user.moveToVoiceChannel(channel);
+			try
+			{
+				user.moveToVoiceChannel(channel);
+			}
+			catch (DiscordException e)
+			{
+				Discord4J.LOGGER.warn(e.getMessage());
+			}
 		});
 	}
 
