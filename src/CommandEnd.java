@@ -1,10 +1,6 @@
-import java.util.List;
-
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
 
 public class CommandEnd implements CommandExecutor
 {
@@ -21,24 +17,7 @@ public class CommandEnd implements CommandExecutor
 			return;
 		
 		}
-		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Moving players out of team rooms");
-		
-		IVoiceChannel general = gather.getGeneralVoiceChannel();
-		IVoiceChannel blue = gather.getBlueVoiceChannel();
-		IVoiceChannel red = gather.getRedVoiceChannel();
-		
-		List<IUser> users;
-		users = blue.getConnectedUsers();
-		for( IUser user : users)
-		{
-			DiscordBot.bot.moveToVoiceChannel(user, general);
-		}
-		users = red.getConnectedUsers();
-		for( IUser user : users)
-		{
-			DiscordBot.bot.moveToVoiceChannel(user, general);
-		}
-		
+		gather.movePlayersOutOfTeamRooms();
 		return;
 	}
 }

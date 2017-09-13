@@ -381,6 +381,28 @@ public class GatherObject
 		runningGames.clear();
 	}
 	
+	public void movePlayersOutOfTeamRooms()
+	{
+		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
+		
+		IVoiceChannel general = this.getGeneralVoiceChannel();
+		IVoiceChannel blue = this.getBlueVoiceChannel();
+		IVoiceChannel red = this.getRedVoiceChannel();
+		
+		List<IUser> users;
+		users = blue.getConnectedUsers();
+		for( IUser user : users)
+		{
+			DiscordBot.bot.moveToVoiceChannel(user, general);
+		}
+		users = red.getConnectedUsers();
+		for( IUser user : users)
+		{
+			DiscordBot.bot.moveToVoiceChannel(user, general);
+		}
+		
+	}
+	
 	public String teamString(int team)
 	{
 		if(team==0)
