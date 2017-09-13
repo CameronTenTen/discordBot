@@ -13,7 +13,7 @@ public class CommandClearQueue implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			gather.getCommandChannel().sendMessage("Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
@@ -21,7 +21,7 @@ public class CommandClearQueue implements CommandExecutor
 		gather.clearQueue();
 		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
 		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
-		gather.getCommandChannel().sendMessage("Queue is now **empty**");
+		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue is now **empty**");
 		return;
 	}
 }

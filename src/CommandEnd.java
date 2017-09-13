@@ -17,11 +17,11 @@ public class CommandEnd implements CommandExecutor
 
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			gather.getCommandChannel().sendMessage("Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
-		//gather.getCommandChannel().sendMessage("Moving players out of team rooms");
+		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Moving players out of team rooms");
 		
 		IVoiceChannel general = gather.getGeneralVoiceChannel();
 		IVoiceChannel blue = gather.getBlueVoiceChannel();

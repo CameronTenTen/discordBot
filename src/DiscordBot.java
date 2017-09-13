@@ -174,7 +174,7 @@ public class DiscordBot {
 				DiscordBot.setPlayingText(object.numPlayersInQueue() + "/" + object.getMaxQueueSize()
 						+ " in queue");
 				DiscordBot.setChannelCaption(object.getGuild(), object.numPlayersInQueue() + "-in-q");
-				object.getCommandChannel().sendMessage(object.fullUserString(user)
+				bot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 						+ " has been **removed** from the queue (disconnected) ("
 						+ DiscordBot.getGatherObjectForGuild(object.getGuild())
 								.numPlayersInQueue()

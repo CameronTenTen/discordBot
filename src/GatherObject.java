@@ -272,7 +272,7 @@ public class GatherObject
 	public boolean endGame(GatherGame game, int winningTeam)
 	{
 		//tell everyone
-		commandChannel.sendMessage("A game has ended, "+teamString(winningTeam));
+		DiscordBot.bot.sendMessage(getCommandChannel(), "A game has ended, "+teamString(winningTeam));
 		if(winningTeam<-1 || winningTeam>1) return true;
 		//print to score report
 		String temp1 = game.blueMentionList().toString();
@@ -283,8 +283,8 @@ public class GatherObject
 		if(winningTeam==1) temp2 += " +1";
 		else if (winningTeam==0) temp2 += " -1";
 		else temp2 += " 0";
-		scoreReportChannel.sendMessage(temp1);
-		scoreReportChannel.sendMessage(temp2);
+		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp1);
+		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp2);
 		//store stats in database
 		//TODO
 		//remove game object from list

@@ -13,13 +13,13 @@ public class CommandClearGames implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			gather.getCommandChannel().sendMessage("Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
 		
 		gather.clearGames();
-		gather.getCommandChannel().sendMessage("cleared all currently running games");
+		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "cleared all currently running games");
 		return;
 	}
 }
