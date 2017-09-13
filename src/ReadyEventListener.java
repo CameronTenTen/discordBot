@@ -39,6 +39,7 @@ public class ReadyEventListener implements IListener<ReadyEvent>
 		Iterator<GatherObject> itr = DiscordBot.gatherObjects.iterator();
 		GatherObject gather = itr.next();
 		if(gather == null) return;
+		gather.clearQueueRole();
 		gather.updateChannelCaption();
 	}
 
