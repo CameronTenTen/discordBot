@@ -13,8 +13,6 @@ public class CommandAdd implements CommandExecutor
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
 		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		
 		switch(addReturnVal)
 		{

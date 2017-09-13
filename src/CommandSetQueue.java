@@ -46,8 +46,7 @@ public class CommandSetQueue implements CommandExecutor
 		gather.setMaxQueueSize(newSize);
 		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue size has been set to "+gather.getMaxQueueSize());
 		
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
+		gather.updateChannelCaption();
 		return;
 	}
 }

@@ -30,8 +30,6 @@ public class CommandForceRem implements CommandExecutor
 			}
 		}
 		
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		return;
 	}
 }

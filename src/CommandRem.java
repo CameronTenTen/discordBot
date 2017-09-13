@@ -13,8 +13,6 @@ public class CommandRem implements CommandExecutor
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
 		int remReturnVal = gather.remFromQueue(new PlayerObject(message.getAuthor(), false));
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		switch(remReturnVal)
 		{
 		case 1:

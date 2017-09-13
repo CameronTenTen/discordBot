@@ -19,8 +19,6 @@ public class CommandClearQueue implements CommandExecutor
 		}
 		
 		gather.clearQueue();
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
 		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue is now **empty**");
 		return;
 	}

@@ -39,10 +39,7 @@ public class ReadyEventListener implements IListener<ReadyEvent>
 		Iterator<GatherObject> itr = DiscordBot.gatherObjects.iterator();
 		GatherObject gather = itr.next();
 		if(gather == null) return;
-		DiscordBot.setPlayingText(gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(gather.getGuild() , gather.numPlayersInQueue()+"-in-q");
-		
-		
+		gather.updateChannelCaption();
 	}
 
 }

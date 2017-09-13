@@ -151,15 +151,13 @@ public class DiscordBot {
 		});
 	}
 
-	public static void setChannelCaption(IGuild guild, String newText) {
-		GatherObject gather = getGatherObjectForGuild(guild);
-
+	public static void setChannelCaption(IGuild guild, IChannel channel, String newText) {
 		// remove spaces from the string (spaces not allowed)
 		// TODO: remove other illegal characters instead of just catching the exception
 		newText.replaceAll("\\s", "");
 		try {
 			RequestBuffer.request(() -> {
-				gather.getCommandChannel().changeName(newText + "_" + gather.commandChannelString);
+				channel.changeName(newText);
 			});
 		} catch (IllegalArgumentException e) {
 			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());
@@ -171,9 +169,6 @@ public class DiscordBot {
 	public static void userWentOffline(IUser user) {
 		for (GatherObject object : gatherObjects) {
 			if (object.remFromQueue(new PlayerObject(user, false)) == 1) {
-				DiscordBot.setPlayingText(object.numPlayersInQueue() + "/" + object.getMaxQueueSize()
-						+ " in queue");
-				DiscordBot.setChannelCaption(object.getGuild(), object.numPlayersInQueue() + "-in-q");
 				bot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 						+ " has been **removed** from the queue (disconnected) ("
 						+ DiscordBot.getGatherObjectForGuild(object.getGuild())

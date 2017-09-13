@@ -187,6 +187,7 @@ public class GatherObject
 		}
 		if(queue.add(player))
 		{
+			updateChannelCaption();
 			DiscordBot.bot.addRole(player.getDiscordUserInfo(), getQueueRole());
 			if(isQueueFull())
 			{
@@ -206,6 +207,7 @@ public class GatherObject
 	{
 		if(queue.remove(player))
 		{
+			updateChannelCaption();
 			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 			return 1;
 		}
@@ -222,6 +224,12 @@ public class GatherObject
 			if(game.isPlayerPlaying(player)) return true;
 		}
 		return false;
+	}
+	
+	public void updateChannelCaption()
+	{
+		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
+		DiscordBot.setChannelCaption(this.getGuild(), this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelString);
 	}
 	
 	public void startGame()
@@ -365,8 +373,7 @@ public class GatherObject
 			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 		}
 		queue.clear();
-		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(this.getGuild() , this.numPlayersInQueue()+"-in-q");
+		updateChannelCaption();
 	}
 	
 	public void clearGames()
