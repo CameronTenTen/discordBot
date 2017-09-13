@@ -124,12 +124,12 @@ public class GatherGame
 	{
 		if(players.isEmpty()) return "";
 		
-		String blueString = "Blue: ";
+		String blueString = "**Blue:** ";
 		for(PlayerObject player : bluePlayerList)
 		{
 			blueString += player.toString();
 		}
-		String redString = "Red: ";
+		String redString = "**Red:** ";
 		for(PlayerObject player : redPlayerList)
 		{
 			redString += player.toString();

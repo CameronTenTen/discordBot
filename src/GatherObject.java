@@ -479,8 +479,9 @@ public class GatherObject
 		for(GatherGame game : runningGames)
 		{
 			returnString += game.toString();
+			returnString += "\n";
 		}
-		return returnString;
+		return returnString.substring(0, returnString.length()-1);
 	}
 	
 	public String queueString()
