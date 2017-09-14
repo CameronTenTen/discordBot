@@ -25,8 +25,8 @@ public class PlayerObject
 		{
 			return false;
 		}
-		//discordUserInfo has an equals override too
-		if(this.discordUserInfo.equals(((PlayerObject)player).discordUserInfo))
+		//id should be a 100% check for if its the same player
+		if(this.discordUserInfo.getLongID() == ((PlayerObject)player).discordUserInfo.getLongID())
 		{
 			return true;
 		}
