@@ -481,6 +481,10 @@ public class GatherObject
 			returnString += game.toString();
 			returnString += "\n";
 		}
+		if(returnString.length()<=2)
+		{
+			return "";
+		}
 		return returnString.substring(0, returnString.length()-1);
 	}
 	
