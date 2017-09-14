@@ -68,14 +68,14 @@ public class GatherGame
 	
 	public int getPlayerTeam(IUser user)
 	{
-		System.out.print(redPlayerList.size());
+		if(user==null) return -1;
 		for(PlayerObject p : bluePlayerList)
 		{
-			if(p.getDiscordUserInfo().equals(user))return 0;
+			if(user.equals(p.getDiscordUserInfo()))return 0;
 		}
 		for(PlayerObject p : redPlayerList)
 		{
-			if(p.getDiscordUserInfo().equals(user))return 1;
+			if(user.equals(p.getDiscordUserInfo()))return 1;
 		}
 		return -1;
 	}
