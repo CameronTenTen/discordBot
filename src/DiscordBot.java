@@ -111,7 +111,14 @@ public class DiscordBot {
 	public void sendMessage(IChannel channel, String msg, boolean tts)
 	{
 		RequestBuffer.request(() -> {
-			channel.sendMessage(msg, tts);
+			try
+			{
+				channel.sendMessage(msg, tts);
+			}
+			catch(NullPointerException e)
+			{
+				Discord4J.LOGGER.warn("Null pointer exception caught from Discord4J code: " + e.getMessage());
+			}
 		});
 	}
 	
