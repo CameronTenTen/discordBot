@@ -8,7 +8,10 @@ public class PlayerObject
 	private boolean captainsVote;
 	private boolean inQueue;
 	
-	
+	PlayerObject(IUser user)
+	{
+		this(user, false);
+	}
 
 	PlayerObject(IUser user, boolean capVote)
 	{
