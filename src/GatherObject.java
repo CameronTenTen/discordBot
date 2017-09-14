@@ -33,16 +33,24 @@ public class GatherObject
 	public long scoreReportID = 0L;
 	public long adminRoleID = 0L;
 	public long queueRoleID = 0L;
+	
+	private int subVotesRequired = 3;
 
 	public Set<GatherServer> servers;
 	
 	private List<GatherGame> runningGames;
+	
+	//list of games with sub in order of request time
+	//will have the same game multiple times if more than one sub for that game
+	//serves as a priority list replacing oldest sub requests first
+	private List<GatherGame> gamesWithSub;
 	
 	GatherObject()
 	{
 		queue = new GatherQueueObject();
 		servers = new HashSet<GatherServer>();
 		runningGames = new ArrayList<GatherGame>();
+		gamesWithSub = new ArrayList<GatherGame>();
 	}
 	
 	public void setDiscordObjects()
@@ -166,6 +174,14 @@ public class GatherObject
 		}
 		return true;
 	}
+
+	public int getSubVotesRequired() {
+		return subVotesRequired;
+	}
+
+	public void setSubVotesRequired(int subVotesRequired) {
+		this.subVotesRequired = subVotesRequired;
+	}
 	
 	public String fullUserString(IUser user)
 	{
@@ -217,13 +233,20 @@ public class GatherObject
 		}
 	}
 	
-	public boolean isInGame(PlayerObject player)
+	public GatherGame getPlayersGame(PlayerObject player)
 	{
 		for(GatherGame game : runningGames)
 		{
-			if(game.isPlayerPlaying(player)) return true;
+			if(game.isPlayerPlaying(player)) return game;
 		}
-		return false;
+		return null;
+	}
+	
+	public boolean isInGame(PlayerObject player)
+	{
+		GatherGame game = getPlayersGame(player);
+		if(game==null) return false;
+		else return true;
 	}
 	
 	public void updateChannelCaption()
@@ -390,6 +413,94 @@ public class GatherObject
 		runningGames.clear();
 	}
 	
+	public int addSubRequest(PlayerObject playerToBeSubbed)
+	{
+		GatherGame game = getPlayersGame(playerToBeSubbed);
+		if(game==null)
+		{
+			//player isnt playing a game
+			return -1;
+		}
+		else
+		{
+			if(game.addSubRequest(playerToBeSubbed))
+			{
+				//successfully added sub request
+				gamesWithSub.add(game);
+				return 1;
+			}
+			else
+			{
+				//player already has sub request
+				return 0;
+			}
+		}
+	}
+	
+	public int addSubRequest(IUser user)
+	{
+		return addSubRequest(new PlayerObject(user));
+	}
+	
+	public int addSubVote(PlayerObject playerVotedFor, PlayerObject playerVoting)
+	{
+		GatherGame voterGame = getPlayersGame(playerVoting);
+		GatherGame votedGame = getPlayersGame(playerVotedFor);
+		if(voterGame == null)
+		{
+			//voter not in game
+			return -1;
+		}
+		if(votedGame == null)
+		{
+			//voted on in a game
+			return -2;
+		}
+		if(!votedGame.equals(voterGame))
+		{
+			//voter and voted must be in same game
+			return -3;
+		}
+		int returnval = votedGame.addSubVote(playerVotedFor, playerVoting);
+		if(returnval == -1)
+		{
+			//sub request already exists for this player
+			return -4;
+		}
+		else if(returnval == -2)
+		{
+			//voter already voted to sub this player
+			return -5;
+		}
+		
+		if(returnval >= getSubVotesRequired())
+		{
+			votedGame.removeSubVotes(playerVotedFor);
+			addSubRequest(playerVotedFor);
+			//votes filled and sub request added
+			return 0;
+		}
+		//vote added
+		return returnval;
+	}
+	
+	public int addSubVote(IUser playerVotedFor, IUser playerVoting)
+	{
+		return addSubVote(new PlayerObject(playerVotedFor), new PlayerObject(playerVoting));
+	}
+	
+	private GatherGame getFirstGameWithSub() {
+		if(gamesWithSub.isEmpty()) return null;
+		return gamesWithSub.remove(0);
+	}
+	
+	public SubstitutionObject subPlayerIntoGame(IUser user)
+	{
+		GatherGame game = getFirstGameWithSub();
+		if(game == null) return null;
+		else return game.subPlayerIntoGame(user);
+	}
+
 	public void movePlayersOutOfTeamRooms()
 	{
 		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
