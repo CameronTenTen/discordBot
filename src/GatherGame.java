@@ -137,6 +137,9 @@ public class GatherGame
 	
 	public void replacePlayer(PlayerObject playerBeingReplaced, PlayerObject player)
 	{
+		System.out.println(players.toString());
+		System.out.println(bluePlayerList.toString());
+		System.out.println(redPlayerList.toString());
 		int team = getPlayerTeam(playerBeingReplaced);
 		if(team == 0)
 		{
@@ -151,7 +154,12 @@ public class GatherGame
 			return;
 		}
 		//only gets here to change player array if they were on a team
-		players.set(players.indexOf(playerBeingReplaced), player);
+		System.out.println(players.toString());
+		System.out.println(bluePlayerList.toString());
+		System.out.println(redPlayerList.toString());
+		int index = players.indexOf(playerBeingReplaced);
+		System.out.println(index);
+		if(index >=0) players.set(index, player);
 		return;
 	}
 	
