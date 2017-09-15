@@ -1,4 +1,7 @@
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import de.btobastian.sdcf4j.CommandHandler;
@@ -23,6 +26,8 @@ public class DiscordBot {
 	public RequestBuilder builder;
 	
 	public static DiscordBot bot;
+	
+	public static GatherDB database;
 
 	//one gather object per guild
 	public static Set<GatherObject> gatherObjects;
@@ -88,11 +93,25 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandSub());
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		bot = new DiscordBot();
 		gatherObjects = new HashSet<GatherObject>();
+		
+		//load database properties
+		Properties props = new Properties();
+		FileInputStream input = new FileInputStream("database.properties");
+		props.load(input);
+		String user = props.getProperty("username");
+		String pass = props.getProperty("password");
+		String id = props.getProperty("ipaddress");
+		String db = props.getProperty("database");
+		input.close();
+		
+		//connect to database
+		database = new GatherDB(user, pass, id, db);
+		database.connect();
+		
 		bot.startBot(args[0]);
-
 	}
 
 	public GatherServer getFreeServer(IGuild guild) {
