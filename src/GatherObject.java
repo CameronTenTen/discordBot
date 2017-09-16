@@ -242,6 +242,11 @@ public class GatherObject
 		return null;
 	}
 	
+	public GatherGame getPlayersGame(IUser user)
+	{
+		return getPlayersGame(new PlayerObject(user));
+	}
+	
 	public boolean isInGame(PlayerObject player)
 	{
 		GatherGame game = getPlayersGame(player);
