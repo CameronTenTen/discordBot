@@ -91,6 +91,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandReconnect());
 		cmdHandler.registerCommand(new CommandRsub());
 		cmdHandler.registerCommand(new CommandSub());
+		cmdHandler.registerCommand(new CommandStart());
 	}
 
 	public static void main(String[] args) throws IOException {
