@@ -33,6 +33,7 @@ public class CommandSub implements CommandExecutor
 				teamString = "ERROR";
 			}
 			DiscordBot.bot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerBeingReplaced.toString() + " on **" + teamString + "** Team!");
+			gather.remFromQueue(new PlayerObject(message.getAuthor()));
 		}
 		return;
 	}
