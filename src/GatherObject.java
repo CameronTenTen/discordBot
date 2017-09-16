@@ -506,6 +506,33 @@ public class GatherObject
 		else return game.subPlayerIntoGame(user);
 	}
 
+	public void movePlayersIntoTeamRooms()
+	{
+		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players into team rooms");
+
+		IVoiceChannel general = this.getGeneralVoiceChannel();
+		IVoiceChannel blue = this.getBlueVoiceChannel();
+		IVoiceChannel red = this.getRedVoiceChannel();
+		
+		List<IUser> users = general.getConnectedUsers();
+		for(IUser user : users)
+		{
+			GatherGame game = this.getPlayersGame(user);
+			if(game!=null)
+			{
+				int team = game.getPlayerTeam(user);
+				if(team==0)
+				{
+					DiscordBot.bot.moveToVoiceChannel(user, blue);
+				}
+				else if(team==1)
+				{
+					DiscordBot.bot.moveToVoiceChannel(user, red);
+				}
+			}
+		}
+	}
+	
 	public void movePlayersOutOfTeamRooms()
 	{
 		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
