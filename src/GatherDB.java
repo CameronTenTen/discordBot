@@ -66,7 +66,7 @@ public class GatherDB {
 		}
 	}
 	
-	public String getKagNameFromDiscordID(long id)
+	public String getKagName(long id)
 	{
 		Statement statement = null;
 		ResultSet result = null;
@@ -106,7 +106,7 @@ public class GatherDB {
 		return "";
 	}
 	
-	public long getDiscordIDFromKagName(String kagName)
+	public long getDiscordID(String kagName)
 	{
 		Statement statement = null;
 		ResultSet result = null;
