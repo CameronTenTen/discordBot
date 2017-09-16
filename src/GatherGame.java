@@ -137,29 +137,22 @@ public class GatherGame
 	
 	public void replacePlayer(PlayerObject playerBeingReplaced, PlayerObject player)
 	{
-		System.out.println(players.toString());
-		System.out.println(bluePlayerList.toString());
-		System.out.println(redPlayerList.toString());
-		int team = getPlayerTeam(playerBeingReplaced);
-		if(team == 0)
+		int blueIndex = bluePlayerList.indexOf(playerBeingReplaced);
+		int redIndex = redPlayerList.indexOf(playerBeingReplaced);
+		if(blueIndex>=0 && blueIndex<bluePlayerList.size())
 		{
-			bluePlayerList.set(bluePlayerList.indexOf(playerBeingReplaced), player);
+			bluePlayerList.set(blueIndex, player);
 		}
-		else if(team == 1)
+		else if(redIndex>=0 && redIndex<redPlayerList.size())
 		{
-			redPlayerList.set(redPlayerList.indexOf(playerBeingReplaced), player);
+			redPlayerList.set(redIndex, player);
 		}
-		else
-		{
-			return;
-		}
-		//only gets here to change player array if they were on a team
-		System.out.println(players.toString());
-		System.out.println(bluePlayerList.toString());
-		System.out.println(redPlayerList.toString());
+		//seems that the shuffle method (setting team arrays as subLists of the player array)
+		//makes it so that replacing the player in the team list makes the replacement in the players one too
+		//will keep this check in here in case something changes (maybe new shuffle function or match making will change this) 
 		int index = players.indexOf(playerBeingReplaced);
 		System.out.println(index);
-		if(index >=0) players.set(index, player);
+		if(index >=0 && index<players.size()) players.set(index, player);
 		return;
 	}
 	
