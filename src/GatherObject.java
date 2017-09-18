@@ -305,6 +305,12 @@ public class GatherObject
 		return null;
 	}
 	
+	public void removeRunningGame(GatherGame game)
+	{
+		runningGames.remove(game);
+		while(gamesWithSub.remove(game));
+	}
+	
 	public boolean endGame(GatherGame game, int winningTeam)
 	{
 		//tell everyone
@@ -331,7 +337,7 @@ public class GatherObject
 			clearGames();
 			return true;
 		}
-		runningGames.remove(game);
+		removeRunningGame(game);
 		//set server unused?
 		//TODO
 		return true;
@@ -501,7 +507,9 @@ public class GatherObject
 	
 	public SubstitutionObject subPlayerIntoGame(IUser user)
 	{
+		System.out.print("number of games with sub: "+gamesWithSub.size());
 		GatherGame game = getFirstGameWithSub();
+		System.out.print("number of games with sub: "+gamesWithSub.size());
 		if(game == null) return null;
 		else return game.subPlayerIntoGame(user);
 	}
