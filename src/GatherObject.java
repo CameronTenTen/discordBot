@@ -527,6 +527,18 @@ public class GatherObject
 		}
 		gamesWithSub.clear();
 	}
+	
+	public String subsString()
+	{
+		String returnString = "Current sub requests: ";
+		for(GatherGame game : gamesWithSub)
+		{
+			//TODO: this is not a good implementation if multiple games are happening (list will be out of order)
+			//will be changing sub implementation before multiple games happen anyway
+			returnString += game.getCurrentSubRequests().toString();
+		}
+		return returnString;
+	}
 
 	public void movePlayersIntoTeamRooms()
 	{
