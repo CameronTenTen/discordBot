@@ -530,7 +530,7 @@ public class GatherObject
 	
 	public String subsString()
 	{
-		String returnString = "Current sub requests: ";
+		String returnString = "";
 		for(GatherGame game : gamesWithSub)
 		{
 			//TODO: this is not a good implementation if multiple games are happening (list will be out of order)
