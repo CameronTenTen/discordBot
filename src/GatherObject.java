@@ -513,6 +513,20 @@ public class GatherObject
 		if(game == null) return null;
 		else return game.subPlayerIntoGame(user);
 	}
+	
+	public void clearSubs()
+	{
+		for(GatherGame game : runningGames)
+		{
+			game.clearSubs();
+		}
+		for(GatherGame game : gamesWithSub)
+		{
+			//these should already be cleared by the previous loop, but just to make sure in case an old game is in this list
+			game.clearSubs();
+		}
+		gamesWithSub.clear();
+	}
 
 	public void movePlayersIntoTeamRooms()
 	{

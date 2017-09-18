@@ -156,6 +156,12 @@ public class GatherGame
 		return;
 	}
 	
+	public void clearSubs()
+	{
+		subRequests.clear();
+		subVotes.clear();
+	}
+	
 	public void shuffleTeams()
 	{
 		Collections.shuffle(players);
