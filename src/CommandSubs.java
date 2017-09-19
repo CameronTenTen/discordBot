@@ -11,10 +11,10 @@ public class CommandSubs implements CommandExecutor
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
-		String currentSubs = gather.subsString();
+		String currentSubs = gather.substitutions.toString();
 		if(!currentSubs.isEmpty())
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Current sub requests: "+currentSubs);
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "There are current sub requests for: "+currentSubs);
 			return;
 		}
 		else

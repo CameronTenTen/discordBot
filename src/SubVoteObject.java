@@ -5,23 +5,30 @@ public class SubVoteObject {
 	
 	private PlayerObject player = null;
 	
+	private GatherGame game = null;
+	
 	private Set<PlayerObject> votesForThisPlayer;
 	
-	SubVoteObject()
+	private SubVoteObject()
 	{
 		votesForThisPlayer = new HashSet<PlayerObject>();
 	}
 	
-	SubVoteObject(PlayerObject playerVotedFor)
+	private SubVoteObject(PlayerObject playerVotedFor)
 	{
 		this();
-		player = playerVotedFor;
-		
+		this.player = playerVotedFor;
 	}
 	
-	SubVoteObject(PlayerObject playerVotedFor, PlayerObject voter)
+	private SubVoteObject(PlayerObject playerVotedFor, GatherGame game)
 	{
 		this(playerVotedFor);
+		this.setGame(game);
+	}
+	
+	SubVoteObject(PlayerObject playerVotedFor, GatherGame game, PlayerObject voter)
+	{
+		this(playerVotedFor, game);
 		votesForThisPlayer.add(voter);
 	}
 	
@@ -60,5 +67,13 @@ public class SubVoteObject {
 	public int numVotes()
 	{
 		return votesForThisPlayer.size();
+	}
+
+	public GatherGame getGame() {
+		return game;
+	}
+
+	public void setGame(GatherGame game) {
+		this.game = game;
 	}
 }

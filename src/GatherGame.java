@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import sx.blah.discord.handle.obj.IUser;
 
@@ -16,8 +18,8 @@ public class GatherGame
 	private List<PlayerObject> redPlayerList;
 	private GatherServer server;
 	
-	private List<PlayerObject> subRequests;
-	private List<SubVoteObject> subVotes;
+	private Set<PlayerObject> playersDeserted;
+	private Set<PlayerObject> playersSubbedIn;
 	
 	enum gameState
 	{
@@ -33,106 +35,9 @@ public class GatherGame
 		this.bluePlayerList = blueTeam;
 		this.redPlayerList = redTeam;
 		this.server = server;
-		subRequests = new ArrayList<PlayerObject>();
-		subVotes = new ArrayList<SubVoteObject>();
-	}
-	
-	public List<PlayerObject> getCurrentSubRequests()
-	{
-		return subRequests;
-	}
-	
-	public boolean hasSubRequest(PlayerObject playerToSub)
-	{
-		return subRequests.contains(playerToSub);
-	}
-	
-	public boolean addSubRequest(PlayerObject playerToSub)
-	{
-		if(hasSubRequest(playerToSub)) return false;
-		return subRequests.add(playerToSub);
-	}
-	
-	public void removeSubRequest(PlayerObject player)
-	{
-		subRequests.remove(player);
-	}
-	
-	public boolean removeSubVotes(PlayerObject playerVotedFor)
-	{
-		for(SubVoteObject obj : subVotes)
-		{
-			if(obj.playerToBeSubbed().equals(playerVotedFor))
-			{
-				subVotes.remove(obj);
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private SubVoteObject getSubVotesForPlayer(PlayerObject player)
-	{
-		for(SubVoteObject obj : subVotes)
-		{
-			if (obj.playerToBeSubbed().equals(player))
-			{
-				return obj;
-			}
-		}
-		return null;
-	}
-	
-	public int getNumSubVotesForPlayer(PlayerObject playerToBeSubbed)
-	{
-		SubVoteObject votes = getSubVotesForPlayer(playerToBeSubbed);
-		return votes.numVotes();
-	}
-	
-	public int addSubVote(PlayerObject playerVotedFor, PlayerObject playerVoting)
-	{
-		if(hasSubRequest(playerVotedFor)) return -1;
-		SubVoteObject votes = getSubVotesForPlayer(playerVotedFor);
-		if(votes != null)
-		{
-			if(!votes.addSubVote(playerVoting))
-			{
-				//gets here if failed to add the sub vote, which probably means the voter has already voted to sub this player
-				return -2;
-			}
-			else
-			{
-				return votes.numVotes();
-			}
-		}
-		else
-		{
-			subVotes.add(new SubVoteObject(playerVotedFor, playerVoting));
-			return 1;
-		}
-	}
-	
-	public SubstitutionObject subPlayerIntoGame(PlayerObject player)
-	{
-		List<PlayerObject> subs = getCurrentSubRequests();
-		if(subs.isEmpty())
-		{
-			//no spaces available
-			return null;
-		}
-		else
-		{
-			PlayerObject playerBeingReplaced = subs.get(0);
-			int team = getPlayerTeam(playerBeingReplaced);
-			replacePlayer(playerBeingReplaced, player);
-			removeSubRequest(playerBeingReplaced);
-			return new SubstitutionObject(playerBeingReplaced, player, team);
-		}
-	}
-	
-	public SubstitutionObject subPlayerIntoGame(IUser user)
-	{
-		return subPlayerIntoGame(new PlayerObject(user));
+		
+		this.playersDeserted = new HashSet<PlayerObject>();
+		this.playersSubbedIn = new HashSet<PlayerObject>();
 	}
 	
 	public void replacePlayer(PlayerObject playerBeingReplaced, PlayerObject player)
@@ -151,15 +56,10 @@ public class GatherGame
 		//makes it so that replacing the player in the team list makes the replacement in the players one too
 		//will keep this check in here in case something changes (maybe new shuffle function or match making will change this) 
 		int index = players.indexOf(playerBeingReplaced);
-		System.out.println(index);
 		if(index >=0 && index<players.size()) players.set(index, player);
+		playersDeserted.add(playerBeingReplaced);
+		playersSubbedIn.add(player);
 		return;
-	}
-	
-	public void clearSubs()
-	{
-		subRequests.clear();
-		subVotes.clear();
 	}
 	
 	public void shuffleTeams()

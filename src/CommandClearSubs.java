@@ -18,7 +18,7 @@ public class CommandClearSubs implements CommandExecutor
 		
 		}
 		
-		gather.clearSubs();
+		gather.substitutions.clearSubs();
 		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Sub list **cleared**");
 		return;
 	}

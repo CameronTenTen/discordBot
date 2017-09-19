@@ -1,5 +1,6 @@
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandSub implements CommandExecutor
@@ -11,7 +12,7 @@ public class CommandSub implements CommandExecutor
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
-		SubstitutionObject returnObj = gather.subPlayerIntoGame(message.getAuthor());
+		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(message.getAuthor());
 		
 		if(returnObj == null)
 		{
@@ -19,12 +20,13 @@ public class CommandSub implements CommandExecutor
 		}
 		else
 		{
+			int team = returnObj.game.getPlayerTeam(returnObj.playerToBeReplaced);
 			String teamString = "";
-			if(returnObj.team == 0)
+			if(team == 0)
 			{
 				teamString = "Blue";
 			}
-			else if (returnObj.team == 1)
+			else if (team == 1)
 			{
 				teamString = "Red";
 			}
@@ -32,7 +34,8 @@ public class CommandSub implements CommandExecutor
 			{
 				teamString = "ERROR";
 			}
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerBeingReplaced.toString() + " on **" + teamString + "** Team!");
+			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into a game for "+returnObj.playerToBeReplaced.toString());
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " on **" + teamString + "** Team!");
 			gather.remFromQueue(new PlayerObject(message.getAuthor()));
 		}
 		return;

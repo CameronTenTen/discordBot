@@ -14,11 +14,12 @@ public class CommandRsub implements CommandExecutor
 		if(message.getGuild() == null) return;
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
-		
-		if(args.length == 0)
+
+		List<IUser> mentions = message.getMentions();
+		if(args.length == 0 || mentions.contains(message.getAuthor()))
 		{
 			//player wants to sub out themselves
-			int returnVal = gather.addSubRequest(message.getAuthor());
+			int returnVal = gather.substitutions.addSubRequest(message.getAuthor(), gather.getPlayersGame(message.getAuthor()));
 			switch(returnVal)
 			{
 			case -1:
@@ -35,14 +36,13 @@ public class CommandRsub implements CommandExecutor
 		}
 		else
 		{
-			List<IUser> mentions = message.getMentions();
 			if(mentions.size()==0)
 			{
 				DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Incorrect command usage " + message.getAuthor().getDisplayName(message.getGuild()) +"! usage is !rsub with no arguments if you want to request a sub for yourself or !rsub @user if you want to request a sub for someone else");
 				return;
 			}
 			//only use the first mention
-			int returnVal = gather.addSubVote(mentions.get(0), message.getAuthor());
+			int returnVal = gather.substitutions.addSubVote(mentions.get(0), message.getAuthor());
 			switch(returnVal)
 			{
 			case -1:
@@ -62,7 +62,7 @@ public class CommandRsub implements CommandExecutor
 				return;
 			}
 			//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Vote to sub " + gather.fullUserString(mentions.get(0)) + " has been **counted** for " + message.getAuthor().getDisplayName(message.getGuild()) + " (" + returnVal +"/"+ gather.getSubVotesRequired() +")");
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Vote to sub " + gather.fullUserString(mentions.get(0)) + " has been **counted** for " + message.getAuthor().getDisplayName(message.getGuild()) + " (" + returnVal +"/"+ gather.substitutions.getSubVotesRequired() +")");
 			return;
 		}
 	}

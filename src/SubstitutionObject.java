@@ -1,13 +1,13 @@
 
 public class SubstitutionObject {
-	
-	SubstitutionObject(PlayerObject beingReplaced, PlayerObject player, int t)
+
+	SubstitutionObject(PlayerObject beingReplaced, PlayerObject player, GatherGame game)
 	{
-		playerBeingReplaced = beingReplaced;
-		playerSubbingIn = player;
-		team = t;
+		this.playerToBeReplaced = beingReplaced;
+		this.playerSubbingIn = player;
+		this.game = game;
 	}
-	PlayerObject playerBeingReplaced;
+	PlayerObject playerToBeReplaced;
 	PlayerObject playerSubbingIn;
-	int team;
+	GatherGame game;
 }
