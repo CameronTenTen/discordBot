@@ -18,7 +18,14 @@ public class PlayerObject
 		setDiscordUserInfo(user);
 		setCaptainsVote(capVote);
 	}
+	
+	@Override
+	public int hashCode()
+	{
+		return this.getDiscordUserInfo().hashCode();
+	}
 
+	@Override
 	public boolean equals(Object player)
 	{
 		if (player == null)
