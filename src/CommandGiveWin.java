@@ -22,7 +22,7 @@ public class CommandGiveWin implements CommandExecutor
 		{
 			team = Integer.parseInt(args[0]);
 		}
-		catch (NumberFormatException e)
+		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
 		}
