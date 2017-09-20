@@ -20,24 +20,34 @@ public class PlayerObject
 	}
 	
 	@Override
-	public int hashCode()
-	{
-		return this.getDiscordUserInfo().hashCode();
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((discordUserInfo == null) ? 0 : discordUserInfo.hashCode());
+		result = prime * result + ((kagName == null) ? 0 : kagName.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object player)
-	{
-		if (player == null)
-		{
-			return false;
-		}
-		//id should be a 100% check for if its the same player
-		if(this.discordUserInfo.getLongID() == ((PlayerObject)player).discordUserInfo.getLongID())
-		{
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		return false;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PlayerObject other = (PlayerObject) obj;
+		if (discordUserInfo == null) {
+			if (other.discordUserInfo != null)
+				return false;
+		} else if (!discordUserInfo.equals(other.discordUserInfo))
+			return false;
+		if (kagName == null) {
+			if (other.kagName != null)
+				return false;
+		} else if (!kagName.equals(other.kagName))
+			return false;
+		return true;
 	}
 	
 	public IUser getDiscordUserInfo() {
