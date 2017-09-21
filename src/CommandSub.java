@@ -12,7 +12,14 @@ public class CommandSub implements CommandExecutor
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
-		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(message.getAuthor());
+		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
+		if(player==null)
+		{
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "You must be linked to sub into a game " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use !link to get started or !linkhelp for more information");
+			return;
+		}
+		
+		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player);
 		
 		if(returnObj == null)
 		{
@@ -36,7 +43,7 @@ public class CommandSub implements CommandExecutor
 			}
 			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into a game for "+returnObj.playerToBeReplaced.toString());
 			DiscordBot.bot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " on **" + teamString + "** Team!");
-			gather.remFromQueue(new PlayerObject(message.getAuthor()));
+			gather.remFromQueue(message.getAuthor());
 		}
 		return;
 	}

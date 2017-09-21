@@ -5,7 +5,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class KagServerChecker implements Runnable
 {
@@ -17,11 +19,14 @@ public class KagServerChecker implements Runnable
 	
 	private String ip;
 	private int port;
-	String rconPassword;
+	private String rconPassword;
+	
+	private Queue<String> sendMessageQueue;
 	
 	KagServerChecker(String ip, int port, String rconPassword) throws UnknownHostException, IOException
 	{
 		listeners = new ArrayList<RconListener>();
+		sendMessageQueue = new LinkedList<String>();
 		this.ip=ip;
 		this.port=port;
 		this.rconPassword=rconPassword;
@@ -35,6 +40,11 @@ public class KagServerChecker implements Runnable
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out.println(rconPassword);
+	}
+	
+	public void sendMessage(String msg)
+	{
+		sendMessageQueue.add(msg);
 	}
 	
 	protected void finalize()
@@ -79,6 +89,10 @@ public class KagServerChecker implements Runnable
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+			while(sendMessageQueue.peek() != null)
+			{
+				out.println(sendMessageQueue.poll());
 			}
 		}
 		this.disconnect();

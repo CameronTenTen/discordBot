@@ -858,4 +858,33 @@ public class GatherDB {
 		return -1;
 	}
 	
+	public int linkAccounts(String kagName, long id)
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("INSERT INTO players (kagname, discordid, gamesplayed, wins, losses, draws, desertions, substitutions) VALUES(\""+kagName+"\","+id+",0,0,0,0,0,0) ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                	//if there is a local player object update it
+			DiscordBot.players.update(id);
+                }
+		return -1;
+	}
+	
 }

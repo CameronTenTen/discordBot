@@ -12,6 +12,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -28,6 +29,7 @@ public class DiscordBot {
 	public static DiscordBot bot;
 	
 	public static GatherDB database;
+	public static PlayerObjectManager players;
 
 	//one gather object per guild
 	public static Set<GatherObject> gatherObjects;
@@ -94,6 +96,8 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandStart());
 		cmdHandler.registerCommand(new CommandClearSubs());
 		cmdHandler.registerCommand(new CommandSubs());
+		cmdHandler.registerCommand(new CommandLink());
+		cmdHandler.registerCommand(new CommandLinkHelp());
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -113,6 +117,8 @@ public class DiscordBot {
 		//connect to database
 		database = new GatherDB(user, pass, id, db);
 		database.connect();
+		
+		players = new PlayerObjectManager();
 		
 		bot.startBot(args[0]);
 	}
@@ -143,6 +149,20 @@ public class DiscordBot {
 			{
 				Discord4J.LOGGER.warn("Null pointer exception caught from Discord4J code: " + e.getMessage());
 			}
+		});
+	}
+	
+	public static void reply(IMessage msg, String reply)
+	{
+		RequestBuffer.request(() -> {
+			msg.reply(reply);
+		});
+	}
+	
+	public static void delete(IMessage msg)
+	{
+		RequestBuffer.request(() -> {
+			msg.delete();
 		});
 	}
 	
@@ -199,7 +219,7 @@ public class DiscordBot {
 
 	public static void userWentOffline(IUser user) {
 		for (GatherObject object : gatherObjects) {
-			if (object.remFromQueue(new PlayerObject(user, false)) == 1) {
+			if (object.remFromQueue(user) == 1) {
 				bot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 						+ " has been **removed** from the queue (disconnected) ("
 						+ DiscordBot.getGatherObjectForGuild(object.getGuild())

@@ -206,6 +206,14 @@ public class GatherObject
 		
 	}
 	
+	public int addToQueue(IUser user)
+	{
+		PlayerObject player = DiscordBot.players.getObject(user);
+		//player is null if they are not linked
+		if(player==null) return -1;
+		return this.addToQueue(player);
+	}
+	
 	public int remFromQueue(PlayerObject player)
 	{
 		if(queue.remove(player))
@@ -220,8 +228,17 @@ public class GatherObject
 		}
 	}
 	
+	public int remFromQueue(IUser user)
+	{
+		PlayerObject player = DiscordBot.players.getObject(user);
+		//player is null if they are not linked
+		if(player==null) return -1;
+		return this.remFromQueue(player);
+	}
+	
 	public GatherGame getPlayersGame(PlayerObject player)
 	{
+		if(player==null) return null;
 		for(GatherGame game : runningGames)
 		{
 			if(game.isPlayerPlaying(player)) return game;
@@ -231,7 +248,7 @@ public class GatherObject
 	
 	public GatherGame getPlayersGame(IUser user)
 	{
-		return getPlayersGame(new PlayerObject(user));
+		return getPlayersGame(DiscordBot.players.getObject(user));
 	}
 	
 	public boolean isInGame(PlayerObject player)
@@ -264,6 +281,7 @@ public class GatherObject
 		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
+		game.sendTeamsToServer();
 		//reset the queue
 		this.clearQueue();
 	}

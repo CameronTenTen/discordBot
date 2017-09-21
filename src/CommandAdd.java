@@ -19,10 +19,13 @@ public class CommandAdd implements CommandExecutor
 			return;
 		}
 		
-		int addReturnVal = gather.addToQueue(new PlayerObject(message.getAuthor(), false));
+		int addReturnVal = gather.addToQueue(message.getAuthor());
 		
 		switch(addReturnVal)
 		{
+		case -1:
+			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link** to get started or **!linkhelp** for more information");
+			return;
 		case 1:
 			DiscordBot.bot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));

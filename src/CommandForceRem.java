@@ -24,7 +24,7 @@ public class CommandForceRem implements CommandExecutor
 		List<IUser> mentions = message.getMentions();
 		for(IUser user : mentions)
 		{
-			if(1==gather.remFromQueue(new PlayerObject(user, false)))
+			if(1==gather.remFromQueue(user))
 			{
 				DiscordBot.bot.sendMessage(gather.getCommandChannel(), gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			}

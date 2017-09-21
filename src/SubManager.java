@@ -66,7 +66,7 @@ public class SubManager {
 	
 	public int addSubRequest(IUser user, GatherGame game)
 	{
-		return addSubRequest(new PlayerObject(user), game);
+		return addSubRequest(DiscordBot.players.getObject(user), game);
 	}
 	
 	public void removeSubRequest(PlayerObject player)
@@ -96,14 +96,14 @@ public class SubManager {
 		return new SubstitutionObject(playerBeingReplaced, playerTakingSpot, sub.game);
 	}
 	
-	public SubstitutionObject subPlayerIntoGame(IUser user)
+	public SubstitutionObject subPlayerIntoGame(PlayerObject player)
 	{
 		SubRequestObject sub = getFirstSubRequest();
 		if(sub == null) return null;
-		else return makeSub(sub, new PlayerObject(user));
+		else return makeSub(sub, player);
 	}
 	
-
+	
 	
 	private int addSubVote(PlayerObject playerVotedFor, PlayerObject playerVoting)
 	{
@@ -155,7 +155,7 @@ public class SubManager {
 	
 	public int addSubVote(IUser votedFor, IUser playerVoting)
 	{
-		return addSubVote(new PlayerObject(votedFor), new PlayerObject(playerVoting));
+		return addSubVote(DiscordBot.players.getObject(votedFor), DiscordBot.players.getObject(playerVoting));
 	}
 
 

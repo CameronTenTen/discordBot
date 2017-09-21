@@ -7,16 +7,27 @@ public class PlayerObject
 	private String kagName;
 	private boolean captainsVote;
 	private boolean inQueue;
-	
-	PlayerObject(IUser user)
-	{
-		this(user, false);
-	}
 
-	PlayerObject(IUser user, boolean capVote)
+	private PlayerObject(IUser user, boolean capVote)
 	{
 		setDiscordUserInfo(user);
 		setCaptainsVote(capVote);
+	}
+	
+	private PlayerObject(IUser user)
+	{
+		this(user, false);
+	}
+	
+	PlayerObject(IUser user, String kagName)
+	{
+		this(user);
+		this.setKagName(kagName);
+	}
+	
+	PlayerObject(long id, String kagName)
+	{
+		this(DiscordBot.client.fetchUser(id), kagName);
 	}
 	
 	@Override
@@ -54,8 +65,8 @@ public class PlayerObject
 		return discordUserInfo;
 	}
 
-	public void setDiscordUserInfo(IUser author) {
-		this.discordUserInfo = author;
+	public void setDiscordUserInfo(IUser user) {
+		this.discordUserInfo = user;
 	}
 	
 	public String getKagName() {

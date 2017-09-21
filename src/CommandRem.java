@@ -12,7 +12,7 @@ public class CommandRem implements CommandExecutor
 		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
 		if(message.getChannel() != gather.getCommandChannel()) return;
 		
-		int remReturnVal = gather.remFromQueue(new PlayerObject(message.getAuthor(), false));
+		int remReturnVal = gather.remFromQueue(message.getAuthor());
 		switch(remReturnVal)
 		{
 		case 1:

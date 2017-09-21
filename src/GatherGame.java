@@ -40,6 +40,43 @@ public class GatherGame
 		this.playersSubbedIn = new HashSet<PlayerObject>();
 	}
 	
+	public void sendTeamsToServer()
+	{
+		//set the teams for the kag server by doing these commands
+		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
+		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
+		//getRules().set_bool('teamsSet',true);
+		String msg = "";
+		msg+="string[] blue={'"+bluePlayerList.get(0).getKagName()+"', '"+bluePlayerList.get(1).getKagName()+"', '"+bluePlayerList.get(2).getKagName()+"', '"
+				+bluePlayerList.get(3).getKagName()+"', '"+bluePlayerList.get(4).getKagName()+"}; getRules().set('blueTeam',blue);";
+		server.sendMessage(msg);
+		msg="";
+		msg+="string[] red={'"+redPlayerList.get(0).getKagName()+"', '"+redPlayerList.get(1).getKagName()+"', '"+redPlayerList.get(2).getKagName()+"', '"
+				+redPlayerList.get(3).getKagName()+"', '"+redPlayerList.get(4).getKagName()+"}; getRules().set('redTeam',red);";
+		server.sendMessage(msg);
+		msg="getRules().set_bool('teamsSet',true);";
+		server.sendMessage(msg);
+	}
+	
+	public void updateTeamsOnServer()
+	{
+		//update the teams for the kag server by doing these commands
+		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
+		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
+		//"getRules().set_bool('teamsUpdated',true);"
+		String msg = "";
+		msg+="string[] blue={'"+bluePlayerList.get(0).getKagName()+"', '"+bluePlayerList.get(1).getKagName()+"', '"+bluePlayerList.get(2).getKagName()+"', '"
+				+bluePlayerList.get(3).getKagName()+"', '"+bluePlayerList.get(4).getKagName()+"}; getRules().set('blueTeam',blue);";
+		server.sendMessage(msg);
+		msg="";
+		msg+="string[] red={'"+redPlayerList.get(0).getKagName()+"', '"+redPlayerList.get(1).getKagName()+"', '"+redPlayerList.get(2).getKagName()+"', '"
+				+redPlayerList.get(3).getKagName()+"', '"+redPlayerList.get(4).getKagName()+"}; getRules().set('redTeam',red);";
+		server.sendMessage(msg);
+		msg="getRules().set_bool('teamsUpdated',true);";
+		server.sendMessage(msg);
+		
+	}
+	
 	public void replacePlayer(PlayerObject playerBeingReplaced, PlayerObject player)
 	{
 		int blueIndex = bluePlayerList.indexOf(playerBeingReplaced);
@@ -59,6 +96,7 @@ public class GatherGame
 		if(index >=0 && index<players.size()) players.set(index, player);
 		playersDeserted.add(playerBeingReplaced);
 		playersSubbedIn.add(player);
+		updateTeamsOnServer();
 		return;
 	}
 	
