@@ -154,6 +154,54 @@ public class GatherGame
 		return;
 	}
 	
+	public void saveResultToDB(int winningTeam)
+	{
+		for(PlayerObject p : bluePlayerList)
+		{
+			//if they subbed in they dont get a win/loss stat
+			if(playersSubbedIn.contains(p))
+			{
+				break;
+			}
+			if(winningTeam==0)
+			{
+				DiscordBot.database.addWin(p.getKagName());
+			}
+			else if(winningTeam==1)
+			{
+				DiscordBot.database.addLoss(p.getKagName());
+			}
+			//TODO warning, draws not accounted for
+		}
+		for(PlayerObject p : redPlayerList)
+		{
+			//if they subbed in they dont get a win/loss stat
+			if(playersSubbedIn.contains(p))
+			{
+				break;
+			}
+			if(winningTeam==1)
+			{
+				DiscordBot.database.addWin(p.getKagName());
+			}
+			else if(winningTeam==0)
+			{
+				DiscordBot.database.addLoss(p.getKagName());
+			}
+			//TODO warning, draws not accounted for
+		}
+		for(PlayerObject p : playersDeserted)
+		{
+			DiscordBot.database.addDesertion(p.getKagName());
+		}
+		for(PlayerObject p : playersSubbedIn)
+		{
+			//only add a subbed in stat if they didnt also desert the game
+			if(playersDeserted.contains(p)) continue;
+			DiscordBot.database.addSubstitution(p.getKagName());
+		}
+	}
+	
 	public void shuffleTeams()
 	{
 		Collections.shuffle(players);

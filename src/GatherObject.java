@@ -333,7 +333,8 @@ public class GatherObject
 		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp1);
 		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp2);
 		//store stats in database
-		//TODO
+		game.saveResultToDB(winningTeam);
+		
 		//remove game object from list
 		if(game.getServer() == null)
 		{
