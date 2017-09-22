@@ -888,4 +888,31 @@ public class GatherDB {
 		return -1;
 	}
 	
+	public int incrementGamesPlayed()
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("UPDATE players SET gamesplayed=gamesplayed+1 WHERE kagname=\"+numgames+\"");
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
 }

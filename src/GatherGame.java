@@ -156,6 +156,7 @@ public class GatherGame
 	
 	public void saveResultToDB(int winningTeam)
 	{
+		DiscordBot.database.incrementGamesPlayed();
 		for(PlayerObject p : bluePlayerList)
 		{
 			//if they subbed in they dont get a win/loss stat
