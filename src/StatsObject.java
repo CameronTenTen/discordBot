@@ -21,7 +21,12 @@ public class StatsObject {
 	@Override
 	public String toString()
 	{
-		float winRate = ((float)wins/((float)wins+(float)losses+(float)desertions))*100;
+		float winRate;
+		if((wins+losses+desertions)==0)
+			winRate=0;
+		else
+			winRate = ((float)wins/((float)wins+(float)losses+(float)desertions))*100;
+		
 		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+"% Desertions: "+desertions;
 	}
 }
