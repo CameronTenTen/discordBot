@@ -865,7 +865,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("INSERT INTO players (kagname, discordid, gamesplayed, wins, losses, draws, desertions, substitutions) VALUES(\""+kagName+"\","+id+",0,0,0,0,0,0) ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
+			return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES(\""+kagName+"\","+id+") ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
 		}
 		catch (SQLException e)
 		{
