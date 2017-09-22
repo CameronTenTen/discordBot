@@ -47,12 +47,39 @@ public class GatherGame
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//getRules().set_bool('teamsSet',true);
 		String msg = "";
-		msg+="string[] blue={'"+bluePlayerList.get(0).getKagName()+"', '"+bluePlayerList.get(1).getKagName()+"', '"+bluePlayerList.get(2).getKagName()+"', '"
-				+bluePlayerList.get(3).getKagName()+"', '"+bluePlayerList.get(4).getKagName()+"}; getRules().set('blueTeam',blue);";
+		if(!bluePlayerList.isEmpty())
+		{
+			msg+="string[] blue={'";
+			for(PlayerObject p : bluePlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('blueTeam',blue);";
+		}
+		else
+		{
+			msg="string[] blue={}; getRules().set('blueTeam',blue);";
+		}
 		server.sendMessage(msg);
+		
 		msg="";
-		msg+="string[] red={'"+redPlayerList.get(0).getKagName()+"', '"+redPlayerList.get(1).getKagName()+"', '"+redPlayerList.get(2).getKagName()+"', '"
-				+redPlayerList.get(3).getKagName()+"', '"+redPlayerList.get(4).getKagName()+"}; getRules().set('redTeam',red);";
+		if(!redPlayerList.isEmpty())
+		{
+			msg+="string[] red={'";
+			for(PlayerObject p : redPlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('redTeam',red);";
+		}
+		else
+		{
+			msg="string[] red={}; getRules().set('redTeam',red);";
+		}
 		server.sendMessage(msg);
 		msg="getRules().set_bool('teamsSet',true);";
 		server.sendMessage(msg);
@@ -65,12 +92,39 @@ public class GatherGame
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//"getRules().set_bool('teamsUpdated',true);"
 		String msg = "";
-		msg+="string[] blue={'"+bluePlayerList.get(0).getKagName()+"', '"+bluePlayerList.get(1).getKagName()+"', '"+bluePlayerList.get(2).getKagName()+"', '"
-				+bluePlayerList.get(3).getKagName()+"', '"+bluePlayerList.get(4).getKagName()+"}; getRules().set('blueTeam',blue);";
+		if(!bluePlayerList.isEmpty())
+		{
+			msg+="string[] blue={'";
+			for(PlayerObject p : bluePlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('blueTeam',blue);";
+		}
+		else
+		{
+			msg="string[] blue={}; getRules().set('blueTeam',blue);";
+		}
 		server.sendMessage(msg);
+		
 		msg="";
-		msg+="string[] red={'"+redPlayerList.get(0).getKagName()+"', '"+redPlayerList.get(1).getKagName()+"', '"+redPlayerList.get(2).getKagName()+"', '"
-				+redPlayerList.get(3).getKagName()+"', '"+redPlayerList.get(4).getKagName()+"}; getRules().set('redTeam',red);";
+		if(!redPlayerList.isEmpty())
+		{
+			msg+="string[] red={'";
+			for(PlayerObject p : redPlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('redTeam',red);";
+		}
+		else
+		{
+			msg="string[] red={}; getRules().set('redTeam',red);";
+		}
 		server.sendMessage(msg);
 		msg="getRules().set_bool('teamsUpdated',true);";
 		server.sendMessage(msg);
