@@ -9,6 +9,7 @@ public class StatsObject {
 		losses = 0;
 		draws = 0;
 		desertions = 0;
+		substitutions = 0;
 	}
 	String kagname;
 	long discordid;
@@ -17,6 +18,7 @@ public class StatsObject {
 	int losses;
 	int draws;
 	int desertions;
+	int substitutions;
 	
 	@Override
 	public String toString()
@@ -27,6 +29,6 @@ public class StatsObject {
 		else
 			winRate = ((float)wins/((float)wins+(float)losses+(float)desertions))*100;
 		
-		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+"% Desertions: "+desertions;
+		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+"% Desertions: "+desertions+" Substitutions: "+substitutions;
 	}
 }

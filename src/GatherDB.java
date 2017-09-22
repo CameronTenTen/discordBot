@@ -165,6 +165,7 @@ public class GatherDB {
 	        		returnObj.losses = result.getInt("losses");
 	        		returnObj.draws = result.getInt("draws");
 	        		returnObj.desertions = result.getInt("desertions");
+	        		returnObj.substitutions = result.getInt("substitutions");
 	        		return returnObj;
 	        	}
 		}
