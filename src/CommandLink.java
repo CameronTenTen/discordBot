@@ -22,13 +22,13 @@ public class CommandLink implements CommandExecutor
 		}
 		else if(args.length<=1)
 		{
-			DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+args[0]+"/token/new to get a token, and then link using the command !link "+args[0]+" playertokenhere");
+			DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+args[0]+"/token/new to get a token, and then link using the command **!link "+args[0]+" PlayerTokenHere**");
 		}
 		else if(args.length>=2)
 		{
 			String token = args[1];
 			//parse the message in case they added extra bits or copied part of/the whole json
-			List<String> tokens = Arrays.asList(message.toString().split("\""));
+			List<String> tokens = Arrays.asList(message.toString().split("[\" ]"));
 			//use the longest sub string as the token
 			for(String str : tokens)
 			{
