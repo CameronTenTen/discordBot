@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import com.google.gson.Gson;
 
@@ -16,22 +18,30 @@ public class CommandLink implements CommandExecutor
 	{
 		if(args.length<=0)
 		{
-			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp");
+			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp (Please note username is **Case Sensitive**)");
 		}
 		else if(args.length<=1)
 		{
 			DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+args[0]+"/token/new to get a token, and then link using the command !link "+args[0]+" playertokenhere");
 		}
-		else if(args.length==2)
+		else if(args.length>=2)
 		{
-			String username = args[0];
 			String token = args[1];
-			String urlString = "https://api.kag2d.com/v1/player/"+(username)+"/token/"+token;
+			//parse the message in case they added extra bits or copied part of/the whole json
+			List<String> tokens = Arrays.asList(message.toString().split("\""));
+			//use the longest sub string as the token
+			for(String str : tokens)
+			{
+				if(str.length()>token.length())
+				{
+					token=str;
+				}
+			}
+
+			String username = args[0];
 			TokenCheckObject tokenCheck = new TokenCheckObject();
-			//parse the token in case they added extra bits
-			
-			
-			
+			String urlString = "https://api.kag2d.com/v1/player/"+(username)+"/token/"+token;
+
 			//check token is valid
 			try
 			{
@@ -57,7 +67,7 @@ public class CommandLink implements CommandExecutor
 		        else
 		        {
 		        	//tell them that the token is not good
-				DiscordBot.reply(message,"an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed");
+				DiscordBot.reply(message,"an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed (Please note that username is **Case Sensitive**)");
 		        }
 		}
 		return;
