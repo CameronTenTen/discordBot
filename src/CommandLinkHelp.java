@@ -12,6 +12,7 @@ public class CommandLinkHelp implements CommandExecutor
 				+ "You should **never submit your password to a site that you don't trust**, therefore linking is done by directing you to a kag2d.com login page. \n"
 				+ "This page provides you with a public key/token after you login, you should then submit this token to the bot so that it knows who you are. \n"
 				+ "This token is how the game verifies your username when connecting to public servers without sharing your password with these servers, and each token can only be used once. \n"
+				+ "To get started with linking, type the command **!link KAGUsernameHere**. \n"
 				+ "You can see the documentation about these tokens here https://developers.thd.vg/api/players.html#get--player-(username)-token-new");
 	}
 }
