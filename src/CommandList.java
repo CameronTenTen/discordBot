@@ -14,12 +14,12 @@ public class CommandList implements CommandExecutor
 		String currentQueue = gather.queueString();
 		if(!currentQueue.isEmpty())
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+"): "+currentQueue);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Current **queue** ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+"): "+currentQueue);
 			return;
 		}
 		else
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue is **empty**");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Queue is **empty**");
 			return;
 		}
 	}

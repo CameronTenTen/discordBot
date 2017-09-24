@@ -14,7 +14,7 @@ public class CommandSetQueue implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
@@ -25,7 +25,7 @@ public class CommandSetQueue implements CommandExecutor
 		//use the second argument as the queue size
 		if(!tokens.hasNextWord())
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
 			return;
 		}
 		try
@@ -34,17 +34,17 @@ public class CommandSetQueue implements CommandExecutor
 		}
 		catch (NumberFormatException e)
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
 			e.printStackTrace();
 			return;
 		}
 		if(newSize<=gather.numPlayersInQueue())
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Cannot set queue size less than or equal to current queue size: "+gather.numPlayersInQueue());
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Cannot set queue size less than or equal to current queue size: "+gather.numPlayersInQueue());
 			return;
 		}
 		gather.setMaxQueueSize(newSize);
-		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue size has been set to "+gather.getMaxQueueSize());
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Queue size has been set to "+gather.getMaxQueueSize());
 		
 		gather.updateChannelCaption();
 		return;

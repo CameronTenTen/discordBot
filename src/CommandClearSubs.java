@@ -13,13 +13,13 @@ public class CommandClearSubs implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
 		
 		gather.substitutions.clearSubs();
-		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Sub list **cleared**");
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Sub list **cleared**");
 		return;
 	}
 }

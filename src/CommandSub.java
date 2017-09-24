@@ -15,7 +15,7 @@ public class CommandSub implements CommandExecutor
 		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
 		if(player==null)
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "You must be linked to sub into a game " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use !link to get started or !linkhelp for more information");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to sub into a game " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use !link to get started or !linkhelp for more information");
 			return;
 		}
 		
@@ -23,7 +23,7 @@ public class CommandSub implements CommandExecutor
 		
 		if(returnObj == null)
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
 		}
 		else
 		{
@@ -42,7 +42,7 @@ public class CommandSub implements CommandExecutor
 				teamString = "ERROR";
 			}
 			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into a game for "+returnObj.playerToBeReplaced.toString());
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " on **" + teamString + "** Team!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " on **" + teamString + "** Team!");
 			gather.remFromQueue(message.getAuthor());
 		}
 		return;

@@ -191,7 +191,7 @@ public class GatherObject
 		if(queue.add(player))
 		{
 			updateChannelCaption();
-			DiscordBot.bot.addRole(player.getDiscordUserInfo(), getQueueRole());
+			DiscordBot.addRole(player.getDiscordUserInfo(), getQueueRole());
 			if(isQueueFull())
 			{
 				return 2;
@@ -219,7 +219,7 @@ public class GatherObject
 		if(queue.remove(player))
 		{
 			updateChannelCaption();
-			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
+			DiscordBot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 			return 1;
 		}
 		else
@@ -269,6 +269,7 @@ public class GatherObject
 		//setup the game
 		List<PlayerObject> list = queue.asList();
 		GatherServer server = DiscordBot.bot.getFreeServer(this.guild);
+		server.setInUse(true);
 		GatherGame game = new GatherGame(-1, list, null, null, server);
 		game.shuffleTeams();
 		runningGames.add(game);
@@ -276,10 +277,10 @@ public class GatherObject
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
 		
-		DiscordBot.bot.sendMessage(getCommandChannel(), "Gather game starting: ", true);
-		DiscordBot.bot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
-		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
-		DiscordBot.bot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
+		DiscordBot.sendMessage(getCommandChannel(), "Gather game starting: ", true);
+		DiscordBot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
+		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
+		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
 		game.sendTeamsToServer();
 		//reset the queue
@@ -319,7 +320,7 @@ public class GatherObject
 	public boolean endGame(GatherGame game, int winningTeam)
 	{
 		//tell everyone
-		DiscordBot.bot.sendMessage(getCommandChannel(), "A game has ended, "+teamString(winningTeam));
+		DiscordBot.sendMessage(getCommandChannel(), "A game has ended, "+teamString(winningTeam));
 		if(winningTeam<-1 || winningTeam>1) return true;
 		//print to score report
 		String temp1 = game.blueMentionList().toString();
@@ -330,8 +331,8 @@ public class GatherObject
 		if(winningTeam==1) temp2 += " +1";
 		else if (winningTeam==0) temp2 += " -1";
 		else temp2 += " 0";
-		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp1);
-		DiscordBot.bot.sendMessage(getScoreReportChannel(), temp2);
+		DiscordBot.sendMessage(getScoreReportChannel(), temp1);
+		DiscordBot.sendMessage(getScoreReportChannel(), temp2);
 		//store stats in database
 		game.saveResultToDB(winningTeam);
 		
@@ -344,8 +345,7 @@ public class GatherObject
 			return true;
 		}
 		removeRunningGame(game);
-		//set server unused?
-		//TODO
+		game.getServer().setInUse(false);
 		return true;
 	}
 	
@@ -411,7 +411,7 @@ public class GatherObject
 		List<IUser> list = getGuild().getUsersByRole(getQueueRole());
 		for(IUser user : list)
 		{
-			DiscordBot.bot.removeRole(user, getQueueRole());
+			DiscordBot.removeRole(user, getQueueRole());
 		}
 	}
 	
@@ -419,7 +419,7 @@ public class GatherObject
 	{
 		for(PlayerObject player : queue)
 		{
-			DiscordBot.bot.removeRole(player.getDiscordUserInfo(), getQueueRole());
+			DiscordBot.removeRole(player.getDiscordUserInfo(), getQueueRole());
 		}
 		queue.clear();
 		updateChannelCaption();
@@ -432,7 +432,7 @@ public class GatherObject
 	
 	public void movePlayersIntoTeamRooms()
 	{
-		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players into team rooms");
+		DiscordBot.sendMessage(this.getCommandChannel(), "Moving players into team rooms");
 
 		IVoiceChannel general = this.getGeneralVoiceChannel();
 		IVoiceChannel blue = this.getBlueVoiceChannel();
@@ -447,11 +447,11 @@ public class GatherObject
 				int team = game.getPlayerTeam(user);
 				if(team==0)
 				{
-					DiscordBot.bot.moveToVoiceChannel(user, blue);
+					DiscordBot.moveToVoiceChannel(user, blue);
 				}
 				else if(team==1)
 				{
-					DiscordBot.bot.moveToVoiceChannel(user, red);
+					DiscordBot.moveToVoiceChannel(user, red);
 				}
 			}
 		}
@@ -459,7 +459,7 @@ public class GatherObject
 	
 	public void movePlayersOutOfTeamRooms()
 	{
-		DiscordBot.bot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
+		DiscordBot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
 		
 		IVoiceChannel general = this.getGeneralVoiceChannel();
 		IVoiceChannel blue = this.getBlueVoiceChannel();
@@ -469,12 +469,12 @@ public class GatherObject
 		users = blue.getConnectedUsers();
 		for( IUser user : users)
 		{
-			DiscordBot.bot.moveToVoiceChannel(user, general);
+			DiscordBot.moveToVoiceChannel(user, general);
 		}
 		users = red.getConnectedUsers();
 		for( IUser user : users)
 		{
-			DiscordBot.bot.moveToVoiceChannel(user, general);
+			DiscordBot.moveToVoiceChannel(user, general);
 		}
 		
 	}

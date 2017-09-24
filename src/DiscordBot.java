@@ -134,12 +134,12 @@ public class DiscordBot {
 	}
 
 	//wrappers for doing things in order to avoid rate limit exceptions
-	public void sendMessage(IChannel channel, String msg)
+	public static void sendMessage(IChannel channel, String msg)
 	{
 		sendMessage(channel, msg, false);
 	}
 	
-	public void sendMessage(IChannel channel, String msg, boolean tts)
+	public static void sendMessage(IChannel channel, String msg, boolean tts)
 	{
 		RequestBuffer.request(() -> {
 			try
@@ -167,7 +167,7 @@ public class DiscordBot {
 		});
 	}
 	
-	public void addRole(IUser user, IRole role)
+	public static void addRole(IUser user, IRole role)
 	{
 		if(user == null || role == null) return;
 		RequestBuffer.request(() -> {
@@ -175,7 +175,7 @@ public class DiscordBot {
 		});
 	}
 	
-	public void removeRole(IUser user, IRole role)
+	public static void removeRole(IUser user, IRole role)
 	{
 		if(user == null || role == null) return;
 		RequestBuffer.request(() -> {
@@ -183,7 +183,7 @@ public class DiscordBot {
 		});
 	}
 	
-	public void moveToVoiceChannel(IUser user, IVoiceChannel channel)
+	public static void moveToVoiceChannel(IUser user, IVoiceChannel channel)
 	{
 		RequestBuffer.request(() -> {
 			try
@@ -221,7 +221,7 @@ public class DiscordBot {
 	public static void userWentOffline(IUser user) {
 		for (GatherObject object : gatherObjects) {
 			if (object.remFromQueue(user) == 1) {
-				bot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
+				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 						+ " has been **removed** from the queue (disconnected) ("
 						+ DiscordBot.getGatherObjectForGuild(object.getGuild())
 								.numPlayersInQueue()

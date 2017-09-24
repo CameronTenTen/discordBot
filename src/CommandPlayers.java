@@ -14,12 +14,12 @@ public class CommandPlayers implements CommandExecutor
 		String currentPlayers = gather.playersString();
 		if(!currentPlayers.isEmpty())
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), currentPlayers);
+			DiscordBot.sendMessage(gather.getCommandChannel(), currentPlayers);
 			return;
 		}
 		else
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "No players currently playing");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "No players currently playing");
 			return;
 		}
 	}

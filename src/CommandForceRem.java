@@ -16,7 +16,7 @@ public class CommandForceRem implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only admins can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only admins can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
@@ -26,7 +26,7 @@ public class CommandForceRem implements CommandExecutor
 		{
 			if(1==gather.remFromQueue(user))
 			{
-				DiscordBot.bot.sendMessage(gather.getCommandChannel(), gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(user)+" was **removed** from the queue (admin) ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 			}
 		}
 		

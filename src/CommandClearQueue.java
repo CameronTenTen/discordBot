@@ -13,13 +13,13 @@ public class CommandClearQueue implements CommandExecutor
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}
 		
 		gather.clearQueue();
-		DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Queue is now **empty**");
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Queue is now **empty**");
 		return;
 	}
 }

@@ -13,7 +13,7 @@ public class CommandStart implements CommandExecutor
 
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
 			return;
 		
 		}

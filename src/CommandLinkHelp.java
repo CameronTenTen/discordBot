@@ -7,7 +7,7 @@ public class CommandLinkHelp implements CommandExecutor
 	@Command(aliases = {"!linkhelp"}, description = "Link your KAG account to your discord account")
 	public void onCommand(IMessage message, String[] args)
 	{
-		DiscordBot.bot.sendMessage(message.getChannel(),"linking is the process of connecting your KAG and Discord accounts so that the bot knows who you are. \n"
+		DiscordBot.sendMessage(message.getChannel(),"linking is the process of connecting your KAG and Discord accounts so that the bot knows who you are. \n"
 				+ "This allows for the server to manage your team and record more detailed stats. \n"
 				+ "You should **never submit your password to a site that you don't trust**, therefore linking is done by directing you to a kag2d.com login page. \n"
 				+ "This page provides you with a public key/token after you login, you should then submit this token to the bot so that it knows who you are. \n"

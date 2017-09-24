@@ -44,7 +44,7 @@ public class CommandStats implements CommandExecutor
 			return;
 		}
 		
-		DiscordBot.bot.sendMessage(message.getChannel(), "Stats for "+stats.kagname+": \n"+stats.toString());
+		DiscordBot.sendMessage(message.getChannel(), "Stats for "+stats.kagname+": \n"+stats.toString());
 		return;
 	}
 }

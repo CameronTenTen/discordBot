@@ -27,7 +27,7 @@ public class RconListener
 			index = msg.indexOf(" ");
 			msg = msg.substring(index+1);
 			
-			DiscordBot.bot.sendMessage(gather.getCommandChannel(), "<"+player+"> "+msg);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "<"+player+"> "+msg);
 		}
 		else if(msg.startsWith("GAMEOVER"))
 		{
