@@ -174,6 +174,11 @@ public class GatherObject
 	{
 		return user.getDisplayName(getGuild()) + "(" + user.getName() + "#" + user.getDiscriminator() + ")";
 	}
+	
+	public String fullUserString(PlayerObject player)
+	{
+		return fullUserString(player.getDiscordUserInfo());
+	}
 
 	/**
 	 * Adds a player to the gather queue
