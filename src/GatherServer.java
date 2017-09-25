@@ -54,6 +54,11 @@ public class GatherServer
 		serverCheckObject.sendMessage(msg);
 	}
 	
+	public void say(String msg)
+	{
+		this.sendMessage("getNet().server_SendMsg("+msg+");");
+	}
+	
 	@Override
 	public boolean equals(Object obj)
 	{
