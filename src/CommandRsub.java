@@ -11,9 +11,8 @@ public class CommandRsub implements CommandExecutor
 	@Command(aliases = {"!rsub"}, description = "request a sub")
 	public void onCommand(IMessage message, String[] args)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 
 		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
 		if(player==null)

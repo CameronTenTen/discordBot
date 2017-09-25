@@ -10,9 +10,8 @@ public class CommandForceRem implements CommandExecutor
 	@Command(aliases = {"!forcerem"}, description = "Admin only - remove a user from the queue")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{

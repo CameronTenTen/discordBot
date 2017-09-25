@@ -7,9 +7,8 @@ public class CommandList implements CommandExecutor
 	@Command(aliases = {"!list"}, description = "Check the current player list")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		String currentQueue = gather.queueString();
 		if(!currentQueue.isEmpty())

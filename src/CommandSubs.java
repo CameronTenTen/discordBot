@@ -7,9 +7,8 @@ public class CommandSubs implements CommandExecutor
 	@Command(aliases = {"!subs"}, description = "Check current sub requests")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		String currentSubs = gather.substitutions.toString();
 		if(!currentSubs.isEmpty())

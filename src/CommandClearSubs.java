@@ -7,9 +7,8 @@ public class CommandClearSubs implements CommandExecutor
 	@Command(aliases = {"!clearsubs"}, description = "Admin only - clear all current sub requests")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{

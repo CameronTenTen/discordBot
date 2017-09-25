@@ -36,9 +36,10 @@ public class DiscordBot {
 
 	public boolean doKagServerConnections = true;
 
-	public static GatherObject getGatherObjectForGuild(IGuild guild) {
+	public static GatherObject getGatherObjectForChannel(IChannel channel) {
+		if(channel==null) return null;
 		for (GatherObject object : gatherObjects) {
-			if (object.getGuild().equals(guild))
+			if (object.getCommandChannel().equals(channel))
 				return object;
 		}
 		return null;
@@ -223,9 +224,9 @@ public class DiscordBot {
 			if (object.remFromQueue(user) == 1) {
 				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 						+ " has been **removed** from the queue (disconnected) ("
-						+ DiscordBot.getGatherObjectForGuild(object.getGuild())
+						+ DiscordBot.getGatherObjectForChannel(object.getCommandChannel())
 								.numPlayersInQueue()
-						+ "/" + DiscordBot.getGatherObjectForGuild(object.getGuild())
+						+ "/" + DiscordBot.getGatherObjectForChannel(object.getCommandChannel())
 								.getMaxQueueSize()
 						+ ")");
 			}

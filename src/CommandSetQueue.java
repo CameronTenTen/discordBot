@@ -8,9 +8,8 @@ public class CommandSetQueue implements CommandExecutor
 	@Command(aliases = {"!setqueue"}, description = "Admin only - change the queue size")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		if(!gather.isAdmin(message.getAuthor()))
 		{

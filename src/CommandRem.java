@@ -8,9 +8,8 @@ public class CommandRem implements CommandExecutor
 	@Command(aliases = {"!rem","!remove"}, description = "Remove yourself from the queue")
 	public void onCommand(IMessage message)
 	{
-		if(message.getGuild() == null) return;
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(message.getGuild());
-		if(message.getChannel() != gather.getCommandChannel()) return;
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
+		if(gather==null) return;
 		
 		int remReturnVal = gather.remFromQueue(message.getAuthor());
 		switch(remReturnVal)
