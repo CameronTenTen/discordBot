@@ -46,6 +46,11 @@ public class GatherServer
 	
 	public void sendMessage(String msg)
 	{
+		if(serverCheckObject == null)
+		{
+			Discord4J.LOGGER.error("Could not send message to kag server, serverConnection is null");
+			return;
+		}
 		serverCheckObject.sendMessage(msg);
 	}
 	
