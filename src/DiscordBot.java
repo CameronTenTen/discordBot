@@ -125,15 +125,6 @@ public class DiscordBot {
 		bot.startBot(args[0]);
 	}
 
-	public GatherServer getFreeServer(IGuild guild) {
-		return getGatherObjectForGuild(guild).getFreeServer();
-	}
-	
-	public static GatherServer getServer(IGuild guild, String ip, int port)
-	{
-		return getGatherObjectForGuild(guild).getServer(ip, port);
-	}
-
 	//wrappers for doing things in order to avoid rate limit exceptions
 	public static void sendMessage(IChannel channel, String msg)
 	{

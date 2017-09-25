@@ -273,7 +273,7 @@ public class GatherObject
 	{
 		//setup the game
 		List<PlayerObject> list = queue.asList();
-		GatherServer server = DiscordBot.bot.getFreeServer(this.guild);
+		GatherServer server = this.getFreeServer();
 		server.setInUse(true);
 		GatherGame game = new GatherGame(-1, list, null, null, server);
 		game.shuffleTeams();
