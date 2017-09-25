@@ -45,10 +45,17 @@ public class DiscordBot {
 		return null;
 	}
 	
-	public static IGuild getGuildForServer(String ip, int port)
+	public static GatherObject getGatherObjectForServer(String ip, int port)
 	{
-		//TODO this is not good if there is multiple gather objects
-		return gatherObjects.iterator().next().getGuild();
+		for(GatherObject obj : gatherObjects)
+		{
+			GatherServer server = obj.getServer(ip, port);
+			if(server!=null)
+			{
+				return obj;
+			}
+		}
+		return null;
 	}
 
 	public void startBot(String token) {

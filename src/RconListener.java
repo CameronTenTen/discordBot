@@ -14,7 +14,7 @@ public class RconListener
 		index = msg.indexOf(" ");
 		msg = msg.substring(index+1);
 		
-		GatherObject gather = DiscordBot.getGatherObjectForGuild(DiscordBot.getGuildForServer(ip, port));
+		GatherObject gather = DiscordBot.getGatherObjectForServer(ip, port);
 		System.out.println(msg);
 		if(msg.startsWith("SAY"))
 		{
