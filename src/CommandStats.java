@@ -10,18 +10,22 @@ public class CommandStats implements CommandExecutor
 	@Command(aliases = {"!stats"}, description = "Check the stats of a player stored in the database")
 	public void onCommand(IMessage message, String[] args)
 	{
-		if(args.length<=0)
-		{
-			DiscordBot.reply(message,"Usage is !stats <KAGName/@user>");
-			return;
-		}
 		
 		StatsObject stats;
 		List<IUser> mentions = message.getMentions();
-		if(!mentions.isEmpty())
+		if(args.length==0)
+		{
+			//if they just did !stats without any argument, just get stats for them
+			stats = DiscordBot.database.getStats(message.getAuthor().getLongID());
+			if(stats==null)
+			{
+				DiscordBot.reply(message,"Could not find personal stats, if you want the stats of someone else then usage is !stats <KAGName/User>");
+				return;
+			}
+		}
+		else if(!mentions.isEmpty())
 		{
 			stats = DiscordBot.database.getStats(mentions.get(0).getLongID());
-			
 		}
 		else
 		{
