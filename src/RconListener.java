@@ -12,29 +12,30 @@ public class RconListener
 		
 		//trim off the [Gather]
 		index = msg.indexOf(" ");
-		msg = msg.substring(index+1);
+		String gatherMsg = msg.substring(index+1);
 		
 		GatherObject gather = DiscordBot.getGatherObjectForServer(ip, port);
-		System.out.println(msg);
-		if(msg.startsWith("SAY"))
+		System.out.println(gatherMsg);
+		if(gatherMsg.startsWith("SAY"))
 		{
-			index = msg.indexOf(" ");
-			msg = msg.substring(index+1);
+			index = gatherMsg.indexOf(" ");
+			gatherMsg = gatherMsg.substring(index+1);
 			
 			//separate player and message
-			index = msg.indexOf(" ");
-			String player = msg.substring(0,index);
-			index = msg.indexOf(" ");
-			msg = msg.substring(index+1);
+			index = gatherMsg.indexOf(" ");
+			String player = gatherMsg.substring(0,index);
+			index = gatherMsg.indexOf(" ");
+			gatherMsg = gatherMsg.substring(index+1);
 			
-			DiscordBot.sendMessage(gather.getCommandChannel(), "<"+player+"> "+msg);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "<"+player+"> "+gatherMsg);
 		}
-		else if(msg.startsWith("GAMEOVER"))
+		else if(gatherMsg.startsWith("GAMEOVER"))
 		{
-			index = msg.indexOf(" ");
-			msg = msg.substring(index+1);
+			index = gatherMsg.indexOf(" ");
+			gatherMsg = gatherMsg.substring(index+1);
 			
-			gather.endGame(ip, port, Integer.parseInt(msg));
+			gather.endGame(ip, port, Integer.parseInt(gatherMsg));
+		}
 		}
 		
 		
