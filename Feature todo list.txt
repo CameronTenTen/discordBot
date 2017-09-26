@@ -1,10 +1,5 @@
-player object manager (so that player info can be updated for the whole bot when a player is linked) (the manager should be the only place where new PlayerObject's are created and should have functions for retreiving a player object based on kagname/discord info)
-linking of discord and kag accounts
-basic statistics
 format player name prints(such as !list and !players) to include kagnames
 import gather rules from old gather
-current players/games in member list
-current tickets in member list
 managed teams on server
 server !freeze vote command
 managed voice chat channels
@@ -12,6 +7,8 @@ add voice chat role to allow @voicechat pings
 scramble teams vote
 player bans
 proper multi guild support
+current players/games in member list
+current tickets in member list
 better exception handling for optional features such as queue role
 mmr based match making
 better designed gamemode
