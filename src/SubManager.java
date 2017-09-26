@@ -106,7 +106,7 @@ public class SubManager {
 	
 	
 	
-	private int addSubVote(PlayerObject playerVotedFor, PlayerObject playerVoting)
+	public int addSubVote(PlayerObject playerVotedFor, PlayerObject playerVoting)
 	{
 		GatherGame voterGame = gather.getPlayersGame(playerVoting);
 		GatherGame votedGame = gather.getPlayersGame(playerVotedFor);
@@ -158,7 +158,6 @@ public class SubManager {
 	{
 		return addSubVote(DiscordBot.players.getObject(votedFor), DiscordBot.players.getObject(playerVoting));
 	}
-
 
 	public boolean removeSubVotes(PlayerObject playerVotedFor)
 	{
