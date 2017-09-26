@@ -2,6 +2,7 @@ import java.util.List;
 
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -38,6 +39,19 @@ public class CommandStats implements CommandExecutor
 				if(!users.isEmpty())
 				{
 					stats = DiscordBot.database.getStats(users.get(0).getLongID());
+				}
+				else
+				{
+					//the argument isnt a recognised kag name or discord name, try nicks for this guild
+					IGuild guild = message.getGuild();
+					if(guild!=null)
+					{
+						users = guild.getUsersByName(args[0], true);
+						if(!users.isEmpty())
+						{
+							stats = DiscordBot.database.getStats(users.get(0).getLongID());
+						}
+					}
 				}
 			}
 		}
