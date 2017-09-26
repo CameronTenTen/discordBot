@@ -56,7 +56,7 @@ public class GatherServer
 	
 	public void say(String msg)
 	{
-		this.sendMessage("getNet().server_SendMsg("+msg+");");
+		this.sendMessage("getNet().server_SendMsg(\""+msg+"\");");
 	}
 	
 	@Override
