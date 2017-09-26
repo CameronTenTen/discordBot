@@ -36,6 +36,17 @@ public class RconListener
 			
 			gather.endGame(ip, port, Integer.parseInt(gatherMsg));
 		}
+		else if(gatherMsg.startsWith("RSUB"))
+		{
+			index = gatherMsg.indexOf(" ");
+			gatherMsg = gatherMsg.substring(index+1);
+			
+			gather.addSubRequest(gatherMsg, ip, port);
+		}
+		else if(gatherMsg.startsWith("SUBVOTE"))
+		{
+			String[] args = gatherMsg.split("\\s");
+			gather.addSubVote(args[1], args[2], ip, port);
 		}
 		
 		
