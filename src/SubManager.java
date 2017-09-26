@@ -55,6 +55,7 @@ public class SubManager {
 			if(subRequests.contains(subObj)) return 0;
 			
 			subRequests.add(subObj);
+			removeSubVotes(subObj.playerToBeReplaced);
 			return 1;
 		}
 	}
