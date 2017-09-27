@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
 public class GatherGame
@@ -283,6 +284,23 @@ public class GatherGame
 
 	public void setServer(GatherServer server) {
 		this.server = server;
+	}
+
+	public String toString(IGuild guild)
+	{
+		if(players.isEmpty()) return "";
+		
+		String blueString = "**Blue:** ";
+		for(PlayerObject player : bluePlayerList)
+		{
+			blueString += player.getKagName()+" ("+player.getDiscordUserInfo().getDisplayName(guild)+") ";
+		}
+		String redString = "**Red:** ";
+		for(PlayerObject player : redPlayerList)
+		{
+			redString += player.getKagName()+" ("+player.getDiscordUserInfo().getDisplayName(guild)+") ";
+		}
+		return blueString + "\n" + redString;
 	}
 	
 	@Override

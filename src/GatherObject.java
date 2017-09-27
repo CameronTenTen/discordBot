@@ -179,6 +179,11 @@ public class GatherObject
 	{
 		return fullUserString(player.getDiscordUserInfo());
 	}
+	
+	public String playerString(PlayerObject player, IGuild currGuild)
+	{
+		return player.getKagName()+" ("+player.getDiscordUserInfo().getDisplayName(currGuild)+")";
+	}
 
 	/**
 	 * Adds a player to the gather queue
@@ -617,7 +622,7 @@ public class GatherObject
 		String returnString = "";
 		for(GatherGame game : runningGames)
 		{
-			returnString += game.toString();
+			returnString += game.toString(this.getGuild());
 			returnString += "\n";
 		}
 		if(returnString.length()<=2)
@@ -632,7 +637,7 @@ public class GatherObject
 		String returnString="";
 		for(PlayerObject player : queue)
 		{
-			returnString+=fullUserString(player.getDiscordUserInfo());
+			returnString+=playerString(player, this.getGuild());
 			returnString+=", ";
 		}
 		if(returnString.length()<=2)
