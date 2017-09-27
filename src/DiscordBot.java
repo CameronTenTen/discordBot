@@ -134,23 +134,24 @@ public class DiscordBot {
 	}
 
 	//wrappers for doing things in order to avoid rate limit exceptions
-	public static void sendMessage(IChannel channel, String msg)
+	public static IMessage sendMessage(IChannel channel, String msg)
 	{
-		sendMessage(channel, msg, false);
+		return sendMessage(channel, msg, false);
 	}
 	
-	public static void sendMessage(IChannel channel, String msg, boolean tts)
+	public static IMessage sendMessage(IChannel channel, String msg, boolean tts)
 	{
-		RequestBuffer.request(() -> {
+		return RequestBuffer.request(() -> {
 			try
 			{
-				channel.sendMessage(msg, tts);
+				return channel.sendMessage(msg, tts);
 			}
 			catch(NullPointerException e)
 			{
 				Discord4J.LOGGER.warn("Null pointer exception caught from Discord4J code: " + e.getMessage());
 			}
-		});
+			return null;
+		}).get();
 	}
 	
 	public static void reply(IMessage msg, String reply)
