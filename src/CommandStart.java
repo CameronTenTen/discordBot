@@ -16,6 +16,7 @@ public class CommandStart implements CommandExecutor
 			return;
 		
 		}
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Moving players in to team rooms");
 		gather.movePlayersIntoTeamRooms();
 		return;
 	}

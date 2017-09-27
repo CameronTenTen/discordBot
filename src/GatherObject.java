@@ -6,6 +6,7 @@ import java.util.Set;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -295,6 +296,8 @@ public class GatherObject
 		game.sendTeamsToServer();
 		//reset the queue
 		this.clearQueue();
+		//do voice channel stuff
+		movePlayersIntoTeamRooms(5);
 	}
 	
 	public GatherGame getRunningGame(String serverIp, int serverPort)
@@ -359,6 +362,8 @@ public class GatherObject
 			removeRunningGame(game);
 			game.getServer().setInUse(false);
 		}
+		//do voice channel stuff
+		movePlayersOutOfTeamRooms(5);
 		return true;
 	}
 	
@@ -512,8 +517,6 @@ public class GatherObject
 	
 	public void movePlayersIntoTeamRooms()
 	{
-		DiscordBot.sendMessage(this.getCommandChannel(), "Moving players into team rooms");
-
 		IVoiceChannel general = this.getGeneralVoiceChannel();
 		IVoiceChannel blue = this.getBlueVoiceChannel();
 		IVoiceChannel red = this.getRedVoiceChannel();
@@ -537,10 +540,27 @@ public class GatherObject
 		}
 	}
 	
+	public void movePlayersIntoTeamRooms(int delay)
+	{
+		String countString = "Moving channels in ";
+		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay, true);
+
+		try {
+			Thread.sleep(1000);
+			for(int i=delay-1;i>0;i--)
+			{
+				countMsg.edit(countString+"**"+i+"**");
+				Thread.sleep(1000);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		movePlayersIntoTeamRooms();
+		countMsg.delete();
+	}
+	
 	public void movePlayersOutOfTeamRooms()
 	{
-		DiscordBot.sendMessage(this.getCommandChannel(), "Moving players out of team rooms");
-		
 		IVoiceChannel general = this.getGeneralVoiceChannel();
 		IVoiceChannel blue = this.getBlueVoiceChannel();
 		IVoiceChannel red = this.getRedVoiceChannel();
@@ -557,6 +577,25 @@ public class GatherObject
 			DiscordBot.moveToVoiceChannel(user, general);
 		}
 		
+	}
+	
+	public void movePlayersOutOfTeamRooms(int delay)
+	{
+		String countString = "Moving channels in ";
+		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay, true);
+
+		try {
+			Thread.sleep(1000);
+			for(int i=delay-1;i>0;i--)
+			{
+				countMsg.edit(countString+i);
+				Thread.sleep(1000);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		movePlayersOutOfTeamRooms();
+		countMsg.delete();
 	}
 	
 	public String teamString(int team)

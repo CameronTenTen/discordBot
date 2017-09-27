@@ -16,6 +16,7 @@ public class CommandEnd implements CommandExecutor
 			return;
 		
 		}
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Moving players out of team rooms");
 		gather.movePlayersOutOfTeamRooms();
 		return;
 	}
