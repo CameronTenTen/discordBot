@@ -37,7 +37,7 @@ public class CommandLink implements CommandExecutor
 	{
 		if(args.length<=0)
 		{
-			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp (Please note username is **Case Sensitive**)");
+			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp");
 		}
 		else if(args.length<=1)
 		{
@@ -110,7 +110,7 @@ public class CommandLink implements CommandExecutor
 			else
 			{
 				//tell them that the token is not good
-				DiscordBot.reply(message,"an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed (Please note that username is **Case Sensitive**)");
+				DiscordBot.reply(message,"an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed");
 			}
 		}
 		return;
