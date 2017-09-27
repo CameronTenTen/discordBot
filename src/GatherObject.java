@@ -331,31 +331,34 @@ public class GatherObject
 	{
 		//tell everyone
 		DiscordBot.sendMessage(getCommandChannel(), "A game has ended, "+teamString(winningTeam));
-		if(winningTeam<-1 || winningTeam>1) return true;
-		//print to score report
-		String temp1 = game.blueMentionList().toString();
-		if(winningTeam==0) temp1 += " +1";
-		else if (winningTeam==1) temp1 += " -1";
-		else temp1 += " 0";
-		String temp2 = game.redMentionList().toString();
-		if(winningTeam==1) temp2 += " +1";
-		else if (winningTeam==0) temp2 += " -1";
-		else temp2 += " 0";
-		DiscordBot.sendMessage(getScoreReportChannel(), temp1);
-		DiscordBot.sendMessage(getScoreReportChannel(), temp2);
-		//store stats in database
-		game.saveResultToDB(winningTeam);
-		
+		if(winningTeam>=-1 && winningTeam<=1)
+		{
+			//print to score report
+			String temp1 = game.blueMentionList().toString();
+			if(winningTeam==0) temp1 += " +1";
+			else if (winningTeam==1) temp1 += " -1";
+			else temp1 += " 0";
+			String temp2 = game.redMentionList().toString();
+			if(winningTeam==1) temp2 += " +1";
+			else if (winningTeam==0) temp2 += " -1";
+			else temp2 += " 0";
+			DiscordBot.sendMessage(getScoreReportChannel(), temp1);
+			DiscordBot.sendMessage(getScoreReportChannel(), temp2);
+			//store stats in database
+			game.saveResultToDB(winningTeam);
+		}
 		//remove game object from list
 		if(game.getServer() == null)
 		{
 			//THIS IS A WORKAROUND FOR WHEN WE HAVE NO SERVER LIST AND THERE IS ONLY 1 GAME AT A TIME
 			Discord4J.LOGGER.warn("Server is null when giving win, clearing running games (if there is more than 1 running game this is a problem)");
 			clearGames();
-			return true;
 		}
-		removeRunningGame(game);
-		game.getServer().setInUse(false);
+		else
+		{
+			removeRunningGame(game);
+			game.getServer().setInUse(false);
+		}
 		return true;
 	}
 	
