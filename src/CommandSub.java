@@ -26,7 +26,7 @@ public class CommandSub implements CommandExecutor
 		}
 		else
 		{
-			int team = returnObj.game.getPlayerTeam(returnObj.playerToBeReplaced);
+			int team = returnObj.game.getPlayerTeam(returnObj.playerSubbingIn);
 			String teamString = "";
 			if(team == 0)
 			{
