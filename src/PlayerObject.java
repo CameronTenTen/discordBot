@@ -101,6 +101,6 @@ public class PlayerObject
 	
 	public String toString()
 	{
-		return discordUserInfo.getName()+"#"+discordUserInfo.getDiscriminator();
+		return getKagName() +" ("+ getDiscordUserInfo().getName()+"#"+getDiscordUserInfo().getDiscriminator()+")";
 	}
 }
