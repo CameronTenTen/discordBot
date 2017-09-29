@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import sx.blah.discord.Discord4J;
+
 public class KagServerChecker implements Runnable
 {
 	private Socket socket;
@@ -16,6 +18,8 @@ public class KagServerChecker implements Runnable
 	private PrintWriter out;
 	private BufferedReader in;
 	private String lastMsg;
+	private boolean connected;
+	private int reconnectTimer;			//milliseconds
 	
 	private String ip;
 	private int port;
@@ -30,7 +34,44 @@ public class KagServerChecker implements Runnable
 		this.ip=ip;
 		this.port=port;
 		this.rconPassword=rconPassword;
+		this.reconnectTimer = 120000;
 		connect();
+	}
+	
+	public boolean isConnected()
+	{
+		return connected;
+	}
+	
+	public void setConnected(boolean val)
+	{
+		if(connected == true && val == false)
+		{
+			connected = val;
+			connectionLost();
+		}
+		else
+		{
+			connected = val;
+		}
+	}
+	
+	public void connectionLost()
+	{
+		//disconnect
+		disconnect();
+		//reconnect later
+		try {
+			Discord4J.LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer+" milliseconds");
+			Thread.sleep(reconnectTimer);
+		} catch (InterruptedException e) {
+		}
+		try {
+			connect();
+		} catch (IOException e) {
+			Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
+			connectionLost();
+		}
 	}
 	
 	public void connect() throws UnknownHostException, IOException
@@ -39,7 +80,9 @@ public class KagServerChecker implements Runnable
 		socket = new Socket(ip, port);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		Discord4J.LOGGER.info("Connected to KAG server: "+ip+":"+port);
 		out.println(rconPassword);
+		connected=true;
 	}
 	
 	public void sendMessage(String msg)
@@ -82,9 +125,18 @@ public class KagServerChecker implements Runnable
 				if(in.ready())
 				{
 					lastMsg = in.readLine();
-					for(RconListener listener : listeners)
+					System.out.println("msg rd: "+lastMsg);
+					if(lastMsg == null || lastMsg.endsWith("server shutting down."))
 					{
-						listener.messageReceived(lastMsg, ip, port);
+						Discord4J.LOGGER.info("connection loss detected: "+lastMsg);
+						setConnected(false);
+					}
+					else
+					{
+						for(RconListener listener : listeners)
+						{
+							listener.messageReceived(lastMsg, ip, port);
+						}
 					}
 				}
 			} catch (IOException e) {

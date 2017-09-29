@@ -26,14 +26,21 @@ public class GatherServer
 	public void connect()
 	{
 		try {
-			serverCheckObject = new KagServerChecker(ip, port, "physics");
+			serverCheckObject = new KagServerChecker(ip, port, rconPassword);
 			serverCheckObject.addListener(new RconListener());
 			rconThread = new Thread(serverCheckObject);
 			rconThread.start();
-			Discord4J.LOGGER.info("Connected to KAG server: "+ip+":"+port+"/"+serverPassword);
 		} catch (IOException e) {
-			Discord4J.LOGGER.error("An error occured connecting to the gather kag server("+e.getMessage()+"): "+ip+":"+port+"/"+serverPassword);
+			Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
+			rconThread = null;
+			serverCheckObject = null;
 		}
+	}
+	
+	public boolean isConnected()
+	{
+		if(rconThread == null || !serverCheckObject.isConnected()) return false;
+		return true;
 	}
 	
 	public void disconnect()

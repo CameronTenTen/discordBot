@@ -7,7 +7,6 @@ public class RconListener
 		int index = msg.indexOf(" ");
 		msg = msg.substring(index+1);
 		
-		System.out.println(msg);
 		if(!msg.startsWith("[Gather]")) return;
 		
 		//trim off the [Gather]
