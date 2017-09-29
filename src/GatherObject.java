@@ -280,7 +280,8 @@ public class GatherObject
 		//setup the game
 		List<PlayerObject> list = queue.asList();
 		GatherServer server = this.getFreeServer();
-		server.setInUse(true);
+		if(server != null) server.setInUse(true);
+		//TODO probably shouldnt start a game if there is no free server
 		GatherGame game = new GatherGame(-1, list, null, null, server);
 		game.shuffleTeams();
 		runningGames.add(game);
@@ -324,8 +325,13 @@ public class GatherObject
 		return null;
 	}
 	
-	public void removeRunningGame(GatherGame game)
+	public void setGameEnded(GatherGame game)
 	{
+		GatherServer server = game.getServer();
+		if(server !=null)
+		{
+			server.setInUse(false);
+		}
 		runningGames.remove(game);
 		substitutions.clearGame(game);
 	}
@@ -359,8 +365,7 @@ public class GatherObject
 		}
 		else
 		{
-			removeRunningGame(game);
-			game.getServer().setInUse(false);
+			setGameEnded(game);
 		}
 		//do voice channel stuff
 		movePlayersOutOfTeamRooms(5);
@@ -512,7 +517,10 @@ public class GatherObject
 	
 	public void clearGames()
 	{
-		runningGames.clear();
+		while(!runningGames.isEmpty())
+		{
+			setGameEnded(runningGames.get(0));
+		}
 	}
 	
 	public void movePlayersIntoTeamRooms()
