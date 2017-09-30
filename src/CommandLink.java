@@ -13,23 +13,28 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandLink implements CommandExecutor
 {
-	
-	public String getCorrectCase(String username)
+	public PlayerInfoObject getPlayerInfo(String username)
 	{
 		String caseCheckURL = "https://api.kag2d.com/v1/player/"+username+"/info";
-		String name="";
 		try
 		{
 	        	URL url = new URL(caseCheckURL);
 			InputStreamReader reader = new InputStreamReader(url.openStream());
 			CaseCheckObject caseCheck = new Gson().fromJson(reader, CaseCheckObject.class);
-			name=caseCheck.playerInfo.username;
+			return caseCheck.playerInfo;
 		}
 		catch(IOException e)
 		{
 			//dont want to do anything here, this function is supposed to find some wrong usernames
 		}
-		return name;
+		return null;
+	}
+	
+	public String getCorrectCase(String username)
+	{
+		PlayerInfoObject info = getPlayerInfo(username);
+		if(info==null) return "";
+		else return info.username;
 	}
 	
 	@Command(aliases = {"!link"}, description = "Link your KAG account to your discord account")
@@ -48,15 +53,20 @@ public class CommandLink implements CommandExecutor
 				return;
 			}
 			//quick sanity check on their username before giving them the link
-			String username = getCorrectCase(args[0]);
-			if(username.equals(""))
+			PlayerInfoObject info = getPlayerInfo(args[0]);
+			if(info==null || info.username.equals(""))
 			{
 				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");
 				return;
 			}
+			else if(info.gold==false)
+			{
+				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.");
+				return;
+			}
 			else
 			{
-				DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+username+"/token/new to get a token, and then link using the command **!link "+username+" PlayerTokenHere**");
+				DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+info.username+"/token/new to get a token, and then link using the command **!link "+info.username+" PlayerTokenHere**");
 			}
 		}
 		else if(args.length>=2)
@@ -73,14 +83,19 @@ public class CommandLink implements CommandExecutor
 				}
 			}
 
-			String username = args[0];
 			//check the right case for their name early rather than late
-			username = getCorrectCase(username);
-			if(username.equals(""))
+			PlayerInfoObject info = getPlayerInfo(args[0]);
+			if(info==null || info.username.equals(""))
 			{
 				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");
 				return;
 			}
+			else if(info.gold==false)
+			{
+				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.");
+				return;
+			}
+			String username = info.username;
 			
 			TokenCheckObject tokenCheck = new TokenCheckObject();
 			String urlString = "https://api.kag2d.com/v1/player/"+(username)+"/token/"+token;
@@ -95,8 +110,7 @@ public class CommandLink implements CommandExecutor
 			}
 			catch(IOException e)
 			{
-				Discord4J.LOGGER.warn("IO exception caught when attempting to link accounts");
-				e.printStackTrace();
+				Discord4J.LOGGER.warn("IO exception caught when attempting to link accounts: "+e.getMessage());
 			}
 			
 			if(tokenCheck.playerTokenStatus)
@@ -105,7 +119,7 @@ public class CommandLink implements CommandExecutor
 				int result = DiscordBot.database.linkAccounts(username, message.getAuthor().getLongID());
 				Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
 				if(result>=0) DiscordBot.reply(message,"account successfully linked");
-				else DiscordBot.reply(message,"an error occured linking your accounts, perhaps the command was typed incorrectly, or perhaps you are trying to link accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
+				else DiscordBot.reply(message,"an error occured linking your accounts, this message should not be displayed, but if it is you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
 			}
 			else
 			{
