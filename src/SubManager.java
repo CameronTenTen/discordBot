@@ -117,7 +117,7 @@ public class SubManager {
 		}
 		if(votedGame == null)
 		{
-			//voted on in a game
+			//voted on not in a game
 			return -2;
 		}
 		if(!votedGame.equals(voterGame))

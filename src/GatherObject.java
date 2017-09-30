@@ -459,15 +459,16 @@ public class GatherObject
 		PlayerObject playerVoting = DiscordBot.players.getObject(voting);
 		
 		GatherGame game = this.getRunningGame(ip, port);
-		if(game==null)
-		{
-			//should never get here because the server only sends the request if there is a game running
-			this.getServer(ip, port).say("An error occured adding sub vote for "+votedFor+", a game isn't running?");
-			return -1;
-		}
 		if(playerVotedFor==null)
 		{
 			this.getServer(ip, port).say("An error occured adding sub vote for "+votedFor+", a linked player with this username could not be found");
+			return -2;
+		}
+		if(game==null)
+		{
+			//should never get here because the server only sends the request if there is a game running
+			this.getServer(ip, port).say("An error occured adding sub vote for "+playerVotedFor.getKagName()+", a game isn't running?");
+			return -3;
 		}
 		int returnVal = substitutions.addSubVote(playerVotedFor, playerVoting);
 		switch(returnVal)
@@ -478,15 +479,15 @@ public class GatherObject
 			this.getServer(ip, port).say("You and the player you are voting for must be in the same game " + voting + "!");
 			return returnVal;
 		case -4:
-			this.getServer(ip, port).say(votedFor + " is already being subbed " + voting + "!");
+			this.getServer(ip, port).say(playerVotedFor.getKagName() + " is already being subbed " + voting + "!");
 			return returnVal;
 		case -5:
-			this.getServer(ip, port).say("You have already voted to sub " + votedFor + ", " + voting + "!");
+			this.getServer(ip, port).say("You have already voted to sub " + playerVotedFor.getKagName() + ", " + voting + "!");
 			return returnVal;
 		case 0:
 			Discord4J.LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
-			this.getServer(ip, port).say("Sub request added for player "+votedFor+", use !sub in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for player " + this.fullUserString(playerVotedFor) + " use **!sub** to sub into their place!");
+			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub in Discord to sub into their place!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + this.fullUserString(playerVotedFor) + " use **!sub** to sub into their place!");
 			return returnVal;
 		}
 		//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count

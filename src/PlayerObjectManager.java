@@ -27,7 +27,7 @@ public class PlayerObjectManager
 	{
 		for(PlayerObject p : playerObjects)
 		{
-			if(p.getKagName()== kagName ) return p;
+			if(p.getKagName().equalsIgnoreCase(kagName) ) return p;
 		}
 		return null;
 	}

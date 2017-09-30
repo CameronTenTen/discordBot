@@ -35,7 +35,7 @@ public class PlayerObject
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((discordUserInfo == null) ? 0 : discordUserInfo.hashCode());
-		result = prime * result + ((kagName == null) ? 0 : kagName.hashCode());
+		result = prime * result + ((kagName == null) ? 0 : kagName.toLowerCase().hashCode());
 		return result;
 	}
 
@@ -56,7 +56,7 @@ public class PlayerObject
 		if (kagName == null) {
 			if (other.kagName != null)
 				return false;
-		} else if (!kagName.equals(other.kagName))
+		} else if (!kagName.equalsIgnoreCase(other.kagName))
 			return false;
 		return true;
 	}

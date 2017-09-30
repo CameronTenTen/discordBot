@@ -64,7 +64,7 @@ public class CommandRsub implements CommandExecutor
 				return;
 			case 0:
 				Discord4J.LOGGER.info("sub requested for: "+message.getAuthor().getDisplayName(message.getGuild()));
-				DiscordBot.sendMessage(gather.getCommandChannel(), "**Sub request** added for player " + gather.fullUserString(message.getAuthor()) + " use **!sub** to sub into their place!");
+				DiscordBot.sendMessage(gather.getCommandChannel(), "A sub has been requested for player " + gather.fullUserString(message.getAuthor()) + " use **!sub** to sub into their place!");
 				return;
 			}
 			//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
