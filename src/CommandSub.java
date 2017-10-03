@@ -18,6 +18,26 @@ public class CommandSub implements CommandExecutor
 			return;
 		}
 		
+		//check there isnt already a sub request for the player trying to sub in
+		if(gather.substitutions.removeSubRequest(player))
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **subbed back** into their game!");
+			return;
+		}
+		
+		if(!gather.substitutions.hasSubRequest())
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			return;
+		}
+		
+		//check they arent already playing
+		if(gather.isInGame(player))
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "You cannot sub into a game when you are **already playing** "+message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			return;
+		}
+		
 		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player);
 		
 		if(returnObj == null)

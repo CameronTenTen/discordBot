@@ -70,17 +70,18 @@ public class SubManager {
 		return addSubRequest(DiscordBot.players.getObject(user), game);
 	}
 	
-	public void removeSubRequest(PlayerObject player)
+	public boolean removeSubRequest(PlayerObject player)
 	{
 		for(SubRequestObject req : subRequests)
 		{
-			if(req.playerToBeReplaced.equals(player)) subRequests.remove(req);
+			if(req.playerToBeReplaced.equals(player)) return subRequests.remove(req);
 		}
+		return false;
 	}
 	
-	public void removeSubRequest(SubRequestObject obj)
+	public boolean removeSubRequest(SubRequestObject obj)
 	{
-		subRequests.remove(obj);
+		return removeSubRequest(obj.playerToBeReplaced);
 	}
 	
 	private SubRequestObject getFirstSubRequest()
