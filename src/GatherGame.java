@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -167,11 +168,13 @@ public class GatherGame
 			}
 			if(winningTeam==0)
 			{
-				DiscordBot.database.addWin(p.getKagName());
+				int val = DiscordBot.database.addWin(p.getKagName());
+				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
 			}
 			else if(winningTeam==1)
 			{
-				DiscordBot.database.addLoss(p.getKagName());
+				int val = DiscordBot.database.addLoss(p.getKagName());
+				Discord4J.LOGGER.info("Adding loss for "+p.getKagName()+" "+val);
 			}
 			//TODO warning, draws not accounted for
 		}
@@ -184,23 +187,27 @@ public class GatherGame
 			}
 			if(winningTeam==1)
 			{
-				DiscordBot.database.addWin(p.getKagName());
+				int val = DiscordBot.database.addWin(p.getKagName());
+				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
 			}
 			else if(winningTeam==0)
 			{
-				DiscordBot.database.addLoss(p.getKagName());
+				int val = DiscordBot.database.addLoss(p.getKagName());
+				Discord4J.LOGGER.info("Adding loss for "+p.getKagName()+" "+val);
 			}
 			//TODO warning, draws not accounted for
 		}
 		for(PlayerObject p : playersDeserted)
 		{
-			DiscordBot.database.addDesertion(p.getKagName());
+			int val = DiscordBot.database.addDesertion(p.getKagName());
+			Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
 		}
 		for(PlayerObject p : playersSubbedIn)
 		{
 			//only add a subbed in stat if they didnt also desert the game
 			if(playersDeserted.contains(p)) continue;
-			DiscordBot.database.addSubstitution(p.getKagName());
+			int val = DiscordBot.database.addSubstitution(p.getKagName());
+			Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
 		}
 	}
 	
