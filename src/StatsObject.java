@@ -42,6 +42,6 @@ public class StatsObject {
 	@Override
 	public String toString()
 	{
-		return "Games Played: "+gamesPlayed+" Win Rate: "+this.winRateString()+" Wins: "+wins+" Losses: "+wins+"% Desertions: "+desertions+" Substitutions: "+substitutions;
+		return "Games Played: "+gamesPlayed+" Win Rate: "+this.winRateString()+"% Wins: "+wins+" Losses: "+losses+" Desertions: "+desertions+" Substitutions: "+substitutions;
 	}
 }
