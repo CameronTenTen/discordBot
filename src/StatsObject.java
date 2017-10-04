@@ -10,6 +10,7 @@ public class StatsObject {
 		draws = 0;
 		desertions = 0;
 		substitutions = 0;
+		winRate = -1.0f;
 	}
 	String kagname;
 	long discordid;
@@ -19,9 +20,9 @@ public class StatsObject {
 	int draws;
 	int desertions;
 	int substitutions;
+	float winRate;
 	
-	@Override
-	public String toString()
+	public float winRate()
 	{
 		float winRate;
 		if((wins+losses+desertions)==0)
@@ -29,6 +30,18 @@ public class StatsObject {
 		else
 			winRate = ((float)wins/((float)wins+(float)losses+(float)desertions))*100;
 		
-		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+" Wins: "+wins+" Losses: "+wins+"% Desertions: "+desertions+" Substitutions: "+substitutions;
+		return winRate;
+	}
+	
+	public String winRateString()
+	{
+		if(winRate>0) return String.format("%.2f", this.winRate);
+		else return String.format("%.2f", this.winRate());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Games Played: "+gamesPlayed+" Win Rate: "+this.winRateString()+" Wins: "+wins+" Losses: "+wins+"% Desertions: "+desertions+" Substitutions: "+substitutions;
 	}
 }
