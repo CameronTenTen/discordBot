@@ -29,6 +29,6 @@ public class StatsObject {
 		else
 			winRate = ((float)wins/((float)wins+(float)losses+(float)desertions))*100;
 		
-		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+"% Desertions: "+desertions+" Substitutions: "+substitutions;
+		return "Games Played: "+gamesPlayed+" Win Rate: "+String.format("%.2f", winRate)+" Wins: "+wins+" Losses: "+wins+"% Desertions: "+desertions+" Substitutions: "+substitutions;
 	}
 }
