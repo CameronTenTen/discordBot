@@ -3,6 +3,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GatherDB {
 
@@ -914,6 +916,60 @@ public class GatherDB {
                 	}
                 }
 		return -1;
+	}
+	
+	public List<StatsObject> getTop10()
+	{
+		Statement statement = null;
+		ResultSet result = null;
+		try
+		{
+			statement = connection.createStatement();
+			result = statement.executeQuery("(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY (wins/(wins+losses+desertions)) DESC LIMIT 10)"
+			                              /*+ " UNION ALL "
+			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
+
+			List<StatsObject> returnList = new ArrayList<StatsObject>();
+	        	while (result.next())
+	        	{
+	        		StatsObject returnObj = new StatsObject();
+	        		returnObj.kagname = result.getString("kagname");
+	        		returnObj.discordid = result.getLong("discordid");
+	        		returnObj.gamesPlayed = result.getInt("gamesplayed");
+	        		returnObj.wins = result.getInt("wins");
+	        		returnObj.losses = result.getInt("losses");
+	        		returnObj.draws = result.getInt("draws");
+	        		returnObj.desertions = result.getInt("desertions");
+	        		returnObj.substitutions = result.getInt("substitutions");
+	        		returnObj.winRate = result.getFloat("(wins/(wins+losses+desertions))*100");
+	        		returnList.add(returnObj);
+	        	}
+        		return returnList;
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(result != null)
+                	{
+                		try {
+                			result.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return null;
 	}
 	
 }

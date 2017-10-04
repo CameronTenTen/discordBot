@@ -25,6 +25,7 @@ public class GatherObject
 	private IVoiceChannel redVoiceChannel = null;
 	private IVoiceChannel generalVoiceChannel = null;
 	private IChannel scoreReportChannel = null;
+	private IMessage scoreboardMessage = null;
 	public long guildID = 0L;
 	public String commandChannelString = "";
 	public long commandChannelID = 0L;
@@ -34,6 +35,8 @@ public class GatherObject
 	public long scoreReportID = 0L;
 	public long adminRoleID = 0L;
 	public long queueRoleID = 0L;
+	public long scoreboardMessageID = 0L;
+	public long scoreboardChannelID = 0L;
 
 	public SubManager substitutions = null;
 	
@@ -65,6 +68,24 @@ public class GatherObject
 		setGeneralVoiceChannel(DiscordBot.client.getVoiceChannelByID(generalVoiceID));
 		setAdminRole(DiscordBot.client.getRoleByID(adminRoleID));
 		setQueueRole(DiscordBot.client.getRoleByID(queueRoleID));
+		
+		if(scoreboardChannelID!=0 && scoreboardMessageID==0)
+		{
+			IChannel chan = DiscordBot.client.getChannelByID(scoreboardChannelID);
+			if(chan == null)
+			{
+				Discord4J.LOGGER.warn("Error getting scoreboard channel, null returned");
+				return;
+			}
+			scoreboardMessageID = chan.sendMessage("scoreboard").getLongID();
+			setScoreboardMessage(DiscordBot.client.getMessageByID(scoreboardMessageID));
+			this.updateScoreboard();
+			System.out.println("new scoreboard message has been created, please enter the message id in the config or a scoreboard will be created each time the bot starts: "+scoreboardMessageID);
+		}
+		else
+		{
+			setScoreboardMessage(DiscordBot.client.getMessageByID(scoreboardMessageID));
+		}
 		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
@@ -143,6 +164,14 @@ public class GatherObject
 		this.generalVoiceChannel = generalVoiceChannel;
 	}
 	
+	public IMessage getScoreboardMessage() {
+		return scoreboardMessage;
+	}
+
+	public void setScoreboardMessage(IMessage scoreboardMessage) {
+		this.scoreboardMessage = scoreboardMessage;
+	}
+
 	public boolean isAdmin(IUser user)
 	{
 		List<IRole> roles = user.getRolesForGuild(this.guild);
@@ -355,6 +384,7 @@ public class GatherObject
 			DiscordBot.sendMessage(getScoreReportChannel(), temp2);
 			//store stats in database
 			game.saveResultToDB(winningTeam);
+			this.updateScoreboard();
 		}
 		//remove game object from list
 		if(game.getServer() == null)
@@ -386,6 +416,51 @@ public class GatherObject
 		if(game == null) return false;
 		this.endGame(game, winningTeam);
 		return true;
+	}
+	
+	public void updateScoreboard()
+	{
+		if(this.getScoreboardMessage()==null)
+		{
+			Discord4J.LOGGER.warn("Scoreboard not set!");
+			return;
+		}
+		List<StatsObject> list = DiscordBot.database.getTop10();
+		if(list == null)
+		{
+			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");
+			return;
+		}
+		String scoreboardString="**Top 10:**\n```  |      KAG name      |  Win %  | Games\n";
+		int i=0;
+		for(StatsObject stats : list)
+		{
+			i++;
+			scoreboardString+=i;
+			if(i<10)scoreboardString+=" ";
+			scoreboardString+="|";
+			//centre the kagname in the column
+			if(stats.kagname.length()%2 != 0)
+			{
+				stats.kagname = stats.kagname + " ";
+			}
+			for(int j = stats.kagname.length()/2; j < 10; j++)
+			{
+				scoreboardString+=" ";
+			}
+			scoreboardString=scoreboardString+stats.kagname;
+			for(int j = stats.kagname.length()/2; j < 10; j++)
+			{
+				scoreboardString+=" ";
+			}
+			scoreboardString+="|";
+			scoreboardString=scoreboardString+" "+stats.winRateString()+"% ";
+			if(stats.winRateString().length()<6)scoreboardString+=" ";
+			scoreboardString=scoreboardString+"|  "+stats.gamesPlayed+"\n";
+		}
+		scoreboardString+="```";
+		if(scoreboardString.length()>2000) Discord4J.LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());
+		this.getScoreboardMessage().edit(scoreboardString);
 	}
 	
 	public GatherServer getFreeServer()
