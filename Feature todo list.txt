@@ -1,5 +1,6 @@
-format player name prints(such as !list and !players) to include kagnames
-import gather rules from old gather
+gather rules from old gather
+auto reconnect to kag server
+clearing the game clearing on kag server
 managed teams on server
 server !freeze vote command
 managed voice chat channels
@@ -7,11 +8,12 @@ add voice chat role to allow @voicechat pings
 scramble teams vote
 player bans
 proper multi guild support
+better exception handling for optional features such as queue role
 current players/games in member list
 current tickets in member list
-better exception handling for optional features such as queue role
-mmr based match making
-better designed gamemode
 add a water map
+better designed gamemode
 advanced statistics
 better ingame user interface
+mmr based match making
+
