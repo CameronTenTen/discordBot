@@ -164,9 +164,8 @@ public class GatherGame
 			//if they subbed in they dont get a win/loss stat
 			if(playersSubbedIn.contains(p))
 			{
-				break;
 			}
-			if(winningTeam==0)
+			else if(winningTeam==0)
 			{
 				int val = DiscordBot.database.addWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
@@ -183,9 +182,8 @@ public class GatherGame
 			//if they subbed in they dont get a win/loss stat
 			if(playersSubbedIn.contains(p))
 			{
-				break;
 			}
-			if(winningTeam==1)
+			else if(winningTeam==1)
 			{
 				int val = DiscordBot.database.addWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
