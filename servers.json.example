@@ -8,6 +8,8 @@
 	"scoreReportID" : 000000000000000000,
 	"adminRoleID" : 000000000000000000,
 	"queueRoleID" : 000000000000000000,
+	"scoreboardChannelID" : 000000000000000000,
+	"scoreboardMessageID" : 000000000000000000,
 	"servers" : 
 	[{
 		"ip" : "127.0.0.1",
