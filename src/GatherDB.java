@@ -760,7 +760,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE discordid="+id);
 		}
 		catch (SQLException e)
 		{
@@ -787,7 +787,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE kagname=\""+kagName+"\"");
 		}
 		catch (SQLException e)
 		{
@@ -814,7 +814,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE discordid="+id);
 		}
 		catch (SQLException e)
 		{
@@ -841,7 +841,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname=\""+kagName+"\"");
 		}
 		catch (SQLException e)
 		{
