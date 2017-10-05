@@ -191,6 +191,17 @@ public class SubManager {
 		return votes.numVotes();
 	}
 	
+	public List<PlayerObject> getOpenSubs(GatherGame game)
+	{
+		List<PlayerObject> returnList = new ArrayList<PlayerObject>();
+		for(SubRequestObject obj : subRequests)
+		{
+			if(obj.game.equals(game)) returnList.add(obj.playerToBeReplaced);
+		}
+		if(returnList.isEmpty()) return null;
+		else return returnList;
+	}
+	
 	public void clearSubs()
 	{
 		subRequests.clear();
