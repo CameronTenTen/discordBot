@@ -18,33 +18,36 @@ public class CommandAdd implements CommandExecutor
 			return;
 		}
 		
-		int addReturnVal = gather.addToQueue(message.getAuthor());
-		
-		switch(addReturnVal)
+		synchronized(gather)
 		{
-		case -1:
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link** to get started or **!linkhelp** for more information");
-			return;
-		case 1:
-			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-			Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
-			return;
-		case 2:
-			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-			Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
-			gather.startGame();
-			return;
-		case 3:
-			DiscordBot.sendMessage(gather.getCommandChannel(),"You cannot add to the queue when you are **already in a game** "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		case 0:
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		case 4:
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You were not added, try again later "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
+			int addReturnVal = gather.addToQueue(message.getAuthor());
+			
+			switch(addReturnVal)
+			{
+			case -1:
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link** to get started or **!linkhelp** for more information");
+				return;
+			case 1:
+				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
+				return;
+			case 2:
+				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
+				gather.startGame();
+				return;
+			case 3:
+				DiscordBot.sendMessage(gather.getCommandChannel(),"You cannot add to the queue when you are **already in a game** "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+				return;
+			case 0:
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+				return;
+			case 4:
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You were not added, try again later "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+				return;
+			}
+			DiscordBot.sendMessage(gather.getCommandChannel(), "An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue");
 		}
-		DiscordBot.sendMessage(gather.getCommandChannel(), "An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue");
 		return;
 	}
 }
