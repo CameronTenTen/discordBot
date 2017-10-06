@@ -535,7 +535,7 @@ public class GatherObject
 		else if(returnVal==1)
 		{
 			this.getServer(ip, port).say("Sub request added for player "+kagName+", use !sub in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for player " + this.fullUserString(playerToBeSubbed) + " use **!sub** to sub into their place!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for player " + this.fullUserString(playerToBeSubbed) + " use **!sub** to sub into their place! ("+this.getQueueRole().mention()+")");
 		}
 		return returnVal;
 	}
@@ -574,7 +574,7 @@ public class GatherObject
 		case 0:
 			Discord4J.LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
 			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + this.fullUserString(playerVotedFor) + " use **!sub** to sub into their place!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + this.fullUserString(playerVotedFor) + " use **!sub** to sub into their place! ("+this.getQueueRole().mention()+")");
 			return returnVal;
 		}
 		//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
