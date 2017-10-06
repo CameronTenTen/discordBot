@@ -808,6 +808,60 @@ public class GatherDB {
 		return -1;
 	}
 	
+	public int addDesertionLoss(long id)
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE discordid="+id);
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
+	public int addDesertionLoss(String kagName)
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE kagname=\""+kagName+"\"");
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
 	public int addSubstitution(long id)
 	{
 		Statement statement = null;
@@ -842,6 +896,60 @@ public class GatherDB {
 		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname=\""+kagName+"\"");
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
+	public int addSubstitutionWin(long id)
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE discordid="+id);
+		}
+		catch (SQLException e)
+		{
+			    System.out.println("SQLException: " + e.getMessage());
+			    System.out.println("SQLState: " + e.getSQLState());
+			    System.out.println("VendorError: " + e.getErrorCode());
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
+	public int addSubstitutionWin(String kagName)
+	{
+		Statement statement = null;
+		try
+		{
+			statement = connection.createStatement();
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE kagname=\""+kagName+"\"");
 		}
 		catch (SQLException e)
 		{
