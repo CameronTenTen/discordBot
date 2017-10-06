@@ -354,6 +354,17 @@ public class GatherObject
 		return null;
 	}
 	
+	public List<GatherGame> getRunningGames()
+	{
+		if(runningGames.isEmpty()) return null;
+		List<GatherGame> returnList = new ArrayList<GatherGame>();
+		for(GatherGame game : runningGames)
+		{
+			returnList.add(game);
+		}
+		return returnList;
+	}
+	
 	public void setGameEnded(GatherGame game)
 	{
 		GatherServer server = game.getServer();
