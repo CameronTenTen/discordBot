@@ -644,7 +644,7 @@ public class GatherObject
 			Thread.sleep(1000);
 			for(int i=delay-1;i>0;i--)
 			{
-				countMsg.edit(countString+"**"+i+"**");
+				DiscordBot.editMessage(countMsg,countString+"**"+i+"**");
 				Thread.sleep(1000);
 			}
 		} catch (InterruptedException e) {
@@ -683,7 +683,7 @@ public class GatherObject
 			Thread.sleep(1000);
 			for(int i=delay-1;i>0;i--)
 			{
-				countMsg.edit(countString+i);
+				DiscordBot.editMessage(countMsg, countString+i);
 				Thread.sleep(1000);
 			}
 		} catch (InterruptedException e) {
