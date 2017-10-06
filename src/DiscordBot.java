@@ -57,6 +57,11 @@ public class DiscordBot {
 		}
 		return null;
 	}
+	
+	public static GatherObject getGatherObjectForGame(GatherGame game)
+	{
+		return DiscordBot.getGatherObjectForServer(game.getServerIp(), game.getServerPort());
+	}
 
 	public void startBot(String token) {
 		ClientBuilder builder = new ClientBuilder(); // Creates a new client builder instance
