@@ -20,8 +20,10 @@ public class GatherGame
 	private List<PlayerObject> redPlayerList;
 	private GatherServer server;
 	
-	private Set<PlayerObject> playersDeserted;
-	private Set<PlayerObject> playersSubbedIn;
+	private Set<PlayerObject> redDeserted;
+	private Set<PlayerObject> blueDeserted;
+	private Set<PlayerObject> redSubbedIn;
+	private Set<PlayerObject> blueSubbedIn;
 	
 	enum gameState
 	{
@@ -38,8 +40,10 @@ public class GatherGame
 		this.redPlayerList = redTeam;
 		this.server = server;
 		
-		this.playersDeserted = new HashSet<PlayerObject>();
-		this.playersSubbedIn = new HashSet<PlayerObject>();
+		this.redDeserted = new HashSet<PlayerObject>();
+		this.blueDeserted = new HashSet<PlayerObject>();
+		this.redSubbedIn = new HashSet<PlayerObject>();
+		this.blueSubbedIn = new HashSet<PlayerObject>();
 	}
 	
 	public void sendTeamsToServer()
@@ -140,30 +144,33 @@ public class GatherGame
 		if(blueIndex>=0 && blueIndex<bluePlayerList.size())
 		{
 			bluePlayerList.set(blueIndex, player);
+			blueDeserted.add(playerBeingReplaced);
+			blueSubbedIn.add(player);
 		}
 		else if(redIndex>=0 && redIndex<redPlayerList.size())
 		{
 			redPlayerList.set(redIndex, player);
+			redDeserted.add(playerBeingReplaced);
+			redSubbedIn.add(player);
 		}
 		//seems that the shuffle method (setting team arrays as subLists of the player array)
 		//makes it so that replacing the player in the team list makes the replacement in the players one too
 		//will keep this check in here in case something changes (maybe new shuffle function or match making will change this) 
 		int index = players.indexOf(playerBeingReplaced);
 		if(index >=0 && index<players.size()) players.set(index, player);
-		playersDeserted.add(playerBeingReplaced);
-		playersSubbedIn.add(player);
 		updateTeamsOnServer();
 		return;
 	}
 	
-	public void saveResultToDB(int winningTeam)
+	public void saveResultToDB(int winningTeam, SubManager subObj)
 	{
 		DiscordBot.database.incrementGamesPlayed();
 		for(PlayerObject p : bluePlayerList)
 		{
-			//if they subbed in they dont get a win/loss stat
-			if(playersSubbedIn.contains(p))
+			//if they subbed in or left they dont get a win/loss stat
+			if(blueSubbedIn.contains(p) || subObj.hasSubRequest(p))
 			{
+				continue;
 			}
 			else if(winningTeam==0)
 			{
@@ -179,9 +186,10 @@ public class GatherGame
 		}
 		for(PlayerObject p : redPlayerList)
 		{
-			//if they subbed in they dont get a win/loss stat
-			if(playersSubbedIn.contains(p))
+			//if they subbed in or left they dont get a win/loss stat
+			if(redSubbedIn.contains(p) || subObj.hasSubRequest(p))
 			{
+				continue;
 			}
 			else if(winningTeam==1)
 			{
@@ -195,17 +203,75 @@ public class GatherGame
 			}
 			//TODO warning, draws not accounted for
 		}
-		for(PlayerObject p : playersDeserted)
+		for(PlayerObject p : blueDeserted)
 		{
-			int val = DiscordBot.database.addDesertion(p.getKagName());
-			Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
+			if(winningTeam==0)
+			{
+				int val = DiscordBot.database.addDesertion(p.getKagName());
+				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
+			}
+			else if(winningTeam==1)
+			{
+				int val = DiscordBot.database.addDesertionLoss(p.getKagName());
+				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
+			}
 		}
-		for(PlayerObject p : playersSubbedIn)
+		for(PlayerObject p : redDeserted)
 		{
-			//only add a subbed in stat if they didnt also desert the game
-			if(playersDeserted.contains(p)) continue;
-			int val = DiscordBot.database.addSubstitution(p.getKagName());
-			Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
+			if(winningTeam==1)
+			{
+				int val = DiscordBot.database.addDesertion(p.getKagName());
+				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
+			}
+			else if(winningTeam==0)
+			{
+				int val = DiscordBot.database.addDesertionLoss(p.getKagName());
+				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
+			}
+		}
+		for(PlayerObject p : blueSubbedIn)
+		{
+			if(winningTeam==0)
+			{
+				int val = DiscordBot.database.addSubstitutionWin(p.getKagName());
+				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
+			}
+			else if(winningTeam==1)
+			{
+				int val = DiscordBot.database.addSubstitution(p.getKagName());
+				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
+			}
+		}
+		for(PlayerObject p : redSubbedIn)
+		{
+			if(winningTeam==1)
+			{
+				int val = DiscordBot.database.addSubstitutionWin(p.getKagName());
+				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
+			}
+			else if(winningTeam==0)
+			{
+				int val = DiscordBot.database.addSubstitution(p.getKagName());
+				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
+			}
+		}
+		
+		List<PlayerObject> subs = subObj.getOpenSubs(this);
+		if(subs!=null)
+		{
+			for(PlayerObject p : subs)
+			{
+				if(this.getPlayerTeam(p) == winningTeam || winningTeam == -1)
+				{
+					//if they were on the winning team or its a draw add a desertion
+					DiscordBot.database.addDesertion(p.getKagName());
+				}
+				else if (winningTeam>=0 && this.getPlayerTeam(p) != winningTeam)
+				{
+					//if a team won and the player wasnt on it then they get a desertion loss
+					DiscordBot.database.addDesertionLoss(p.getKagName());
+				}
+			}
 		}
 	}
 	
