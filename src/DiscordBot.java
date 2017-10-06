@@ -154,6 +154,13 @@ public class DiscordBot {
 		}).get();
 	}
 	
+	public static void editMessage(IMessage msg, String newString)
+	{
+		RequestBuffer.request(() -> {
+			msg.edit(newString);
+		});
+	}
+	
 	public static void reply(IMessage msg, String reply)
 	{
 		RequestBuffer.request(() -> {
