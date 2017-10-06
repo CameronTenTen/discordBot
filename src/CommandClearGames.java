@@ -4,7 +4,7 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandClearGames implements CommandExecutor
 {
-	@Command(aliases = {"!cleargames"}, description = "Admin only - clear the queue")
+	@Command(aliases = {"!cleargames"}, description = "Admin only - clear all currently running games")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
