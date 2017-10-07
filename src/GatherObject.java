@@ -87,6 +87,8 @@ public class GatherObject
 			setScoreboardMessage(DiscordBot.client.getMessageByID(scoreboardMessageID));
 		}
 		
+		if(this.getScoreboardMessage()!=null)this.updateScoreboard();
+		
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
 	}
