@@ -446,7 +446,7 @@ public class GatherObject
 			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");
 			return;
 		}
-		String scoreboardString="**Top 10:**\n```  |      KAG name      |  Win %  | Games\n";
+		String scoreboardString="**Scoreboard:**\n```  |      KAG name      |  Win %  | Games\n";
 		int i=0;
 		for(StatsObject stats : list)
 		{
