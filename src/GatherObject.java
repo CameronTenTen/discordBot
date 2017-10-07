@@ -469,7 +469,7 @@ public class GatherObject
 			scoreboardString+="|";
 			scoreboardString=scoreboardString+" "+stats.winRateString()+"% ";
 			if(stats.winRateString().length()<6)scoreboardString+=" ";
-			scoreboardString=scoreboardString+"|  "+stats.gamesPlayed+"\n";
+			scoreboardString=scoreboardString+"|  "+stats.gamesplayed+"\n";
 		}
 		scoreboardString+="```";
 		if(scoreboardString.length()>2000) Discord4J.LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());
