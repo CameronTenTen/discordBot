@@ -162,12 +162,14 @@ public class GatherDB {
 	        	if (result.next())
 	        	{
 	        		returnObj.discordid = result.getLong("discordid");
-	        		returnObj.gamesPlayed = result.getInt("gamesplayed");
+	        		returnObj.gamesplayed = result.getInt("gamesplayed");
 	        		returnObj.wins = result.getInt("wins");
 	        		returnObj.losses = result.getInt("losses");
 	        		returnObj.draws = result.getInt("draws");
 	        		returnObj.desertions = result.getInt("desertions");
 	        		returnObj.substitutions = result.getInt("substitutions");
+	        		returnObj.desertionlosses = result.getInt("desertionlosses");
+	        		returnObj.substitutionwins = result.getInt("substitutionwins");
 	        		return returnObj;
 	        	}
 		}
@@ -211,12 +213,14 @@ public class GatherDB {
 	        	if (result.next())
 	        	{
 	        		returnObj.kagname = result.getString("kagName");
-	        		returnObj.gamesPlayed = result.getInt("gamesplayed");
+	        		returnObj.gamesplayed = result.getInt("gamesplayed");
 	        		returnObj.wins = result.getInt("wins");
 	        		returnObj.losses = result.getInt("losses");
 	        		returnObj.draws = result.getInt("draws");
 	        		returnObj.desertions = result.getInt("desertions");
 	        		returnObj.substitutions = result.getInt("substitutions");
+	        		returnObj.desertionlosses = result.getInt("desertionlosses");
+	        		returnObj.substitutionwins = result.getInt("substitutionwins");
 	        		return returnObj;
 	        	}
 		}
@@ -1033,7 +1037,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY (wins/(wins+losses+desertions)) DESC LIMIT 10)"
+			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT 10)"
 			                              /*+ " UNION ALL "
 			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
 
@@ -1043,13 +1047,13 @@ public class GatherDB {
 	        		StatsObject returnObj = new StatsObject();
 	        		returnObj.kagname = result.getString("kagname");
 	        		returnObj.discordid = result.getLong("discordid");
-	        		returnObj.gamesPlayed = result.getInt("gamesplayed");
+	        		returnObj.gamesplayed = result.getInt("gamesplayed");
 	        		returnObj.wins = result.getInt("wins");
 	        		returnObj.losses = result.getInt("losses");
 	        		returnObj.draws = result.getInt("draws");
 	        		returnObj.desertions = result.getInt("desertions");
 	        		returnObj.substitutions = result.getInt("substitutions");
-	        		returnObj.winRate = result.getFloat("(wins/(wins+losses+desertions))*100");
+	        		returnObj.winRate = result.getFloat("((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100");
 	        		returnList.add(returnObj);
 	        	}
         		return returnList;
