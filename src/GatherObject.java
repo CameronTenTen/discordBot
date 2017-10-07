@@ -370,6 +370,7 @@ public class GatherObject
 		GatherServer server = game.getServer();
 		if(server !=null)
 		{
+			server.clearGame();
 			server.setInUse(false);
 		}
 		runningGames.remove(game);

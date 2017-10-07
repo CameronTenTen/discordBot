@@ -66,6 +66,11 @@ public class GatherServer
 		this.sendMessage("getNet().server_SendMsg(\""+msg+"\");");
 	}
 	
+	public void clearGame()
+	{
+		this.sendMessage("getRules().set_bool('clearGame', true);");
+	}
+	
 	@Override
 	public boolean equals(Object obj)
 	{
