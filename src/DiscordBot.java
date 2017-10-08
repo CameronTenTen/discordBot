@@ -1,6 +1,8 @@
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -110,6 +112,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandClearSubs());
 		cmdHandler.registerCommand(new CommandSubs());
 		cmdHandler.registerCommand(new CommandLink());
+		cmdHandler.registerCommand(new CommandLinkServer());
 		cmdHandler.registerCommand(new CommandLinkHelp());
 		cmdHandler.registerCommand(new CommandStats());
 		cmdHandler.registerCommand(new CommandPlayerInfo());
@@ -137,6 +140,8 @@ public class DiscordBot {
 		players = new PlayerObjectManager();
 		
 		bot.startBot(args[0]);
+		
+		linkRequests = new ArrayList<PlayerObject>();
 	}
 
 	//wrappers for doing things in order to avoid rate limit exceptions
@@ -236,13 +241,69 @@ public class DiscordBot {
 		for (GatherObject object : gatherObjects) {
 			if (object.remFromQueue(user) == 1) {
 				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
-						+ " has been **removed** from the queue (disconnected) ("
-						+ DiscordBot.getGatherObjectForChannel(object.getCommandChannel())
-								.numPlayersInQueue()
-						+ "/" + DiscordBot.getGatherObjectForChannel(object.getCommandChannel())
-								.getMaxQueueSize()
-						+ ")");
+				                + " has been **removed** from the queue (disconnected) ("
+				                + DiscordBot.getGatherObjectForChannel(object.getCommandChannel()).numPlayersInQueue()+ "/" 
+				                + DiscordBot.getGatherObjectForChannel(object.getCommandChannel()).getMaxQueueSize()+ ")");
 			}
 		}
 	}
+	
+	public static List<PlayerObject> linkRequests;
+	
+	public static PlayerObject getDiscordLinkRequest(IUser user)
+	{
+		for(PlayerObject p : linkRequests)
+		{
+			if(p.getDiscordUserInfo().equals(user))
+			{
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	public static int addLinkRequest(IUser user, String kagname)
+	{
+		//check for an existing request
+		PlayerObject p = getDiscordLinkRequest(user);
+		if(p != null)
+		{
+			p.setKagName(kagname);
+			return 0;
+		}
+		//link request doesnt already exist for this user, make a new one
+		//careful with these player objects, they are not managed, dont use them anywhere else
+		linkRequests.add(new PlayerObject(user, kagname));
+		return 1;
+	}
+
+	public static int doLinkRequest(String kagname, IUser user)
+	{
+		//check if the other half of this request exists
+		PlayerObject p = getDiscordLinkRequest(user);
+		if(p != null)
+		{
+			//other half of the request exists
+			if(!p.getKagName().equals(kagname))
+			{
+				//they are using a different account to what they said they would
+				return -2;
+			}
+			//both kag name and user info match
+			int result = database.linkAccounts(kagname, user.getLongID());
+			Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
+			linkRequests.remove(p);
+			return 1;
+		}
+		return -1;
+		
+	}
+
+	public static int doLinkRequest(String kagname, long id)
+	{
+		IUser user = client.getUserByID(id);
+		if(user == null) return -3;
+		else return doLinkRequest(kagname, user);
+	}
+	
 }

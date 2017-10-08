@@ -61,7 +61,7 @@ public class CommandLink implements CommandExecutor
 			}
 			else if(info.gold==false)
 			{
-				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.");
+				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should **use your game account**, if you **have not set your password for that account** there is a **button in the main menu** of the game to do so. \nIf you **do not want to setup your account** you can use the command **!linkserver KAGUsernameHere** instead");
 				return;
 			}
 			else

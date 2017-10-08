@@ -47,6 +47,36 @@ public class RconListener
 			String[] args = gatherMsg.split("\\s");
 			gather.addSubVote(args[1], args[2], ip, port);
 		}
+		else if(gatherMsg.startsWith("LINK"))
+		{
+			String[] args = gatherMsg.split("\\s");
+			long id = -1;
+			try
+			{
+				id = Long.parseLong(args[1]);
+				int returnVal = DiscordBot.doLinkRequest(args[2], id);
+				switch(returnVal)
+				{
+				case 1:
+					gather.getServer(ip, port).say("Accounts linked successfully, you can now join the queue in discord");
+					DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserByID(id).mention()+" has sucessfully linked");
+					break;
+				case -1:
+					gather.getServer(ip, port).say("There is no existing link request for that discord user");
+					break;
+				case -2:
+					gather.getServer(ip, port).say("The existing discord request for that discord user uses a different kag username, you should make a link request for the correct username in discord or login with the correct KAG account");
+					break;
+				case -3:
+					gather.getServer(ip, port).say("Could not find a user for that discord id, did you type it correctly?");
+					break;
+				}
+			}
+			catch (NumberFormatException e)
+			{
+				gather.getServer(ip, port).say("An error occured reading the supplied discord id, did you type it correctly?");
+			}
+		}
 		
 		
 	}
