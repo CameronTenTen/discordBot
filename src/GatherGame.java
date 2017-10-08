@@ -25,6 +25,10 @@ public class GatherGame
 	private Set<PlayerObject> redSubbedIn;
 	private Set<PlayerObject> blueSubbedIn;
 	
+	private Set<PlayerObject> scrambleVotes;
+	
+	private int scrambleVotesReq = 7;
+	
 	enum gameState
 	{
 		pregame,
@@ -44,6 +48,8 @@ public class GatherGame
 		this.blueDeserted = new HashSet<PlayerObject>();
 		this.redSubbedIn = new HashSet<PlayerObject>();
 		this.blueSubbedIn = new HashSet<PlayerObject>();
+		
+		this.scrambleVotes = new HashSet<PlayerObject>();
 	}
 	
 	public void sendTeamsToServer()
@@ -282,6 +288,23 @@ public class GatherGame
 		redPlayerList = players.subList(players.size()/2, players.size());
 	}
 	
+	public int addScrambleVote(PlayerObject player)
+	{
+		if(!this.scrambleVotes.add(player))
+		{
+			//player already voted
+			return -1;
+		}
+		if(this.scrambleVotes.size()>=this.scrambleVotesReq)
+		{
+			this.shuffleTeams();
+			this.updateTeamsOnServer();
+			this.scrambleVotes.clear();
+			return 0;
+		}
+		return this.scrambleVotes.size();
+	}
+	
 	public List<String> blueMentionList()
 	{
 		ArrayList<String> list = new ArrayList<String>();
@@ -355,6 +378,18 @@ public class GatherGame
 
 	public void setServer(GatherServer server) {
 		this.server = server;
+	}
+	
+	public int getScrambleVotesReq() {
+		return scrambleVotesReq;
+	}
+
+	public void setScrambleVotesReq(int scrambleVotesReq) {
+		this.scrambleVotesReq = scrambleVotesReq;
+	}
+
+	public int getNumScrambleVotes() {
+		return this.scrambleVotes.size();
 	}
 
 	public String toString(IGuild guild)

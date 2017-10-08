@@ -306,6 +306,31 @@ public class GatherObject
 		DiscordBot.setChannelCaption(this.getGuild(), this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelString);
 	}
 	
+	public void addScrambleVote(PlayerObject player)
+	{
+		GatherGame game = this.getPlayersGame(player);
+		if(game==null)
+		{
+			DiscordBot.sendMessage(this.getCommandChannel(), "There is **no game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			return;
+		}
+		int returnVal = game.addScrambleVote(player);
+		switch(returnVal)
+		{
+		case 0:
+			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled!", true);
+			DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
+			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
+			Discord4J.LOGGER.info("Teams shuffled: "+game.blueMentionList().toString()+game.redMentionList().toString());
+			this.sortTeamRoomsAfterShuffle();
+			return;
+		case -1:
+			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getNicknameForGuild(getGuild())+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
+			return;
+		}
+		DiscordBot.sendMessage(getCommandChannel(), "**Vote to scramble** teams has been counted for "+player.getDiscordUserInfo().getNicknameForGuild(getGuild())+" ("+returnVal+"/"+game.getScrambleVotesReq()+")");
+	}
+	
 	public void startGame()
 	{
 		//setup the game
@@ -695,6 +720,34 @@ public class GatherObject
 		}
 		movePlayersOutOfTeamRooms();
 		countMsg.delete();
+	}
+	
+	public void sortTeamRoomsAfterShuffle()
+	{
+		IVoiceChannel blue = this.getBlueVoiceChannel();
+		IVoiceChannel red = this.getRedVoiceChannel();
+		
+		movePlayersIntoTeamRooms();
+		List<IUser> users;
+		users = blue.getConnectedUsers();
+		for( IUser user : users)
+		{
+			GatherGame game = this.getPlayersGame(user);
+			if(game.getPlayerTeam(user)==1)
+			{
+				DiscordBot.moveToVoiceChannel(user, red);
+			}
+		}
+		users = red.getConnectedUsers();
+		for( IUser user : users)
+		{
+			GatherGame game = this.getPlayersGame(user);
+			if(game.getPlayerTeam(user)==0)
+			{
+				DiscordBot.moveToVoiceChannel(user, blue);
+			}
+		}
+		
 	}
 	
 	public String teamString(int team)
