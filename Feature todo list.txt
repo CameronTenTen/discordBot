@@ -1,7 +1,6 @@
-add !refresh command to refresh server player list (in case of server being disconnected when game starts)
-add !linkserver command for linking from gather server
-clearing the game clearing on kag server
+!rsub should accept arguments written as names instead of only mentions
 managed teams on server
+!status command for seeing the status of a game (tickets etc)
 server !freeze vote command
 auto reconnect to kag server
 managed voice chat channels
