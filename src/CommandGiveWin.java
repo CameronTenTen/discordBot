@@ -24,6 +24,8 @@ public class CommandGiveWin implements CommandExecutor
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
+			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured setting win, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			return;
 		}
 		
 		
