@@ -57,7 +57,7 @@ public class CommandRsub implements CommandExecutor
 				DiscordBot.sendMessage(gather.getCommandChannel(), "You and the player you are voting for must be in the **same game** " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
 				return;
 			case -4:
-				DiscordBot.sendMessage(gather.getCommandChannel(), mentions.get(0).getNicknameForGuild(message.getGuild()) + " is **already** being subbed " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+				DiscordBot.sendMessage(gather.getCommandChannel(), mentions.get(0).getDisplayName(message.getGuild()) + " is **already** being subbed " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
 				return;
 			case -5:
 				DiscordBot.sendMessage(gather.getCommandChannel(), "You have **already voted** to sub this player " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
