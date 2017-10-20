@@ -25,7 +25,7 @@ public class CommandAdd implements CommandExecutor
 			switch(addReturnVal)
 			{
 			case -1:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link** to get started or **!linkhelp** for more information");
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
 				return;
 			case 1:
 				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");

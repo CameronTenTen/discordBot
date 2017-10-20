@@ -14,7 +14,7 @@ public class CommandSub implements CommandExecutor
 		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
 		if(player==null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to sub into a game " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use !link to get started or !linkhelp for more information");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to sub into a game " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
 			return;
 		}
 		
