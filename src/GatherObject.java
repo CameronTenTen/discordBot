@@ -547,6 +547,18 @@ public class GatherObject
 		}
 	}
 	
+	public void setBuildingTimeEnded(String ip, int port)
+	{
+		this.getRunningGame(ip, port).setStateInProgress();
+		DiscordBot.sendMessage(this.getCommandChannel(), "Building time ended on server");
+	}
+	
+	public void setRoundStarted(String ip, int port)
+	{
+		this.getRunningGame(ip, port).setStateBuilding();
+		DiscordBot.sendMessage(this.getCommandChannel(), "Building time started on server");
+	}
+	
 	public int addSubRequest(String kagName, String ip, int port)
 	{
 		PlayerObject playerToBeSubbed = DiscordBot.players.getObject(kagName);

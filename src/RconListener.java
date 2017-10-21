@@ -79,11 +79,11 @@ public class RconListener
 			}
 			else if(gatherMsg.startsWith("BUILDINGTIMEENDED"))
 			{
-				gather.getRunningGame(ip, port).setStateInProgress();
+				gather.setBuildingTimeEnded(ip, port);
 			}
 			else if(gatherMsg.startsWith("ROUNDSTARTED"))
 			{
-				gather.getRunningGame(ip, port).setStateBuilding();
+				gather.setRoundStarted(ip, port);
 			}
 		}
 		else if(msg.startsWith("[Tickets]"))
