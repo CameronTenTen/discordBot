@@ -14,6 +14,9 @@ public class GatherGame
 	private int gameID;
 	private int currentRound;
 	private gameState currState;
+	private int blueTickets;
+	private int redTickets;
+	private List<PlayerObject> eliminatedPlayers;
 	
 	private List<PlayerObject> players;
 	private List<PlayerObject> bluePlayerList;
@@ -29,11 +32,13 @@ public class GatherGame
 	
 	private int scrambleVotesReq = 7;
 	
-	enum gameState
+	public enum gameState
 	{
-		pregame,
-		roundInProgress,
-		ended
+		PREGAME,
+		BUILDINGTIME,
+		ROUNDINPROGRESS,
+		LASTSTAND,
+		ENDED
 	}
 	
 	GatherGame(int matchId, List<PlayerObject> players, List<PlayerObject> blueTeam, List<PlayerObject> redTeam, GatherServer server)
@@ -43,6 +48,10 @@ public class GatherGame
 		this.bluePlayerList = blueTeam;
 		this.redPlayerList = redTeam;
 		this.server = server;
+		this.setCurrentRound(0);
+		this.setRedTickets(0);
+		this.setBlueTickets(0);
+		this.setCurrState(gameState.PREGAME);
 		
 		this.redDeserted = new HashSet<PlayerObject>();
 		this.blueDeserted = new HashSet<PlayerObject>();
@@ -50,6 +59,11 @@ public class GatherGame
 		this.blueSubbedIn = new HashSet<PlayerObject>();
 		
 		this.scrambleVotes = new HashSet<PlayerObject>();
+	}
+	
+	public boolean isConnectedToServer()
+	{
+		return server.isConnected();
 	}
 	
 	public void sendTeamsToServer()
@@ -390,6 +404,69 @@ public class GatherGame
 
 	public int getNumScrambleVotes() {
 		return this.scrambleVotes.size();
+	}
+
+	public int getCurrentRound() {
+		return currentRound;
+	}
+
+	public void setCurrentRound(int currentRound) {
+		this.currentRound = currentRound;
+	}
+
+	public gameState getCurrState() {
+		return currState;
+	}
+
+	public void setCurrState(gameState currState) {
+		this.currState = currState;
+	}
+
+	public int getBlueTickets() {
+		return blueTickets;
+	}
+
+	public void setBlueTickets(int blueTickets) {
+		this.blueTickets = blueTickets;
+	}
+
+	public int getRedTickets() {
+		return redTickets;
+	}
+
+	public void setRedTickets(int redTickets) {
+		this.redTickets = redTickets;
+	}
+
+	public void setStateBuilding() {
+		this.setCurrState(gameState.BUILDINGTIME);
+	}
+	public void setStateInProgress() {
+		this.setCurrState(gameState.ROUNDINPROGRESS);
+	}
+	public void setStateLastStand() {
+		this.setCurrState(gameState.LASTSTAND);
+	}
+	public void setStateEnded() {
+		this.setCurrState(gameState.ENDED);
+	}
+	
+	public String getStateString()
+	{
+		switch(getCurrState())
+		{
+		case PREGAME:
+			return "Pregame";
+		case BUILDINGTIME:
+			return "Building Time";
+		case ROUNDINPROGRESS:
+			return "Round In Progress";
+		case LASTSTAND:
+			return "Last Stand";
+		case ENDED:
+			return "Game Ended";
+		}
+		return"";
 	}
 
 	public String toString(IGuild guild)

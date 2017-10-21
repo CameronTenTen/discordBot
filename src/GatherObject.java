@@ -792,6 +792,20 @@ public class GatherObject
 	{
 		GatherQueueObject.setMaxQueueSize(size);
 	}
+
+	public void updateTickets(String ip, int port, int team, int tickets)
+	{
+		GatherGame game = getRunningGame(ip, port);
+		if(game==null) return;
+		if(team==0)
+		{
+			game.setBlueTickets(tickets);
+		}
+		else if(team==1)
+		{
+			game.setRedTickets(tickets);
+		}
+	}
 	
 	/*public String getMentionString()
 	{
@@ -813,6 +827,26 @@ public class GatherObject
 		}
 		return returnList;
 	}*/
+	
+	public String statusString()
+	{
+		String returnString = "";
+
+		for(GatherGame game : runningGames)
+		{
+			if(!game.isConnectedToServer())
+			{
+				returnString += "No server connection"+ "\n";
+				continue;
+			}
+			returnString += "Game State: " + game.getStateString() + "\n";
+			returnString += "Blue Tickets: " + game.getBlueTickets() + "\n";
+			returnString += "Red Tickets: " + game.getRedTickets() + "\n";
+			
+		}
+		
+		return returnString;
+	}
 	
 	public String playersString()
 	{
