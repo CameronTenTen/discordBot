@@ -471,7 +471,7 @@ public class GatherObject
 			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");
 			return;
 		}
-		String scoreboardString="**Scoreboard:**\n```  |      KAG name      |  Win %  | Games\n";
+		String scoreboardString="**Scoreboard:**\n```  |      KAG name      |  Win % |Games| Score\n";
 		int i=0;
 		for(StatsObject stats : list)
 		{
@@ -494,9 +494,12 @@ public class GatherObject
 				scoreboardString+=" ";
 			}
 			scoreboardString+="|";
-			scoreboardString=scoreboardString+" "+stats.winRateString()+"% ";
+			scoreboardString=scoreboardString+" "+stats.winRateString()+"%";
 			if(stats.winRateString().length()<6)scoreboardString+=" ";
-			scoreboardString=scoreboardString+"|  "+stats.gamesplayed+"\n";
+			scoreboardString=scoreboardString+"| "+stats.gamesplayed;
+			if(stats.gamesplayed<100)scoreboardString+=" ";
+			scoreboardString=scoreboardString+" | "+stats.mmr;
+			scoreboardString=scoreboardString+"\n";
 		}
 		scoreboardString+="```";
 		if(scoreboardString.length()>2000) Discord4J.LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());

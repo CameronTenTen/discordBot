@@ -208,7 +208,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
+			result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE discordid = "+id);
 
 	        	if (result.next())
 	        	{
@@ -221,6 +221,7 @@ public class GatherDB {
 	        		returnObj.substitutions = result.getInt("substitutions");
 	        		returnObj.desertionlosses = result.getInt("desertionlosses");
 	        		returnObj.substitutionwins = result.getInt("substitutionwins");
+	        		returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
 	        		return returnObj;
 	        	}
 		}
@@ -1037,8 +1038,9 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT 20)"
-			                              /*+ " UNION ALL "
+			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT 20)"
+			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT 20)"
+			                             /*+ " UNION ALL "
 			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
 
 			List<StatsObject> returnList = new ArrayList<StatsObject>();
@@ -1054,6 +1056,7 @@ public class GatherDB {
 	        		returnObj.desertions = result.getInt("desertions");
 	        		returnObj.substitutions = result.getInt("substitutions");
 	        		returnObj.winRate = result.getFloat("((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100");
+	        		returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
 	        		returnList.add(returnObj);
 	        	}
         		return returnList;
