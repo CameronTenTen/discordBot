@@ -157,7 +157,7 @@ public class GatherDB {
 		try
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \""+kagname + "\"");
+			result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE kagname = \""+kagname + "\"");
 
 	        	if (result.next())
 	        	{
@@ -170,6 +170,7 @@ public class GatherDB {
 	        		returnObj.substitutions = result.getInt("substitutions");
 	        		returnObj.desertionlosses = result.getInt("desertionlosses");
 	        		returnObj.substitutionwins = result.getInt("substitutionwins");
+	        		returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
 	        		return returnObj;
 	        	}
 		}
