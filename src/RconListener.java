@@ -77,9 +77,13 @@ public class RconListener
 					gather.getServer(ip, port).say("An error occured reading the supplied discord id, did you type it correctly?");
 				}
 			}
-			else if(gatherMsg.startsWith("ROUNDSTARTED"))
+			else if(gatherMsg.startsWith("BUILDINGTIMEENDED"))
 			{
 				gather.getRunningGame(ip, port).setStateInProgress();
+			}
+			else if(gatherMsg.startsWith("ROUNDSTARTED"))
+			{
+				gather.getRunningGame(ip, port).setStateBuilding();
 			}
 		}
 		else if(msg.startsWith("[Tickets]"))
