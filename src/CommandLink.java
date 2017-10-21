@@ -38,8 +38,9 @@ public class CommandLink implements CommandExecutor
 	}
 	
 	@Command(aliases = {"!link"}, description = "Link your KAG account to your discord account")
-	public void onCommand(IMessage message, String[] args)
+	public void onCommand(IMessage message)
 	{
+		String[] args = message.getContent().split("\\s+");
 		if(args.length<=0)
 		{
 			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp");
