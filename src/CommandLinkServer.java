@@ -1,39 +1,9 @@
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-
-import com.google.gson.Gson;
-
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandLinkServer implements CommandExecutor
 {
-	public PlayerInfoObject getPlayerInfo(String username)
-	{
-		String caseCheckURL = "https://api.kag2d.com/v1/player/"+username+"/info";
-		try
-		{
-	        	URL url = new URL(caseCheckURL);
-			InputStreamReader reader = new InputStreamReader(url.openStream());
-			CaseCheckObject caseCheck = new Gson().fromJson(reader, CaseCheckObject.class);
-			return caseCheck.playerInfo;
-		}
-		catch(IOException e)
-		{
-			//dont want to do anything here, this function is supposed to find some wrong usernames
-		}
-		return null;
-	}
-	
-	public String getCorrectCase(String username)
-	{
-		PlayerInfoObject info = getPlayerInfo(username);
-		if(info==null) return "";
-		else return info.username;
-	}
-	
 	@Command(aliases = {"!linkserver"}, description = "Link your KAG account to your discord account by logging into a kag server")
 	public void onCommand(IMessage message, String[] args)
 	{
@@ -50,7 +20,7 @@ public class CommandLinkServer implements CommandExecutor
 				return;
 			}
 			//quick sanity check on their username before giving them the link
-			PlayerInfoObject info = getPlayerInfo(args[0]);
+			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
 			if(info==null || info.username.equals(""))
 			{
 				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");

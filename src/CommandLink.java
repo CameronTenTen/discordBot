@@ -13,30 +13,6 @@ import sx.blah.discord.handle.obj.IMessage;
 
 public class CommandLink implements CommandExecutor
 {
-	public PlayerInfoObject getPlayerInfo(String username)
-	{
-		String caseCheckURL = "https://api.kag2d.com/v1/player/"+username+"/info";
-		try
-		{
-	        	URL url = new URL(caseCheckURL);
-			InputStreamReader reader = new InputStreamReader(url.openStream());
-			CaseCheckObject caseCheck = new Gson().fromJson(reader, CaseCheckObject.class);
-			return caseCheck.playerInfo;
-		}
-		catch(IOException e)
-		{
-			//dont want to do anything here, this function is supposed to find some wrong usernames
-		}
-		return null;
-	}
-	
-	public String getCorrectCase(String username)
-	{
-		PlayerInfoObject info = getPlayerInfo(username);
-		if(info==null) return "";
-		else return info.username;
-	}
-	
 	@Command(aliases = {"!link"}, description = "Link your KAG account to your discord account")
 	public void onCommand(IMessage message)
 	{
@@ -55,7 +31,7 @@ public class CommandLink implements CommandExecutor
 				return;
 			}
 			//quick sanity check on their username before giving them the link
-			PlayerInfoObject info = getPlayerInfo(args[0]);
+			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
 			if(info==null || info.username.equals(""))
 			{
 				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");
@@ -86,7 +62,7 @@ public class CommandLink implements CommandExecutor
 			}
 
 			//check the right case for their name early rather than late
-			PlayerInfoObject info = getPlayerInfo(args[0]);
+			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
 			if(info==null || info.username.equals(""))
 			{
 				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");

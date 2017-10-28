@@ -1,10 +1,14 @@
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
+import com.google.gson.Gson;
 
 import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.Discord4JHandler;
@@ -262,6 +266,30 @@ public class DiscordBot {
 			}
 		}
 		return null;
+	}
+	
+	public static PlayerInfoObject getPlayerInfo(String username)
+	{
+		String caseCheckURL = "https://api.kag2d.com/v1/player/"+username+"/info";
+		try
+		{
+	        	URL url = new URL(caseCheckURL);
+			InputStreamReader reader = new InputStreamReader(url.openStream());
+			CaseCheckObject caseCheck = new Gson().fromJson(reader, CaseCheckObject.class);
+			return caseCheck.playerInfo;
+		}
+		catch(IOException e)
+		{
+			//dont want to do anything here, this function is supposed to find some wrong usernames
+		}
+		return null;
+	}
+	
+	public static String getCorrectCase(String username)
+	{
+		PlayerInfoObject info = getPlayerInfo(username);
+		if(info==null) return "";
+		else return info.username;
 	}
 	
 	public static int addLinkRequest(IUser user, String kagname)
