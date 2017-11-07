@@ -51,10 +51,12 @@ public class RconListener
 			{
 				String[] args = gatherMsg.split("\\s");
 				long id = -1;
+				String username = "";
 				try
 				{
 					id = Long.parseLong(args[1]);
-					int returnVal = DiscordBot.doLinkRequest(args[2], id);
+					username = args[2];
+					int returnVal = DiscordBot.doLinkRequest(username, id);
 					switch(returnVal)
 					{
 					case 1:
@@ -66,6 +68,7 @@ public class RconListener
 						break;
 					case -2:
 						gather.getServer(ip, port).say("The existing discord request for that discord user uses a different kag username, you should make a link request for the correct username in discord or login with the correct KAG account");
+						gather.getServer(ip, port).say("The username of the KAG account you are currently connected with is "+username);
 						break;
 					case -3:
 						gather.getServer(ip, port).say("Could not find a user for that discord id, did you type it correctly?");
