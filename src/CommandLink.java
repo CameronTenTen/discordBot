@@ -11,8 +11,33 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
+/**Command for users to link their KAG usernames with their discord account. 
+ * <p>
+ * Typing !link directs the player to type !link KAGUsernameHere or !linkhelp for more information
+ * <p>
+ * Typing !link with 1 argument will check if the string is small enough to be a username (20 characters)
+ * It then checks for the username of the api and corrects the case of the characters if necessary (KAG usernames are defined with a case, but the same name with different capitalization is not allowed)
+ * If the username is not registered or does not own the game the appropriate response will be returned. Otherwise, the player will be given a link to a place in the api where they can login for a token. 
+ * <p>
+ * Typing !link with 2 arguments takes the second string as a kag username, and splits the message at any quotes or spaces, taking the longest string as a token.
+ * The same checks on username validity are made as with the 1 argument version, then the validity of the token is checked. 
+ * If the token is valid, the players details are linked in the connected sql database. 
+ * 
+ * @author cameron
+ * @see https://developers.thd.vg/api/players.html
+ * @see https://api.kag2d.com/v1/player/username/info
+ * @see https://api.kag2d.com/v1/player/username/token/new
+ * @see DiscordBot#getPlayerInfo(String)
+ * @see DiscordBot#getCorrectCase(String)
+ * @see GatherDB#linkAccounts(String, long)
+ */
 public class CommandLink implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandLink
+	 */
 	@Command(aliases = {"!link"}, description = "Link your KAG account to your discord account")
 	public void onCommand(IMessage message)
 	{
