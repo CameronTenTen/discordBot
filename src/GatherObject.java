@@ -896,6 +896,6 @@ public class GatherObject
 	@Override
 	public boolean equals(Object obj)
 	{
-		return (this.guild == ((GatherObject)obj).guild);
+		return (this.getCommandChannel().equals(((GatherObject)obj).getCommandChannel()));
 	}
 }
