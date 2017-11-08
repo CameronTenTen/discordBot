@@ -623,7 +623,7 @@ public class GatherObject
 			Discord4J.LOGGER.warn("Scoreboard not set!");
 			return;
 		}
-		List<StatsObject> list = DiscordBot.database.getTop10();
+		List<StatsObject> list = DiscordBot.database.getTopPlayers(20);
 		if(list == null)
 		{
 			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");

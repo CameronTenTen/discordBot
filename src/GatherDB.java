@@ -1175,19 +1175,19 @@ public class GatherDB {
 		return -1;
 	}
 	
-	public List<StatsObject> getTop10()
 	/**Returns a list of players ordered based on their rank, followed by win percentage, then games played. Players with less than 10 games are ignored. 
 	 * @param numPlayers the number of players to get
 	 * @return a list of StatsObject that has a length of numPlayers or less 
 	 */
+	public List<StatsObject> getTopPlayers(int numPlayers)
 	{
 		Statement statement = null;
 		ResultSet result = null;
 		try
 		{
 			statement = connection.createStatement();
-			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT 20)"
-			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT 20)"
+			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT "+numPlayers+")"
+			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT "+numPlayers+")"
 			                             /*+ " UNION ALL "
 			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
 
