@@ -3,8 +3,17 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.MessageTokenizer;
 
+/**Admin only command for setting queue size. Useful for testing. Must be used in command channel. 
+ * @author cameron
+ *
+ */
 public class CommandSetQueue implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandSetQueue
+	 */
 	@Command(aliases = {"!setqueue"}, description = "Admin only - change the queue size")
 	public void onCommand(IMessage message)
 	{
