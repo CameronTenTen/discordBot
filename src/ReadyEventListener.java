@@ -8,9 +8,17 @@ import com.google.gson.stream.JsonReader;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 
+/**Listener for when the discord bot is ready for various setup code. 
+ * @author cameron
+ * @see https://jitpack.io/com/github/austinv11/Discord4j/2.8.4/javadoc/sx/blah/discord/api/events/IListener.html
+ */
 public class ReadyEventListener implements IListener<ReadyEvent>
 {
-
+	/**The function that is called when the bot is ready
+	 * @param event
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #ReadyEventListener
+	 */
 	@Override
 	public void handle(ReadyEvent event)
 	{
