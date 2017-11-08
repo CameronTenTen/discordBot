@@ -45,8 +45,18 @@ public class CommandSub implements CommandExecutor
 		//check they arent already playing
 		if(gather.isInGame(player))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You cannot sub into a game when you are **already playing** "+message.getAuthor().getDisplayName(message.getGuild()) + "!");
-			return;
+			//check if there is sub votes for this player already
+			if(gather.substitutions.getNumSubVotesForPlayer(player)>0)
+			{
+				gather.substitutions.removeSubVotes(player);
+				DiscordBot.reply(message, "all current sub votes for you have been cleared!");
+				return;
+			}
+			else
+			{
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You cannot sub into a game when you are **already playing** "+message.getAuthor().getDisplayName(message.getGuild()) + "!");
+				return;
+			}
 		}
 		
 		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player);
