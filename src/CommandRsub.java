@@ -6,8 +6,23 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+/**Command for requesting a substitute for a player. If the command is used with no arguments, a sub is requested for yourself. 
+ * To add a sub request vote for someone else, the command must be used with a user mention of another player in the game.
+ * <p>
+ * When the substitution of a player gets enough votes, a sub request will be added. Each player may only vote to sub each other player once. 
+ * <p>
+ * If a player mentions themself in the message, the command behaves as if there was no arguments. Must be used in command channel. 
+ * @author cameron
+ * @see SubManager
+ */
 public class CommandRsub implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @param args
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandRsub
+	 */
 	@Command(aliases = {"!rsub"}, description = "request a sub")
 	public void onCommand(IMessage message, String[] args)
 	{
