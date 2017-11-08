@@ -8,6 +8,10 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
+/**Object that represents one gather game, with players, sub history, server, and other status variables. 
+ * @author cameron
+ *
+ */
 public class GatherGame
 {
 	//currently unused
@@ -17,21 +21,21 @@ public class GatherGame
 	private int blueTickets;
 	private int redTickets;
 	private List<PlayerObject> eliminatedPlayers;
-	
+
 	private List<PlayerObject> players;
 	private List<PlayerObject> bluePlayerList;
 	private List<PlayerObject> redPlayerList;
 	private GatherServer server;
-	
+
 	private Set<PlayerObject> redDeserted;
 	private Set<PlayerObject> blueDeserted;
 	private Set<PlayerObject> redSubbedIn;
 	private Set<PlayerObject> blueSubbedIn;
-	
+
 	private Set<PlayerObject> scrambleVotes;
-	
+
 	private int scrambleVotesReq = 7;
-	
+
 	public enum gameState
 	{
 		PREGAME,
@@ -40,7 +44,7 @@ public class GatherGame
 		LASTSTAND,
 		ENDED
 	}
-	
+
 	GatherGame(int matchId, List<PlayerObject> players, List<PlayerObject> blueTeam, List<PlayerObject> redTeam, GatherServer server)
 	{
 		this.gameID = matchId;
@@ -52,20 +56,25 @@ public class GatherGame
 		this.setRedTickets(0);
 		this.setBlueTickets(0);
 		this.setCurrState(gameState.PREGAME);
-		
+
 		this.redDeserted = new HashSet<PlayerObject>();
 		this.blueDeserted = new HashSet<PlayerObject>();
 		this.redSubbedIn = new HashSet<PlayerObject>();
 		this.blueSubbedIn = new HashSet<PlayerObject>();
-		
+
 		this.scrambleVotes = new HashSet<PlayerObject>();
 	}
-	
+
+	/**Checks if the bot is connected with the server that this game is being played on. 
+	 * @return
+	 */
 	public boolean isConnectedToServer()
 	{
 		return server.isConnected();
 	}
-	
+
+	/**Helper function for sending the teams to the KAG server when a game is created
+	 */
 	public void sendTeamsToServer()
 	{
 		//set the teams for the kag server by doing these commands
@@ -89,7 +98,7 @@ public class GatherGame
 			msg="string[] blue={}; getRules().set('blueTeam',blue);";
 		}
 		server.sendMessage(msg);
-		
+
 		msg="";
 		if(!redPlayerList.isEmpty())
 		{
@@ -110,7 +119,9 @@ public class GatherGame
 		msg="getRules().set_bool('teamsSet',true);";
 		server.sendMessage(msg);
 	}
-	
+
+	/**Helper function for updating the teams on the KAG server when the teams are changed or for any other reason. 
+	 */
 	public void updateTeamsOnServer()
 	{
 		//update the teams for the kag server by doing these commands
@@ -134,7 +145,7 @@ public class GatherGame
 			msg="string[] blue={}; getRules().set('blueTeam',blue);";
 		}
 		server.sendMessage(msg);
-		
+
 		msg="";
 		if(!redPlayerList.isEmpty())
 		{
@@ -154,9 +165,13 @@ public class GatherGame
 		server.sendMessage(msg);
 		msg="getRules().set_bool('teamsUpdated',true);";
 		server.sendMessage(msg);
-		
+
 	}
-	
+
+	/**Replaces one player in the game with another, this is the place where subs are actually subbed in. 
+	 * @param playerBeingReplaced a PlayerObject representing the player that is being removed
+	 * @param player a PlayerObject representing the player that is taking their place
+	 */
 	public void replacePlayer(PlayerObject playerBeingReplaced, PlayerObject player)
 	{
 		int blueIndex = bluePlayerList.indexOf(playerBeingReplaced);
@@ -181,7 +196,11 @@ public class GatherGame
 		updateTeamsOnServer();
 		return;
 	}
-	
+
+	/**Function for saving the result of the game to the database. 
+	 * @param winningTeam the team that won this game
+	 * @param subObj the SubManager object that tracks subs for this game
+	 */
 	public void saveResultToDB(int winningTeam, SubManager subObj)
 	{
 		DiscordBot.database.incrementGamesPlayed();
@@ -275,7 +294,7 @@ public class GatherGame
 				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
 			}
 		}
-		
+
 		List<PlayerObject> subs = subObj.getOpenSubs(this);
 		if(subs!=null)
 		{
@@ -294,14 +313,21 @@ public class GatherGame
 			}
 		}
 	}
-	
+
+	/**Shuffles the current player list, then puts the first half into the blue team, and the second half into the red team. 
+	 * @see Collections#shuffle(List)
+	 */
 	public void shuffleTeams()
 	{
 		Collections.shuffle(players);
 		bluePlayerList = players.subList(0, players.size()/2);
 		redPlayerList = players.subList(players.size()/2, players.size());
 	}
-	
+
+	/**Add a vote to scramble teams. 
+	 * @param player the player voting to scramble
+	 * @return -1 if the player has already voted, 0 if enough votes were counted to shuffle the teams, otherwise the current number of scramble votes counted
+	 */
 	public int addScrambleVote(PlayerObject player)
 	{
 		if(!this.scrambleVotes.add(player))
@@ -318,7 +344,10 @@ public class GatherGame
 		}
 		return this.scrambleVotes.size();
 	}
-	
+
+	/**Helper function for getting a list of mention strings of each player on blue team. 
+	 * @return a list of mention strings of blue team
+	 */
 	public List<String> blueMentionList()
 	{
 		ArrayList<String> list = new ArrayList<String>();
@@ -328,7 +357,10 @@ public class GatherGame
 		}
 		return list;
 	}
-	
+
+	/**Helper function for getting a list of mention strings of each player on red team. 
+	 * @return a list of mention strings of red team
+	 */
 	public List<String> redMentionList()
 	{
 		ArrayList<String> list = new ArrayList<String>();
@@ -339,14 +371,24 @@ public class GatherGame
 		return list;
 	}
 
+	/**Gets the id of this game. 
+	 * @return the game id number
+	 */
 	public int getGameID() {
 		return gameID;
 	}
 
+	/**Sets the id of this game. 
+	 * @param gameID the game id number
+	 */
 	public void setGameId(int gameID) {
 		this.gameID = gameID;
 	}
-	
+
+	/**Find the team of a player. 
+	 * @param user the Discord4J user object for the player
+	 * @return the team number of the player
+	 */
 	public int getPlayerTeam(IUser user)
 	{
 		if(user==null) return -1;
@@ -360,97 +402,166 @@ public class GatherGame
 		}
 		return -1;
 	}
-	
+
+	/**Wrapper function for finding the team of a player using their PlayerObject. 
+	 * @param player the PlayerObject of the player
+	 * @return the team number of the player
+	 * @see #getPlayerTeam(IUser)
+	 */
 	public int getPlayerTeam(PlayerObject player)
 	{
 		return getPlayerTeam(player.getDiscordUserInfo());
 	}
-	
+
+	/**Check if this player is playing in the game from Discord4J user object. 
+	 * @param user the Discord4J user object for the player
+	 * @return true if the players team number is valid, false if not
+	 */
 	public boolean isPlayerPlaying(IUser user)
 	{
 		return getPlayerTeam(user)!=-1;
 	}
-	
+
+	/**Check if this player is playing in the game from PlayerObject. 
+	 * @param player the PlayerObject of the player
+	 * @return true if the players team number is valid, false if not
+	 */
 	public boolean isPlayerPlaying(PlayerObject player)
 	{
 		return getPlayerTeam(player)!=-1;
 	}
 
+	/**Getter for the server ip address. 
+	 * @return the ip address of the server this game is being played on
+	 */
 	public String getServerIp()
 	{
 		return server.getIp();
 	}
-	
+
+	/**Getter for the server port.
+	 * @return the port of the server this game is being played on. 
+	 */
 	public int getServerPort()
 	{
 		return server.getPort();
 	}
 
+	/**Getter for the GatherServer object
+	 * @return the GatherServer that this game is being played on. 
+	 */
 	public GatherServer getServer() {
 		return server;
 	}
 
+	/**Setter for the GatherServer object
+	 * @param server the GatherServer this game will be played on
+	 */
 	public void setServer(GatherServer server) {
 		this.server = server;
 	}
-	
+
+	/**Getter for the number of votes required to scramble the teams.
+	 * @return the number of votes required to scramble the teams
+	 */
 	public int getScrambleVotesReq() {
 		return scrambleVotesReq;
 	}
 
+	/**Setter for the number of votes required to scramble the teams. 
+	 * @param scrambleVotesReq the new number of votes required to scramble the teams
+	 */
 	public void setScrambleVotesReq(int scrambleVotesReq) {
 		this.scrambleVotesReq = scrambleVotesReq;
 	}
 
+	/**Getter for the current number of scramble votes. 
+	 * @return the current number of votes to scramble the teams
+	 */
 	public int getNumScrambleVotes() {
 		return this.scrambleVotes.size();
 	}
 
+	/**Getter for the current round number. 
+	 * @return the current round number
+	 */
 	public int getCurrentRound() {
 		return currentRound;
 	}
 
+	/**Setter for the current round number. 
+	 * @param currentRound the new current round number
+	 */
 	public void setCurrentRound(int currentRound) {
 		this.currentRound = currentRound;
 	}
 
+	/**Getter for the current state of the game. e.g pre game, building time or in progress. 
+	 * @return the current game state
+	 */
 	public gameState getCurrState() {
 		return currState;
 	}
 
+	/**Setter for the current state of the game. 
+	 * @param currState the new current state
+	 */
 	public void setCurrState(gameState currState) {
 		this.currState = currState;
 	}
 
+	/**Getter for current blue ticket count
+	 * @return the current number of blue tickets
+	 */
 	public int getBlueTickets() {
 		return blueTickets;
 	}
 
+	/**Setter for current blue ticket count
+	 * @param blueTickets the new number of blue tickets
+	 */
 	public void setBlueTickets(int blueTickets) {
 		this.blueTickets = blueTickets;
 	}
 
+	/**Getter for current number of red tickets
+	 * @return the current number of red tickets
+	 */
 	public int getRedTickets() {
 		return redTickets;
 	}
 
+	/**Setter for current number of red tickets
+	 * @param redTickets the new number of red tickets
+	 */
 	public void setRedTickets(int redTickets) {
 		this.redTickets = redTickets;
 	}
 
+	/**Set the state enum to gameState.BUILDINGTIME
+	 */
 	public void setStateBuilding() {
 		this.setCurrState(gameState.BUILDINGTIME);
 	}
+	/**Set the state enum to gameState.ROUNDINPROGRESS
+	 */
 	public void setStateInProgress() {
 		this.setCurrState(gameState.ROUNDINPROGRESS);
 	}
+	/**Set the state enum to gameState.LASTSTAND
+	 */
 	public void setStateLastStand() {
 		this.setCurrState(gameState.LASTSTAND);
 	}
+	/**Set the state enum to gameState.ENDED
+	 */
 	public void setStateEnded() {
 		this.setCurrState(gameState.ENDED);
 	}
-	
+
+	/**Gets the current state as a user readable string. 
+	 * @return a string representing the current game state
+	 */
 	public String getStateString()
 	{
 		switch(getCurrState())
@@ -469,10 +580,14 @@ public class GatherGame
 		return"";
 	}
 
+	/**Returns a formatted string of the teams playing this game
+	 * @param guild the guild to use for getting user nicks
+	 * @return a string containing a list of both teams with player names formatted as KAG username(Discord Nick)
+	 */
 	public String toString(IGuild guild)
 	{
 		if(players.isEmpty()) return "";
-		
+
 		String blueString = "**Blue:** ";
 		for(PlayerObject player : bluePlayerList)
 		{
@@ -485,18 +600,28 @@ public class GatherGame
 		}
 		return blueString + "\n" + redString;
 	}
-	
+
+	/**Checks if the GatherGame's are equal by comparing the server they are being played on
+	 * TODO this should probably also check the player list
+	 * @param obj the object to compare this one with
+	 * @return true if the servers are equal, or false if not
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj)
 	{
 		return this.server.equals(((GatherGame)obj).server);
 	}
-	
+
+	/**Converts the game to a string as a list of each of the teams using the PlayerObject.toString() method for player name formatting. 
+	 * @return the string representation of the teams
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString()
 	{
 		if(players.isEmpty()) return "";
-		
+
 		String blueString = "**Blue:** ";
 		for(PlayerObject player : bluePlayerList)
 		{
