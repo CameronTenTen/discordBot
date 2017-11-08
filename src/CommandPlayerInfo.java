@@ -6,8 +6,21 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+/**Command for showing player account info in the channel. Shows KAG username, Discord ID, Nick, Name and Discriminator as stored in the database. 
+ * <p>
+ * Useful for checking the link status of a player. 
+ * @author cameron
+ * @see GatherDB#getKagName(long)
+ * @see GatherDB#getDiscordID(String)
+ */
 public class CommandPlayerInfo implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @param args
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandPlayerInfo
+	 */
 	@Command(aliases = {"!playerinfo"}, description = "Check the information of a player stored in the database")
 	public void onCommand(IMessage message, String[] args)
 	{
