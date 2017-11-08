@@ -6,9 +6,22 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+/**Command for checking the stats of a player that are stored in the database. If no args are given, it finds the stats for the player who typed the command. 
+ * If the command contains a mention, stats are retreived for that player. 
+ * It is then assumed the argument given is a KAG name. If this is unsuccessful the bot attempts to find a discord user by that name or a discord nick by that name. 
+ * @author cameron
+ * @see GatherDB#getStats(long)
+ * @see GatherDB#getStats(String)
+ */
 public class CommandStats implements CommandExecutor
 {
-	@Command(aliases = {"!stats"}, description = "Check the stats of a player stored in the database")
+	/**The function that is called when the command is used
+	 * @param message
+	 * @param args
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandStats
+	 */
+	@Command(aliases = {"!stats","!playerstats"}, description = "Check the stats of a player stored in the database")
 	public void onCommand(IMessage message, String[] args)
 	{
 		
