@@ -4,8 +4,26 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.StatusType;
 
+/**
+ * Chat command for players to add to the queue. Must be used in command channel. 
+ * Prints a response message to the command channel depending on the result of the command.
+ * Starts a game if queue is filled by the add request.
+ * <p>
+ * Does not allow players to add while offline(invisible mode). This is done to prevent people adding while invisible, then going offline (which the bot cant detect). 
+ * The bot needs to remove players when they go offline to prevent games starting after people have left. 
+ * <p>
+ * Adding to queue and starting game are contined in a synchronized statement to prevent players removing while a game is being started.
+ * 
+ * @author cameron
+ *
+ */
 public class CommandAdd implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandAdd
+	 */
 	@Command(aliases = {"!add"}, description = "Add yourself to the queue")
 	public void onCommand(IMessage message)
 	{
