@@ -6,6 +6,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**Object for managing the database connection. Provides various useful functions for database interaction. 
+ * @author cameron
+ *
+ */
 public class GatherDB {
 
 	private String username;
@@ -21,34 +25,59 @@ public class GatherDB {
 		connect();
 	}
 	
+	/**
+	 * @return the username to use to connect to the database
+	 */
 	public String getUsername() {
 		return username;
 	}
 
+	/**
+	 * @param username the username to use to connect to the database
+	 */
 	public void setUsername(String username) {
 		this.username = username;
 	}
 
+	/**
+	 * @return the password to use to connect to the database
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * @param password the password to use to connect to the database
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * @return the url to use to connect to the database
+	 */
 	public String getUrl() {
 		return url;
 	}
 
+	/**
+	 * @param url the url to use to connect to the databse
+	 */
 	public void setUrl(String url) {
 		this.url = url;
 	}
 	
+	/**Helper function for setting the connection url by joining the ip and database name together into a properly formatted string
+	 * @param ip the ip address of the server
+	 * @param database the name of the database to use on the server
+	 */
 	public void setUrl(String ip, String database) {
 		this.url = "jdbc:mysql://" + ip + "/" + database;
 	}
 
+	/**
+	 * Initiates the connection between the bot and the database. 
+	 */
 	public void connect()
 	{
 		try {
@@ -68,6 +97,10 @@ public class GatherDB {
 		}
 	}
 	
+	/**Takes a Discord id and returns the corresponding KAG username that is stored in the database. Returns a blank string if they were not found. 
+	 * @param id the Discord id of the player to be found
+	 * @return the KAG username as a string, or a blank string if no user was found
+	 */
 	public String getKagName(long id)
 	{
 		Statement statement = null;
@@ -107,7 +140,11 @@ public class GatherDB {
                 }
 		return "";
 	}
-	
+
+	/**Takes a KAG username and returns the corresponding Discord id that is stored in the database. Returns -1 if they were not found. 
+	 * @param kagName the KAG username of the player to be found
+	 * @return the Discord id as a long, or -1 if no user was found. 
+	 */
 	public long getDiscordID(String kagName)
 	{
 		Statement statement = null;
@@ -148,6 +185,11 @@ public class GatherDB {
 		return -1;
 	}
 	
+	/**Gets the stats of a player from the database. Returns all the stats in a StatsObject. 
+	 * @param kagname the KAG username of the player
+	 * @return the StatsObject holding the players stats
+	 * @see #StatsObject
+	 */
 	public StatsObject getStats(String kagname)
 	{
 		Statement statement = null;
@@ -199,7 +241,12 @@ public class GatherDB {
                 }
 		return null;
 	}
-	
+
+	/**Gets the stats of a player from the database. Returns all the stats in a StatsObject. 
+	 * @param id the Discord id of the player
+	 * @return the StatsObject holding the players stats
+	 * @see #StatsObject
+	 */
 	public StatsObject getStats(long id)
 	{
 		Statement statement = null;
@@ -252,6 +299,10 @@ public class GatherDB {
 		return null;
 	}
 
+	/**Gets the number of games played by the player from the database. 
+	 * @param kagname the KAG username of the player
+	 * @return the number of games played by the player, -1 if the player couldnt be found.
+	 */
 	public int getGamesPlayed(String kagname)
 	{
 		Statement statement = null;
@@ -292,6 +343,10 @@ public class GatherDB {
 		return -1;
 	}
 
+	/**Gets the number of games played by the player from the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of games played by the player, -1 if the player couldnt be found.
+	 */
 	public int getGamesPlayed(long id)
 	{
 		Statement statement = null;
@@ -331,7 +386,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of wins of the player from the database. 
+	 * @param kagname the KAG username of the player
+	 * @return the number of games won by the player, -1 if the player couldnt be found.
+	 */
 	public int getWins(String kagname)
 	{
 		Statement statement = null;
@@ -371,7 +430,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of wins of the player from the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of games won by the player, -1 if the player couldnt be found.
+	 */
 	public int getWins(long id)
 	{
 		Statement statement = null;
@@ -411,7 +474,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of losses of the player from the database. 
+	 * @param kagname the KAG username of the player
+	 * @return the number of games lost by the player, -1 if the player couldnt be found.
+	 */
 	public int getLosses(String kagname)
 	{
 		Statement statement = null;
@@ -451,7 +518,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of losses of the player from the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of games lost by the player, -1 if the player couldnt be found.
+	 */
 	public int getLosses(long id)
 	{
 		Statement statement = null;
@@ -491,7 +562,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of draws of the player from the database. 
+	 * @param kagname the KAG username of the player
+	 * @return the number of games drawn by the player, -1 if the player couldnt be found.
+	 */
 	public int getDraws(String kagname)
 	{
 		Statement statement = null;
@@ -531,7 +606,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of draws of the player from the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of games drawn by the player, -1 if the player couldnt be found.
+	 */
 	public int getDraws(long id)
 	{
 		Statement statement = null;
@@ -571,7 +650,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of desertions of the player from the database. 
+	 * @param kagname the KAG username of the player
+	 * @return the number of games deserted by the player, -1 if the player couldnt be found.
+	 */
 	public int getdesertions(String kagname)
 	{
 		Statement statement = null;
@@ -611,7 +694,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Gets the number of desertions of the player from the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of games deserted by the player, -1 if the player couldnt be found.
+	 */
 	public int getdesertions(long id)
 	{
 		Statement statement = null;
@@ -652,6 +739,10 @@ public class GatherDB {
 		return -1;
 	}
 
+	/**Adds a win to the player in the database. Also increments their games played. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addWin(long id)
 	{
 		Statement statement = null;
@@ -678,7 +769,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a win to the player in the database. Also increments their games played. 
+	 * @param id the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addWin(String kagName)
 	{
 		Statement statement = null;
@@ -705,7 +800,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a loss to the player in the database. Also increments their games played. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addLoss(long id)
 	{
 		Statement statement = null;
@@ -732,7 +831,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a loss to the player in the database. Also increments their games played. 
+	 * @param id the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addLoss(String kagName)
 	{
 		Statement statement = null;
@@ -759,7 +862,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a desertion to the player in the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addDesertion(long id)
 	{
 		Statement statement = null;
@@ -786,7 +893,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a desertion to the player in the database. 
+	 * @param id the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addDesertion(String kagName)
 	{
 		Statement statement = null;
@@ -813,7 +924,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a desertion loss to the player in the database. A desertion loss means that in a game where this player deserted, their team lost. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addDesertionLoss(long id)
 	{
 		Statement statement = null;
@@ -840,7 +955,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a desertion loss to the player in the database. A desertion loss means that in a game where this player deserted, their team lost. 
+	 * @param id the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addDesertionLoss(String kagName)
 	{
 		Statement statement = null;
@@ -867,7 +986,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a substitution to the player in the database. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addSubstitution(long id)
 	{
 		Statement statement = null;
@@ -894,7 +1017,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a substitution to the player in the database. 
+	 * @param id the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addSubstitution(String kagName)
 	{
 		Statement statement = null;
@@ -921,7 +1048,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a substitution win to the player in the database. A substitution win means that in a game where this player subbed in, their team won. 
+	 * @param id the Discord id of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addSubstitutionWin(long id)
 	{
 		Statement statement = null;
@@ -948,7 +1079,11 @@ public class GatherDB {
                 }
 		return -1;
 	}
-	
+
+	/**Adds a substitution win to the player in the database. A substitution win means that in a game where this player subbed in, their team won. 
+	 * @param kagName the KAG username of the player
+	 * @return the number of rows changed by this request, -1 if the player couldnt be found.
+	 */
 	public int addSubstitutionWin(String kagName)
 	{
 		Statement statement = null;
@@ -976,6 +1111,11 @@ public class GatherDB {
 		return -1;
 	}
 	
+	/**Links a KAG username and a Discord id in the database. If one of the two already exists in the database, the entry should be updated to the new values. If both already exist it is likely to return an error(not properly tested since its an unlikely case). 
+	 * @param kagName the KAG username to link
+	 * @param id the Discord id to link
+	 * @return the number of rows changed by the request, -1 if the user couldnt be found. 
+	 */
 	public int linkAccounts(String kagName, long id)
 	{
 		Statement statement = null;
@@ -1005,6 +1145,9 @@ public class GatherDB {
 		return -1;
 	}
 	
+	/**Increments the total number of gather games played. 
+	 * @return the number of rows changed by the requeset, -1 if something went wrong. 
+	 */
 	public int incrementGamesPlayed()
 	{
 		Statement statement = null;
@@ -1033,6 +1176,10 @@ public class GatherDB {
 	}
 	
 	public List<StatsObject> getTop10()
+	/**Returns a list of players ordered based on their rank, followed by win percentage, then games played. Players with less than 10 games are ignored. 
+	 * @param numPlayers the number of players to get
+	 * @return a list of StatsObject that has a length of numPlayers or less 
+	 */
 	{
 		Statement statement = null;
 		ResultSet result = null;
