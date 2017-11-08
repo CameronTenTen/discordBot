@@ -2,8 +2,21 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
+/**Admin only command for ending the current game. Must be used in command channel. 
+ * Parses the first argument as an int, if any error occurs doing this it gives a vague error.
+ * <p>
+ * 0 is blue team, 1 is red team, -1 is a draw, -2 will wipe the game with no results recorded
+ * @author cameron
+ *
+ */
 public class CommandGiveWin implements CommandExecutor
 {
+
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandGiveWin
+	 */
 	@Command(aliases = {"!givewin"}, description = "Admin only - give win in the current game to a particular team")
 	public void onCommand(IMessage message, String[] args)
 	{
