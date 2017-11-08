@@ -11,6 +11,10 @@ import java.util.Queue;
 
 import sx.blah.discord.Discord4J;
 
+/**Listens to the tcp socket that is connected to the KAG server and sends received messages to its listeners. 
+ * @author cameron
+ *
+ */
 public class KagServerChecker implements Runnable
 {
 	private Socket socket;
@@ -38,11 +42,17 @@ public class KagServerChecker implements Runnable
 		connect();
 	}
 	
+	/**Checks if this object thinks it is connected with the server. 
+	 * @return the value of the connected variable
+	 */
 	public boolean isConnected()
 	{
 		return connected;
 	}
 	
+	/**Changes the connection status of this object. If the connection is changed from true to false, it also triggers a connectionLost() call. 
+	 * @param val true connected, false otherwise
+	 */
 	public void setConnected(boolean val)
 	{
 		if(connected == true && val == false)
@@ -56,6 +66,8 @@ public class KagServerChecker implements Runnable
 		}
 	}
 	
+	/**Triggered whenever the connection is lost. Disconnects the socket and sets up a task to reconnect later. 
+	 */
 	public void connectionLost()
 	{
 		//disconnect
@@ -74,6 +86,10 @@ public class KagServerChecker implements Runnable
 		}
 	}
 	
+	/**Initiates the connection with the server. 
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
 	public void connect() throws UnknownHostException, IOException
 	{
 
@@ -85,16 +101,24 @@ public class KagServerChecker implements Runnable
 		connected=true;
 	}
 	
+	/**Sends text to the KAG server. 
+	 * @param msg the string to send
+	 */
 	public void sendMessage(String msg)
 	{
 		sendMessageQueue.add(msg);
 	}
 	
+	/**Calls {@link #disconnect()}. 
+	 * @see java.lang.Object#finalize()
+	 */
 	protected void finalize()
 	{
 		this.disconnect();
 	}
 	
+	/**Disconnect from the kag server and close the apporpriate resources. 
+	 */
 	public void disconnect()
 	{
 		try {
@@ -106,17 +130,29 @@ public class KagServerChecker implements Runnable
 		}
 	}
 	
+	/**Add a listener object to be passed messages when they are received. 
+	 * @param listener an RconListener object
+	 * @see #RconListener
+	 */
 	public void addListener(RconListener listener)
 	{
 		listeners.add(listener);
 	}
 	
+	/**Remove a listener so that it is no longer passed messages when they are received. 
+	 * @param listener an RconListener object
+	 * @see #RconListener
+	 */
 	public void removeListener(RconListener listener)
 	{
 		listeners.remove(listener);
 	}
 	
 	
+	/**runs the thread that checks the socket for messages. When a message is received it is sent to all listeners. Checks for messages to send and sends them all. Tries to detect disconnects by detection server shutdown messages.
+	 * TODO implement a heartbeat in order to detect when the server is disconnected. 
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run()
 	{
 		while(!Thread.interrupted())
