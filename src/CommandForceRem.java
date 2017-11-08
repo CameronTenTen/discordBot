@@ -5,8 +5,18 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+/**Admin only command for removing a player from the queue. Must be used in command channel. 
+ * Gets a list of all the mentions in the command and removes those players from the queue if they are in it. 
+ * @author cameron
+ *
+ */
 public class CommandForceRem implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandForceRem
+	 */
 	@Command(aliases = {"!forcerem"}, description = "Admin only - remove a user from the queue")
 	public void onCommand(IMessage message)
 	{
