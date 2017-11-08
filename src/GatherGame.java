@@ -602,7 +602,7 @@ public class GatherGame
 	}
 
 	/**Checks if the GatherGame's are equal by comparing the server they are being played on
-	 * TODO this should probably also check the player list
+	 * TODO when id is implemented it should just compare the id's
 	 * @param obj the object to compare this one with
 	 * @return true if the servers are equal, or false if not
 	 * @see java.lang.Object#equals(java.lang.Object)
