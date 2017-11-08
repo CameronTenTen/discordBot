@@ -2,8 +2,19 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
+/**
+ * Admin only command for clearing all currently running games for a gather object. Must be used in command channel. 
+ * Calls GatherObject.clearGames()
+ * @author cameron
+ * @see GatherObject#clearGames()
+ */
 public class CommandClearGames implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandClearGames
+	 */
 	@Command(aliases = {"!cleargames"}, description = "Admin only - clear all currently running games")
 	public void onCommand(IMessage message)
 	{
