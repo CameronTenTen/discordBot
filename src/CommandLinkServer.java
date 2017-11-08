@@ -2,8 +2,29 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
+/**Command for users to link their KAG usernames with their discord account without logging into their KAG account by directing them to the KAG server instead. Useful for people who don't know their KAG account details(steam users).
+ * <p>
+ * Typing !linkserver directs the player to type !linkserver KAGUsernameHere or !linkhelp for more information
+ * <p>
+ * Typing !linkserver with 1 argument will check if the string is small enough to be a username (20 characters)
+ * It then checks for the username of the api and corrects the case of the characters if necessary (KAG usernames are defined with a case, but the same name with different capitalization is not allowed)
+ * If the username is not registered or does not own the game the appropriate response will be returned. Otherwise, the player will be directed to a gather server to complete the link process. 
+ * 
+ * @author cameron
+ * @see DiscordBot#getPlayerInfo(String)
+ * @see DiscordBot#getCorrectCase(String)
+ * @see GatherDB#linkAccounts(String, long)
+ * @see DiscordBot#addLinkRequest(sx.blah.discord.handle.obj.IUser, String)
+ * @see DiscordBot#doLinkRequest(String, long)
+ */
 public class CommandLinkServer implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @param args
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandLinkServer
+	 */
 	@Command(aliases = {"!linkserver"}, description = "Link your KAG account to your discord account by logging into a kag server")
 	public void onCommand(IMessage message, String[] args)
 	{
