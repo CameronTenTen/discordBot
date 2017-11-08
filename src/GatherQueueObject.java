@@ -2,18 +2,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+/**
+ * Holds a list of players that are currently in the gather queue
+ * @author cameron
+ *
+ */
 public class GatherQueueObject extends Vector<PlayerObject>
 {
 	private static int maxQueueSize = 10;
 	
+	/**
+	 * @return The maximum queue size
+	 */
 	public static int getMaxQueueSize() {
 		return maxQueueSize;
 	}
 
+	/**
+	 * @param The new max queue size
+	 */
 	public static void setMaxQueueSize(int maxQueueSize) {
 		GatherQueueObject.maxQueueSize = maxQueueSize;
 	}
-
+	
+	/** 
+	 * @param player - The player to add to the queue
+	 * @return true if player was added to the queue
+	 * @see java.util.Vector#add(java.lang.Object)
+	 */
 	@Override
 	public boolean add(PlayerObject player)
 	{
@@ -29,6 +45,11 @@ public class GatherQueueObject extends Vector<PlayerObject>
 		}
 	}
 	
+	/**
+	 * @param player The player to remove from the queue
+	 * @return true if the player was removed from the queue
+	 * @see java.util.Vector#remove(java.lang.Object)
+	 */
 	@Override
 	public boolean remove(Object player)
 	{
@@ -45,16 +66,25 @@ public class GatherQueueObject extends Vector<PlayerObject>
 	}
 	
 	
+	/**
+	 * @return The number of players currently in the queue
+	 */
 	public int numPlayersInQueue()
 	{
 		return super.size();
 	}
 	
+	/**
+	 * @return True if the current queue size is greater than or equal to the max queue size
+	 */
 	public boolean isFull()
 	{
 		return this.numPlayersInQueue()>=getMaxQueueSize();
 	}
 	
+	/**
+	 * @return A copy of the current list as a List of PlayerObjects
+	 */
 	public List<PlayerObject> asList()
 	{
 		ArrayList<PlayerObject> list = new ArrayList<PlayerObject>();
@@ -62,6 +92,11 @@ public class GatherQueueObject extends Vector<PlayerObject>
 		return list;
 	}
 	
+	/**
+	 * @return A comma delimited representation of the players in the queue using PlayerObject.toString()
+	 * @see java.util.Vector#toString()
+	 * @see PlayerObject#toString()
+	 */
 	public String toString()
 	{
 		String returnString="";
