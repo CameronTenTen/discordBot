@@ -1,4 +1,8 @@
 
+/**Object for holding a players stats when they are retreived from the database
+ * @author cameron
+ *
+ */
 public class StatsObject {
 	StatsObject()
 	{
@@ -28,6 +32,9 @@ public class StatsObject {
 	float winRate;
 	int mmr;
 	
+	/**Calculates the win rate of the player based on ((wins+subwins)/(gamesplayed+desertionlosses+subwins))*100. This is no longer used, win rate is calculated by the database query instead. 
+	 * @return the calculated win percentage, or 0 if the player has 0 wins, 0 losses, and 0 desertions
+	 */
 	public float winRate()
 	{
 		float winRate;
@@ -39,12 +46,19 @@ public class StatsObject {
 		return winRate;
 	}
 	
+	/**Gets the win percent of this player as a string 
+	 * @return a string of the win rate to two decimal places
+	 */
 	public String winRateString()
 	{
 		if(winRate>0) return String.format("%.2f", this.winRate);
 		else return String.format("%.2f", this.winRate());
 	}
 	
+	/**Helper for getting a players stats in a readable form. 
+	 * @return a string containing all the players stats in a readable form
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString()
 	{
