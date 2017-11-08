@@ -2,8 +2,17 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
+/** Prints a linking help message
+ * @author cameron
+ *
+ */
 public class CommandLinkHelp implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandLinkHelp
+	 */
 	@Command(aliases = {"!linkhelp"}, description = "Link your KAG account to your discord account")
 	public void onCommand(IMessage message, String[] args)
 	{
