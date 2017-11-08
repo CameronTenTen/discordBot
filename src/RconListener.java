@@ -1,6 +1,15 @@
 
+/**Listener object to be added to the KagServerChecker. Gets messages passed to it when they are received from the server. 
+ * @author cameron
+ *
+ */
 public class RconListener
 {
+	/**The function that is called when a message is received. 
+	 * @param msg the message received from the server
+	 * @param ip the ip address of the server
+	 * @param port the port of the server
+	 */
 	public void messageReceived(String msg, String ip, int port)
 	{
 		//remove time stamp
