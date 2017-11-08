@@ -3,8 +3,19 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
+/**Command for subbing into a game. Must be used in command channel. Player must be linked and not already playing a game.
+ * <p>
+ * prefers to sub a player back into their own spot in the game if one of the sub requests is for them. Otherwise subs the player into places in the order that the sub requests were made.
+ * @author cameron
+ * @see SubManager#subPlayerIntoGame(PlayerObject)
+ */
 public class CommandSub implements CommandExecutor
 {
+	/**The function that is called when the command is used
+	 * @param message
+	 * @see https://github.com/BtoBastian/sdcf4j
+	 * @see #CommandSub
+	 */
 	@Command(aliases = {"!sub"}, description = "sub into the first open sub position")
 	public void onCommand(IMessage message, String[] args)
 	{
