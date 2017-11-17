@@ -1257,7 +1257,7 @@ public class GatherDB {
 
 	/**Adds the data of a game to the database. 
 	 * @param game the GatherGame object representing this game. 
-	 * @return the number of rows changed by the requeset, -1 if something went wrong. 
+	 * @return the number of rows changed by the request, -1 if something went wrong. 
 	 */
 	public int addGame(GatherGame game)
 	{

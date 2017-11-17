@@ -54,7 +54,6 @@ public class CommandLinkServer implements CommandExecutor
 			}
 			else
 			{
-				//TODO save the link request info
 				int returnVal = DiscordBot.addLinkRequest(message.getAuthor(), info.username);
 				switch(returnVal)
 				{
