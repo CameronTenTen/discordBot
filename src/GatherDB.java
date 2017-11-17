@@ -8,7 +8,15 @@ import java.util.List;
 
 /**Object for managing the database connection. Provides various useful functions for database interaction. 
  * @author cameron
- *
+ * <p>
+ * players table created using the command:
+ *  CREATE TABLE players2 (kagname VARCHAR(20), discordid BIGINT, gamesplayed INT DEFAULT 0, wins INT DEFAULT 0, losses INT DEFAULT 0, draws INT DEFAULT 0, desertions INT DEFAULT 0, substitutions INT DEFAULT 0, desertionlosses INT DEFAULT 0, substitutionwins INT DEFAULT 0, UNIQUE KEY (kagname, discordid));
+ * <p>
+ * games table created using the command:
+ * CREATE TABLE games (gameId INT UNSIGNED NOT NULL AUTO_INCREMENT, gameLengthSeconds INT, PRIMARY KEY (gameId));
+ * <p>
+ * playerGames table created using the command:
+ * CREATE TABLE playerGames (gameId INT UNSIGNED NOT NULL, kagName VARCHAR(20), team TINYINT, won BOOL, UNIQUE KEY (gameId, kagName));
  */
 public class GatherDB {
 
