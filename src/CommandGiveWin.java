@@ -30,9 +30,11 @@ public class CommandGiveWin implements CommandExecutor
 		
 		}
 		int team = -2;
+		int matchId = -1;
 		try
 		{
-			team = Integer.parseInt(args[0]);
+			matchId = Integer.parseInt(args[0]);
+			team = Integer.parseInt(args[1]);
 		}
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
@@ -42,7 +44,7 @@ public class CommandGiveWin implements CommandExecutor
 		}
 		
 		
-		if(!gather.endGame(-1, team))
+		if(!gather.endGame(matchId, team))
 		{
 			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured setting win, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
 		}

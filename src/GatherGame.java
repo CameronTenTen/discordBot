@@ -3,6 +3,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
@@ -21,6 +22,11 @@ public class GatherGame
 	private int blueTickets;
 	private int redTickets;
 	private List<PlayerObject> eliminatedPlayers;
+	
+	private long startTime;
+	private int gameLengthSeconds;
+	
+	private int winningTeam;
 
 	private List<PlayerObject> players;
 	private List<PlayerObject> bluePlayerList;
@@ -56,6 +62,10 @@ public class GatherGame
 		this.setRedTickets(0);
 		this.setBlueTickets(0);
 		this.setCurrState(gameState.PREGAME);
+		
+		this.startTime = System.nanoTime();
+		this.gameLengthSeconds = 0;
+		this.setWinningTeam(-2);
 
 		this.redDeserted = new HashSet<PlayerObject>();
 		this.blueDeserted = new HashSet<PlayerObject>();
@@ -201,8 +211,10 @@ public class GatherGame
 	 * @param winningTeam the team that won this game
 	 * @param subObj the SubManager object that tracks subs for this game
 	 */
-	public void saveResultToDB(int winningTeam, SubManager subObj)
+	public void saveResultToDB(SubManager subObj)
 	{
+		DiscordBot.database.addGame(this);
+		//TODO remove games played variable at the end of the season
 		DiscordBot.database.incrementGamesPlayed();
 		for(PlayerObject p : bluePlayerList)
 		{
@@ -211,12 +223,12 @@ public class GatherGame
 			{
 				continue;
 			}
-			else if(winningTeam==0)
+			else if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==1)
+			else if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addLoss(p.getKagName());
 				Discord4J.LOGGER.info("Adding loss for "+p.getKagName()+" "+val);
@@ -230,12 +242,12 @@ public class GatherGame
 			{
 				continue;
 			}
-			else if(winningTeam==1)
+			else if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding win for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==0)
+			else if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addLoss(p.getKagName());
 				Discord4J.LOGGER.info("Adding loss for "+p.getKagName()+" "+val);
@@ -244,12 +256,12 @@ public class GatherGame
 		}
 		for(PlayerObject p : blueDeserted)
 		{
-			if(winningTeam==0)
+			if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addDesertion(p.getKagName());
 				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==1)
+			else if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addDesertionLoss(p.getKagName());
 				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
@@ -257,12 +269,12 @@ public class GatherGame
 		}
 		for(PlayerObject p : redDeserted)
 		{
-			if(winningTeam==1)
+			if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addDesertion(p.getKagName());
 				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==0)
+			else if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addDesertionLoss(p.getKagName());
 				Discord4J.LOGGER.info("Adding desertion for "+p.getKagName()+" "+val);
@@ -270,12 +282,12 @@ public class GatherGame
 		}
 		for(PlayerObject p : blueSubbedIn)
 		{
-			if(winningTeam==0)
+			if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addSubstitutionWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==1)
+			else if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addSubstitution(p.getKagName());
 				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
@@ -283,12 +295,12 @@ public class GatherGame
 		}
 		for(PlayerObject p : redSubbedIn)
 		{
-			if(winningTeam==1)
+			if(this.getWinningTeam()==1)
 			{
 				int val = DiscordBot.database.addSubstitutionWin(p.getKagName());
 				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
 			}
-			else if(winningTeam==0)
+			else if(this.getWinningTeam()==0)
 			{
 				int val = DiscordBot.database.addSubstitution(p.getKagName());
 				Discord4J.LOGGER.info("Adding substitution for "+p.getKagName()+" "+val);
@@ -300,12 +312,12 @@ public class GatherGame
 		{
 			for(PlayerObject p : subs)
 			{
-				if(this.getPlayerTeam(p) == winningTeam || winningTeam == -1)
+				if(this.getPlayerTeam(p) == this.getWinningTeam() || this.getWinningTeam() == -1)
 				{
 					//if they were on the winning team or its a draw add a desertion
 					DiscordBot.database.addDesertion(p.getKagName());
 				}
-				else if (winningTeam>=0 && this.getPlayerTeam(p) != winningTeam)
+				else if (this.getWinningTeam()>=0 && this.getPlayerTeam(p) != this.getWinningTeam())
 				{
 					//if a team won and the player wasnt on it then they get a desertion loss
 					DiscordBot.database.addDesertionLoss(p.getKagName());
@@ -542,6 +554,7 @@ public class GatherGame
 	 */
 	public void setStateBuilding() {
 		this.setCurrState(gameState.BUILDINGTIME);
+		this.startTime = System.nanoTime();
 	}
 	/**Set the state enum to gameState.ROUNDINPROGRESS
 	 */
@@ -557,6 +570,59 @@ public class GatherGame
 	 */
 	public void setStateEnded() {
 		this.setCurrState(gameState.ENDED);
+		this.setGameLengthSeconds((int)TimeUnit.SECONDS.convert(System.nanoTime() - this.startTime, TimeUnit.NANOSECONDS));
+	}
+
+	/**Getter for game length in seconds
+	 * @return the game length in seconds
+	 */
+	public int getGameLengthSeconds() {
+		return gameLengthSeconds;
+	}
+
+	/**Setter for game length in seconds
+	 * @param gameLengthSeconds the game length in seconds
+	 */
+	public void setGameLengthSeconds(int gameLengthSeconds) {
+		this.gameLengthSeconds = gameLengthSeconds;
+	}
+
+	/**Getter for winning team 0 is blue team 1 is red team, -1 is draw, -2 is no result
+	 * @return the winning team
+	 */
+	public int getWinningTeam() {
+		return winningTeam;
+	}
+
+	/**Setter for winning team 0 is blue team 1 is red team, -1 is draw, -2 is no result
+	 * @param winningTeam the team that won the game
+	 */
+	public void setWinningTeam(int winningTeam) {
+		this.winningTeam = winningTeam;
+	}
+
+	/**Get a list of player KAG usernames for blue team
+	 * @return a List<String> of blue's KAG usernames
+	 */
+	public List<String> getBlueKagNames() {
+		List<String> returnString = new ArrayList<String>();
+		for(PlayerObject p : bluePlayerList)
+		{
+			returnString.add(p.getKagName());
+		}
+		return returnString;
+	}
+
+	/**Get a list of player KAG usernames for red team
+	 * @return a List<String> of red's KAG usernames
+	 */
+	public List<String> getRedKagNames() {
+		List<String> returnString = new ArrayList<String>();
+		for(PlayerObject p : redPlayerList)
+		{
+			returnString.add(p.getKagName());
+		}
+		return returnString;
 	}
 
 	/**Gets the current state as a user readable string. 
@@ -602,7 +668,6 @@ public class GatherGame
 	}
 
 	/**Checks if the GatherGame's are equal by comparing the server they are being played on
-	 * TODO when id is implemented it should just compare the id's
 	 * @param obj the object to compare this one with
 	 * @return true if the servers are equal, or false if not
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -610,7 +675,9 @@ public class GatherGame
 	@Override
 	public boolean equals(Object obj)
 	{
-		return this.server.equals(((GatherGame)obj).server);
+		if(this.getGameID() == -1) return this.server.equals(((GatherGame)obj).server);
+		if(this.getGameID() == ((GatherGame)obj).getGameID()) return true;
+		return false;
 	}
 
 	/**Converts the game to a string as a list of each of the teams using the PlayerObject.toString() method for player name formatting. 

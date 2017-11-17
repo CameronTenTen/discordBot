@@ -458,14 +458,14 @@ public class GatherObject
 		GatherServer server = this.getFreeServer();
 		if(server != null) server.setInUse(true);
 		//TODO probably shouldnt start a game if there is no free server
-		GatherGame game = new GatherGame(-1, list, null, null, server);
+		GatherGame game = new GatherGame(DiscordBot.database.reserveGameId(), list, null, null, server);
 		game.shuffleTeams();
 		runningGames.add(game);
 
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
 
-		DiscordBot.sendMessage(getCommandChannel(), "Gather game starting: ", true);
+		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting: ", true);
 		DiscordBot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
@@ -550,7 +550,7 @@ public class GatherObject
 	public boolean endGame(GatherGame game, int winningTeam)
 	{
 		//tell everyone
-		DiscordBot.sendMessage(getCommandChannel(), "A game has ended, "+teamString(winningTeam));
+		DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has ended, "+teamString(winningTeam));
 		if(winningTeam>=-1 && winningTeam<=1)
 		{
 			//print to score report
@@ -565,8 +565,8 @@ public class GatherObject
 			DiscordBot.sendMessage(getScoreReportChannel(), temp1);
 			DiscordBot.sendMessage(getScoreReportChannel(), temp2);
 			//store stats in database
-			//TODO save a record of the game in the db
-			game.saveResultToDB(winningTeam, this.substitutions);
+			game.setWinningTeam(winningTeam);
+			game.saveResultToDB(this.substitutions);
 			this.updateScoreboard();
 		}
 		//remove game object from list
