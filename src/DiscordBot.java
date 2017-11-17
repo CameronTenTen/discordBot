@@ -242,9 +242,16 @@ public class DiscordBot {
 	 */
 	public static void editMessage(IMessage msg, String newString)
 	{
-		RequestBuffer.request(() -> {
-			msg.edit(newString);
-		});
+		try
+		{
+			RequestBuffer.request(() -> {
+				msg.edit(newString);
+			});
+		}
+		catch (DiscordException e)
+		{
+			Discord4J.LOGGER.warn("DiscordException caught from Discord4J code when trying to edit a message: " + e.getMessage());
+		}
 	}
 	
 	/**Wrapper for replying to messages without getting rate limit exceptions. 
