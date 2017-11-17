@@ -1175,6 +1175,99 @@ public class GatherDB {
 		return -1;
 	}
 	
+	/**(not yet implemented) Gets a unique game id from the database and reserves the id for future use (so that it is not returned by this function again). 
+	 * @return the game id that has been reserved
+	 */
+	public int reserveGameId() {
+		Statement statement = null;
+		ResultSet result = null;
+		try
+		{
+			statement = connection.createStatement();
+			statement.executeUpdate("INSERT INTO games () VALUES ()");
+			result = statement.executeQuery("SELECT LAST_INSERT_ID();");
+
+	        	if (result.next())
+	        	{
+	        		return result.getInt("LAST_INSERT_ID()");
+	        	}
+		}
+		catch (SQLException e)
+		{
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+        	finally
+                {
+                	if(result != null)
+                	{
+                		try {
+                			result.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+
+	/**Adds the data of a game to the database. 
+	 * @param game the GatherGame object representing this game. 
+	 * @return the number of rows changed by the requeset, -1 if something went wrong. 
+	 */
+	public int addGame(GatherGame game)
+	{
+		Statement statement = null;
+		int rowsChanged=-1;
+		try
+		{
+			statement = connection.createStatement();
+			//game into games table
+			rowsChanged = statement.executeUpdate("INSERT INTO games (gameId, gameLengthSeconds) VALUES ("+game.getGameID()+","+game.getGameLengthSeconds()+") ON DUPLICATE KEY UPDATE gameLengthSeconds="+game.getGameLengthSeconds());
+			//players into playergames table
+			//TODO make an object for storing more stats related to what the player did in the game, we would then get a list of these objects instead of strings here
+			//TODO appropriate stats for subs
+			List<String> blueTeam = game.getBlueKagNames();
+			List<String> redTeam = game.getRedKagNames();
+			for(String kagName : blueTeam) {
+				boolean blueWon = game.getWinningTeam()==0 ? true : false;
+				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 0, "+blueWon+")");
+			}
+			for(String kagName : redTeam) {
+				boolean redWon = game.getWinningTeam()==1 ? true : false;
+				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 1, "+redWon+")");
+			}
+			
+			return rowsChanged;
+		}
+		catch (SQLException e)
+		{
+			System.out.println("SQLException: " + e.getMessage());
+			System.out.println("SQLState: " + e.getSQLState());
+			System.out.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+        	finally
+                {
+                	if(statement != null)
+                	{
+                		try {
+                			statement.close();
+                		} catch (SQLException e) {
+                		}
+                	}
+                }
+		return -1;
+	}
+	
 	/**Returns a list of players ordered based on their rank, followed by win percentage, then games played. Players with less than 10 games are ignored. 
 	 * @param numPlayers the number of players to get
 	 * @return a list of StatsObject that has a length of numPlayers or less 
