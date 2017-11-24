@@ -73,6 +73,21 @@ public class DiscordBot {
 		}
 		return null;
 	}
+
+	/**Helper function for getting the correct gather objects for a guild, used when a user leaves a guild.
+	 * @param guild - the channel being used
+	 * @return A list of GatherObjects associated with the channel, list is empty if there are no objects for this channel
+	 * @see GatherObject
+	 */
+	public static List<GatherObject> getGatherObjectsForGuild(IGuild guild) {
+		if(guild==null) return null;
+		List<GatherObject> returnList = new ArrayList<GatherObject>();
+		for (GatherObject object : gatherObjects) {
+			if (object.getGuild().equals(guild))
+				returnList.add(object);
+		}
+		return returnList;
+	}
 	
 	/**Helper function for getting the correct gather object when data or commands are sent from a connected KAG server. 
 	 * @param ip - the ip address of the server
