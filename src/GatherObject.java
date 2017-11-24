@@ -1094,10 +1094,10 @@ public class GatherObject
 		{
 			if(!game.isConnectedToServer())
 			{
-				returnString += "No server connection"+ "\n";
+				returnString += "#"+game.getGameID()+" No server connection"+ "\n";
 				continue;
 			}
-			returnString += "Game State: " + game.getStateString() + "\n";
+			returnString += "Game #" + game.getGameID() + " " + game.getStateString() + "\n";
 			returnString += "Blue Tickets: " + game.getBlueTickets() + "\n";
 			returnString += "Red Tickets: " + game.getRedTickets() + "\n";
 
