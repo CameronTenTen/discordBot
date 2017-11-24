@@ -512,19 +512,13 @@ public class GatherObject
 		return null;
 	}
 
-	/**Returns a shallow copy of the running games list. i.e. a new list is created and the GatherGame objects are placed into it. 
-	 * @return list of currently running games
+	/**Returns an unmodifiable version of the running games list. 
+	 * @return unmodifiable list of currently running games
 	 * @see #GatherGame
 	 */
 	public List<GatherGame> getRunningGames()
 	{
-		if(runningGames.isEmpty()) return null;
-		List<GatherGame> returnList = new ArrayList<GatherGame>();
-		for(GatherGame game : runningGames)
-		{
-			returnList.add(game);
-		}
-		return returnList;
+		return Collections.unmodifiableList(this.runningGames);
 	}
 
 	/**Helper function for ending a game by resetting the appropriate server object variables, removing the game from the list of running games, and clearing all subs for the game. 
