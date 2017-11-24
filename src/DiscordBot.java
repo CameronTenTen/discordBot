@@ -387,13 +387,33 @@ public class DiscordBot {
 	 * @param user the user that disconnected
 	 * @see #PresenceEventListener
 	 */
-	public static void userWentOffline(IUser user) {
-		for (GatherObject object : gatherObjects) {
-			if (object.remFromQueue(user) == 1) {
+	public static void userWentOffline(IUser user)
+	{
+		for (GatherObject object : gatherObjects)
+		{
+			if (object.remFromQueue(user) == 1)
+			{
 				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
 				                + " has been **removed** from the queue (disconnected) ("
-				                + DiscordBot.getGatherObjectForChannel(object.getCommandChannel()).numPlayersInQueue()+ "/" 
-				                + DiscordBot.getGatherObjectForChannel(object.getCommandChannel()).getMaxQueueSize()+ ")");
+				                + object.numPlayersInQueue()+ "/" 
+				                + object.getMaxQueueSize()+ ")");
+			}
+		}
+	}
+
+	/**Does the things needed when a player leaves the server. As of writing this it only removes them from any queue they might be in. Called by the UserLeaveEventListener when a user leaves any guild. 
+	 * @param user the user that disconnected
+	 * @see #PresenceEventListener
+	 */
+	public static void userLeftGuild(IGuild guild, IUser user)
+	{
+		List<GatherObject> gatherObjects = DiscordBot.getGatherObjectsForGuild(guild);
+		for(GatherObject obj : gatherObjects) {
+			if (obj.remFromQueue(user) == 1) {
+				DiscordBot.sendMessage(obj.getCommandChannel(), obj.fullUserString(user)
+				                + " has been **removed** from the queue (left server) ("
+				                + obj.numPlayersInQueue()+ "/" 
+				                + obj.getMaxQueueSize()+ ")");
 			}
 		}
 	}
