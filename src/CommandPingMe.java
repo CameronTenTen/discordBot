@@ -1,9 +1,6 @@
-import java.util.List;
-
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
 
 /**
  * Chat command for players to add to/remove from the soft queue/ping list. Must be used in command channel. 
@@ -27,21 +24,30 @@ public class CommandPingMe implements CommandExecutor
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
 		if(gather==null) return;
-		
-		//check if the player has the role
-		List<IRole> roles = message.getAuthor().getRolesForGuild(gather.getGuild());
-		for(IRole role : roles)
+
+		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
+		if(player==null)
 		{
-			if(role.equals(gather.getSoftQueueRole()))
-			{
-				//if they have the role, remove them from it
-				DiscordBot.removeRole(message.getAuthor(), gather.getSoftQueueRole());
-				DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **removed** from the **soft queue**");
-				return;
-			}
+			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to play gather " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
+			return;
 		}
-		//otherwise give them the role
-		DiscordBot.addRole(message.getAuthor(), gather.getSoftQueueRole());
-		DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **added** to the **soft queue**, type the same command again to leave it");
+		
+		int val = gather.toggleInterested(message.getAuthor());
+		
+		switch(val)
+		{
+		case 2:
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **removed** from the **soft queue**");
+			return;
+		case 1:
+			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+") they are now in the **soft queue**!");
+		case -1:
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" an unexpected error occured retrievng your player info");
+			return;
+		case 0:
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **added** to the **soft queue**, type the same command again to leave it");
+			return;
+			
+		}
 	}
 }

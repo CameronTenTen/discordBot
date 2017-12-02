@@ -47,10 +47,12 @@ public class CommandAdd implements CommandExecutor
 				return;
 			case 1:
 				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				gather.setNotInterested(message.getAuthor());
 				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 				return;
 			case 2:
 				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				gather.setNotInterested(message.getAuthor());
 				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 				gather.startGame();
 				return;
