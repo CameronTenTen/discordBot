@@ -17,6 +17,16 @@ import java.util.List;
  * <p>
  * playerGames table created using the command:
  * CREATE TABLE playerGames (gameId INT UNSIGNED NOT NULL, kagName VARCHAR(20), team TINYINT, won BOOL, UNIQUE KEY (gameId, kagName));
+ * <p>
+ * export players table to csv using
+ * SELECT *, 2000+(wins*10)-(losses*10) FROM orders WHERE foo = 'bar' INTO OUTFILE '/var/lib/mysql-files/players.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+ * <p>
+ * make copy of players table using
+ * CREATE TABLE newtable LIKE players; 
+ * INSERT newtable SELECT * FROM players;
+ * <p>
+ * clear stats data from players table using
+ * UPDATE players SET gamesplayed=0, wins=0, losses=0, draws=0, desertions=0, substitutions=0, desertionlosses=0, substitutionwins=0;
  */
 public class GatherDB {
 
