@@ -624,6 +624,30 @@ public class GatherGame
 		}
 		return returnString;
 	}
+	
+	/**Helper function for getting the list of players in this game. Returns an unmodifiable version of the player list
+	 * @return an unmodifiable List<PlayerObject> of the current players in this game
+	 */
+	public List<PlayerObject> getPlayerList()
+	{
+		return Collections.unmodifiableList(this.players);
+	}
+	
+	/**Helper function for getting the list of blue players in this game. Returns an unmodifiable version of the blue player list
+	 * @return an unmodifiable List<PlayerObject> of the players currently in blue team
+	 */
+	public List<PlayerObject> getBluePlayerList()
+	{
+		return Collections.unmodifiableList(this.bluePlayerList);
+	}
+	
+	/**Helper function for getting the list of red players in this game. Returns an unmodifiable version of the red player list
+	 * @return an unmodifiable List<PlayerObject> of the players currently in red team
+	 */
+	public List<PlayerObject> getRedPlayerList()
+	{
+		return Collections.unmodifiableList(this.redPlayerList);
+	}
 
 	/**Gets the current state as a user readable string. 
 	 * @return a string representing the current game state
