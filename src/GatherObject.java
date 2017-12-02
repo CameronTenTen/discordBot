@@ -8,6 +8,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -494,6 +495,17 @@ public class GatherObject
 		this.clearQueue();
 		//do voice channel stuff
 		movePlayersIntoTeamRooms(5);
+		//send private messages last so they dont cause other things to be rate limited
+		List<PlayerObject> blue = game.getBluePlayerList();
+		List<PlayerObject> red = game.getRedPlayerList();
+		for(PlayerObject p : blue)
+		{
+			DiscordBot.getPMChannel(p.getDiscordUserInfo()).sendMessage("Gather game #"+game.getGameID()+" is starting and you are on the **Blue** team");
+		}
+		for(PlayerObject p : red)
+		{
+			DiscordBot.getPMChannel(p.getDiscordUserInfo()).sendMessage("Gather game #"+game.getGameID()+" is starting and you are on the **Red** team");
+		}
 	}
 
 	/**Gets the GatherGame object for the currently running game on the specified server. 
