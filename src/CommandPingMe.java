@@ -41,6 +41,7 @@ public class CommandPingMe implements CommandExecutor
 			return;
 		case 1:
 			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+") they are now in the **soft queue**!");
+			return;
 		case -1:
 			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" an unexpected error occured retrievng your player info");
 			return;
