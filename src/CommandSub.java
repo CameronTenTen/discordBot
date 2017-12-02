@@ -36,12 +36,6 @@ public class CommandSub implements CommandExecutor
 			return;
 		}
 		
-		if(!gather.substitutions.hasSubRequest())
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
-			return;
-		}
-		
 		//check they arent already playing
 		if(gather.isInGame(player))
 		{
@@ -57,6 +51,12 @@ public class CommandSub implements CommandExecutor
 				DiscordBot.sendMessage(gather.getCommandChannel(), "You cannot sub into a game when you are **already playing** "+message.getAuthor().getDisplayName(message.getGuild()) + "!");
 				return;
 			}
+		}
+		
+		if(!gather.substitutions.hasSubRequest())
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			return;
 		}
 		
 		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player);
