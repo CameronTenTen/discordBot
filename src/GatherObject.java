@@ -500,11 +500,11 @@ public class GatherObject
 		List<PlayerObject> red = game.getRedPlayerList();
 		for(PlayerObject p : blue)
 		{
-			DiscordBot.getPMChannel(p.getDiscordUserInfo()).sendMessage("Gather game #"+game.getGameID()+" is starting and you are on the **Blue** team");
+			DiscordBot.sendMessage(DiscordBot.getPMChannel(p.getDiscordUserInfo()), "Gather game #"+game.getGameID()+" is starting and you are on the **Blue** team");
 		}
 		for(PlayerObject p : red)
 		{
-			DiscordBot.getPMChannel(p.getDiscordUserInfo()).sendMessage("Gather game #"+game.getGameID()+" is starting and you are on the **Red** team");
+			DiscordBot.sendMessage(DiscordBot.getPMChannel(p.getDiscordUserInfo()), "Gather game #"+game.getGameID()+" is starting and you are on the **Red** team");
 		}
 	}
 
