@@ -178,6 +178,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandRefreshServers());
 		cmdHandler.registerCommand(new CommandScramble());
 		cmdHandler.registerCommand(new CommandStatus());
+		cmdHandler.registerCommand(new CommandPingMe());
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers

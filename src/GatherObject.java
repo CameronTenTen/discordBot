@@ -26,6 +26,7 @@ public class GatherObject
 	private IChannel commandChannel = null;
 	private IRole adminRole = null;
 	private IRole queueRole = null;
+	private IRole softQueueRole = null;
 	private IVoiceChannel blueVoiceChannel = null;
 	private IVoiceChannel redVoiceChannel = null;
 	private IVoiceChannel generalVoiceChannel = null;
@@ -40,6 +41,7 @@ public class GatherObject
 	public long scoreReportID = 0L;
 	public long adminRoleID = 0L;
 	public long queueRoleID = 0L;
+	public long softQueueRoleID = 0L;
 	public long scoreboardMessageID = 0L;
 	public long scoreboardChannelID = 0L;
 
@@ -76,6 +78,7 @@ public class GatherObject
 		setGeneralVoiceChannel(DiscordBot.client.getVoiceChannelByID(generalVoiceID));
 		setAdminRole(DiscordBot.client.getRoleByID(adminRoleID));
 		setQueueRole(DiscordBot.client.getRoleByID(queueRoleID));
+		setSoftQueueRole(DiscordBot.client.getRoleByID(softQueueRoleID));
 
 		if(scoreboardChannelID!=0 && scoreboardMessageID==0)
 		{
@@ -175,6 +178,21 @@ public class GatherObject
 	public void setQueueRole(IRole queueRole) {
 		if(queueRole == null) Discord4J.LOGGER.warn("queue role is being set as null");
 		this.queueRole = queueRole;
+	}
+
+	/**
+	 * @return the soft queue role for allowing people express interest in a game without committing
+	 */
+	public IRole getSoftQueueRole() {
+		return softQueueRole;
+	}
+
+	/**
+	 * @param softQueueRole the role that should be used for displaying the current soft queue in the members list
+	 */
+	public void setSoftQueueRole(IRole softQueueRole) {
+		if(softQueueRole == null) Discord4J.LOGGER.warn("queue role is being set as null");
+		this.softQueueRole = softQueueRole;
 	}
 
 	/**
