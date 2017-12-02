@@ -19,6 +19,7 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
@@ -348,6 +349,17 @@ public class DiscordBot {
 				Discord4J.LOGGER.warn(e.getMessage());
 			}
 		});
+	}
+
+	/**Wrapper for getting/creating a users private message channel without getting rate limit exceptions. Used for sending messages directly to a user. 
+	 * @param user the user you want to message
+	 * @return the user's private channel
+	 */
+	public static IPrivateChannel getPMChannel(IUser user)
+	{
+		return RequestBuffer.request(() -> {
+			return user.getOrCreatePMChannel();
+		}).get();
 	}
 
 	/**Wrapper for setting the bot "playing" text without getting rate limit exceptions. Playing text is global for all guilds the bot is in. 
