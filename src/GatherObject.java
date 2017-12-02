@@ -873,6 +873,43 @@ public class GatherObject
 		queue.clear();
 		updateChannelCaption();
 	}
+	
+	/**Helper function for setting a player as interested. This means that they get the soft queue role. 
+	 * @param user
+	 */
+	public void setInterested(IUser user) {
+		DiscordBot.addRole(user, this.getSoftQueueRole());
+	}
+	
+	/**Helper function for setting a player as not interested. This means that they get the soft queue role role removed. 
+	 * @param user
+	 */
+	public void setNotInterested(IUser user) {
+		DiscordBot.removeRole(user, this.getSoftQueueRole());
+	}
+	
+	/**Toggles the users current interested state. Checks if they currently have the interested role, and removes them from it if they do, returning 2.
+	 * If they do not already have the role, they are given the role and removed from the queue. The result of {@link GatherObject#remFromQueue(IUser)} is reuturned. 
+	 * 1 if the player was removed, -1 if the user wasn't found (only if they are not linked?) or 0 otherwise. 
+	 * @param user
+	 * @return 2 if the user was changed to not interested, 1 if the player was set to interested and removed from the queue, -1 if the player wasnt found, 0 otherwise
+	 */
+	public int toggleInterested(IUser user) {
+		//check if the player has the role
+		List<IRole> roles = user.getRolesForGuild(this.getGuild());
+		for(IRole role : roles)
+		{
+			if(role.equals(this.getSoftQueueRole()))
+			{
+				//if they have the role, remove them from it
+				setNotInterested(user);
+				return 2;
+			}
+		}
+		//otherwise give them the role
+		setInterested(user);
+		return this.remFromQueue(user);
+	}
 
 	/**Function for clearing all running games and ending them. 
 	 */
