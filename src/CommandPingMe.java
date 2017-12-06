@@ -19,7 +19,7 @@ public class CommandPingMe implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandPingMe
 	 */
-	@Command(aliases = {"!pingme","!softqueue","!softadd","!soft","!interested","!interest"}, description = "Add or remove yourself from the soft queue")
+	@Command(aliases = {"!pingme","!softqueue","!softadd","!soft","!interested","!interest","!int"}, description = "Add or remove yourself from the soft queue")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
