@@ -328,6 +328,45 @@ public class DiscordBot {
 		});
 	}
 	
+	/**Wrapper function for creating a role on a guild. The role object should then be manipulated as needed. 
+	 * @param guild the guild for the role
+	 * @return IRole object representing the new role
+	 */
+	public static IRole createRole(IGuild guild)
+	{
+		return RequestBuffer.request(() -> {
+			return guild.createRole();
+		}).get();
+	}
+	
+	/**Wrapper for deleting a role from a guild without getting rate limit exceptions.
+	 * @param role the role object to delete
+	 */
+	public static void deleteRole(IRole role)
+	{
+		RequestBuffer.request(() -> {
+			role.delete();
+		});
+	}
+	
+	/**Wrapper for getting a list of the roles of a guild sorted by their effective positions without getting rate limit exceptions. 
+	 * @param guild the guild to get the roles from
+	 * @return List<IRole> the list of roles for the guild
+	 */
+	public static List<IRole> getRoles(IGuild guild)
+	{
+		return RequestBuffer.request(() -> {
+			return guild.getRoles();
+		}).get();
+	}
+	
+	public static void reorderRoles(IGuild guild, List<IRole> newOrder)
+	{
+		RequestBuffer.request(() -> {
+			guild.reorderRoles(newOrder.toArray(new IRole[] {}));
+		}).get();
+	}
+	
 	/**Wrapper for moving a user to a voice channel without getting rate limit exceptions. User must already be in a voice channel to allow moving them. 
 	 * @param user - the user to be moved
 	 * @param channel - the channel to move them to
