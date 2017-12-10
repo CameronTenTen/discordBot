@@ -475,15 +475,17 @@ public class GatherObject
 		//setup the game
 		List<PlayerObject> list = queue.asList();
 		GatherServer server = this.getFreeServer();
-		if(server != null) server.setInUse(true);
 		//TODO probably shouldnt start a game if there is no free server
-		GatherGame game = new GatherGame(DiscordBot.database.reserveGameId(), list, null, null, server);
+		if(server != null) server.setInUse(true);
+		GatherGame game = new GatherGame(DiscordBot.database.reserveGameId(), list, null, null, server, null, null);
 		game.shuffleTeams();
 		runningGames.add(game);
 
+		//create the team roles
+		this.generateAndSetTeamRoles(game);
+
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
-
 		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting: ", true);
 		DiscordBot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
@@ -492,6 +494,8 @@ public class GatherObject
 		game.sendTeamsToServer();
 		//reset the queue
 		this.clearQueue();
+		//put the players into the team roles
+		this.addPlayersToTeamRoles(game);
 		//do voice channel stuff
 		movePlayersIntoTeamRooms(5);
 		//send private messages last so they dont cause other things to be rate limited
@@ -604,6 +608,9 @@ public class GatherObject
 		{
 			setGameEnded(game);
 		}
+		//remove the team role from the players
+		this.removePlayerTeamRoles(game);
+		this.deleteTeamRoles(game);
 		//do voice channel stuff
 		movePlayersOutOfTeamRooms(5);
 		return true;
@@ -1043,6 +1050,74 @@ public class GatherObject
 			}
 		}
 
+	}
+
+	private void generateAndSetTeamRoles(GatherGame game) {
+		//check there isnt already roles that should be deleted
+		if(game.getBlueRole() != null && !game.getBlueRole().isDeleted()) DiscordBot.deleteRole(game.getBlueRole());
+		if(game.getRedRole() != null && !game.getRedRole().isDeleted()) DiscordBot.deleteRole(game.getRedRole());
+		
+		//create the new roles
+		IRole blue = DiscordBot.createRole(this.getGuild());
+		IRole red = DiscordBot.createRole(this.getGuild());
+		
+		//apply the appropriate settings
+		//.changeHoist() doesnt work, using .edit() instead
+		/*blue.changeHoist(true);
+		blue.changeName("#"+game.getGameID()+" Blue Team");
+		blue.changeMentionable(true);
+		red.changeHoist(true);
+		red.changeName("#"+game.getGameID()+" Red Team");
+		red.changeMentionable(true);*/
+		blue.edit(blue.getColor(), true, "Blue Team #"+game.getGameID(), blue.getPermissions(), true);
+		red.edit(red.getColor(), true, "Red Team #"+game.getGameID(), red.getPermissions(), true);
+		
+		//put the two team roles just after the queue role
+		List<IRole> roles = DiscordBot.getRoles(this.getGuild());
+		//they should be at the bottom of the role list, but remove them before getting the queue index just in case
+		roles.remove(red);
+		roles.remove(blue);
+		int queueIndex = roles.indexOf(this.getQueueRole());
+		roles.add(queueIndex+1, red);
+		roles.add(queueIndex+1, blue);
+		DiscordBot.reorderRoles(this.getGuild(), roles);
+		
+		//set the roles on the game object
+		game.setBlueRole(blue);
+		game.setRedRole(red);
+	}
+
+	private void addPlayersToTeamRoles(GatherGame game) {
+		List<PlayerObject> players = game.getBluePlayerList();
+		for(PlayerObject player : players)
+		{
+			DiscordBot.addRole(player.getDiscordUserInfo(), game.getBlueRole());
+		}
+		players = game.getRedPlayerList();
+		for(PlayerObject player : players)
+		{
+			DiscordBot.addRole(player.getDiscordUserInfo(), game.getRedRole());
+		}
+	}
+
+	private void removePlayerTeamRoles(GatherGame game) {
+		List<PlayerObject> players = game.getBluePlayerList();
+		for(PlayerObject player : players)
+		{
+			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getBlueRole());
+		}
+		players = game.getRedPlayerList();
+		for(PlayerObject player : players)
+		{
+			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getRedRole());
+		}
+	}
+	
+	private void deleteTeamRoles(GatherGame game) {
+		DiscordBot.deleteRole(game.getBlueRole());
+		game.setBlueRole(null);
+		DiscordBot.deleteRole(game.getRedRole());
+		game.setRedRole(null);
 	}
 
 	/**Helper function for converting a team number into a team string for win messages
