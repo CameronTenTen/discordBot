@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 /**Object that represents one gather game, with players, sub history, server, and other status variables. 
@@ -32,6 +33,9 @@ public class GatherGame
 	private List<PlayerObject> bluePlayerList;
 	private List<PlayerObject> redPlayerList;
 	private GatherServer server;
+	
+	private IRole blueRole;
+	private IRole redRole;
 
 	private Set<PlayerObject> redDeserted;
 	private Set<PlayerObject> blueDeserted;
@@ -51,13 +55,15 @@ public class GatherGame
 		ENDED
 	}
 
-	GatherGame(int matchId, List<PlayerObject> players, List<PlayerObject> blueTeam, List<PlayerObject> redTeam, GatherServer server)
+	GatherGame(int matchId, List<PlayerObject> players, List<PlayerObject> blueTeam, List<PlayerObject> redTeam, GatherServer server, IRole blueTeamRole, IRole redTeamRole)
 	{
 		this.gameID = matchId;
 		this.players = players;
 		this.bluePlayerList = blueTeam;
 		this.redPlayerList = redTeam;
 		this.server = server;
+		this.blueRole = blueTeamRole;
+		this.redRole = redTeamRole;
 		this.setCurrentRound(0);
 		this.setRedTickets(0);
 		this.setBlueTickets(0);
@@ -647,6 +653,34 @@ public class GatherGame
 	public List<PlayerObject> getRedPlayerList()
 	{
 		return Collections.unmodifiableList(this.redPlayerList);
+	}
+
+	/**Getter for blue team role associated with this game (for showing teams in members list)
+	 * @return the role object
+	 */
+	public IRole getBlueRole() {
+		return blueRole;
+	}
+
+	/**Setter for blue team role associated with this game (for showing teams in members list)
+	 * @return the role object
+	 */
+	public void setBlueRole(IRole blueRole) {
+		this.blueRole = blueRole;
+	}
+
+	/**Getter for red team role associated with this game (for showing teams in members list)
+	 * @return the role object
+	 */
+	public IRole getRedRole() {
+		return redRole;
+	}
+
+	/**setter for red team role associated with this game (for showing teams in members list)
+	 * @return the role object
+	 */
+	public void setRedRole(IRole redRole) {
+		this.redRole = redRole;
 	}
 
 	/**Gets the current state as a user readable string. 
