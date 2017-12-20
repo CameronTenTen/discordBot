@@ -577,6 +577,8 @@ public class GatherObject
 	 */
 	public boolean endGame(GatherGame game, int winningTeam)
 	{
+		//set the game state as ended
+		game.setStateEnded();
 		//tell everyone
 		DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has ended, "+teamString(winningTeam));
 		if(winningTeam>=-1 && winningTeam<=1)
