@@ -579,8 +579,6 @@ public class GatherObject
 	{
 		//set the game state as ended
 		game.setStateEnded();
-		//tell everyone
-		DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has ended, "+teamString(winningTeam));
 		if(winningTeam>=-1 && winningTeam<=1)
 		{
 			//print to score report
@@ -599,6 +597,8 @@ public class GatherObject
 			game.saveResultToDB(this.substitutions);
 			this.updateScoreboard();
 		}
+		//tell everyone
+		DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has ended, "+teamString(winningTeam));
 		//remove game object from list
 		if(game.getServer() == null)
 		{
