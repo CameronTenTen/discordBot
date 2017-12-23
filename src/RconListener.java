@@ -41,8 +41,12 @@ public class RconListener
 			{
 				index = gatherMsg.indexOf(" ");
 				gatherMsg = gatherMsg.substring(index+1);
-				
-				gather.endGame(ip, port, Integer.parseInt(gatherMsg));
+
+				//just to make sure there isnt some strange cases of the end game detecting a full queue while someone is adding
+				synchronized(gather)
+				{
+					gather.endGame(ip, port, Integer.parseInt(gatherMsg));
+				}
 			}
 			else if(gatherMsg.startsWith("RSUB"))
 			{

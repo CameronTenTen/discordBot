@@ -63,7 +63,7 @@ public class CommandAdd implements CommandExecutor
 				DiscordBot.sendMessage(gather.getCommandChannel(), "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 				return;
 			case 4:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You were not added, try again later "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You were not added because the queue is already full, try again later "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 				return;
 			}
 			DiscordBot.sendMessage(gather.getCommandChannel(), "An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue");

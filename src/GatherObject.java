@@ -339,7 +339,7 @@ public class GatherObject
 			return 1;
 		}
 		if(isQueueFull())
-		{	//this happens if someone adds after a queue fills but before a game has been started
+		{
 			return 4;
 		}
 		return 0;
@@ -470,19 +470,22 @@ public class GatherObject
 	 * then sends appropriate messages to discord and the KAG server, then clears the queue and moves players into their team rooms
 	 * TODO: make this function not block for 5 seconds while the blocking movePlayersIntoTeamRooms(5) is called
 	 */
-	public void startGame()
+	public int startGame()
 	{
+		GatherServer server = this.getFreeServer();
+		if(server == null)
+		{
+			DiscordBot.sendMessage(getCommandChannel(), "There are currently **no servers** to play on! A game will be **started when** a server becomes **available**!");
+			return -1;
+		}
 		//setup the game
 		List<PlayerObject> list = queue.asList();
-		GatherServer server = this.getFreeServer();
-		//TODO probably shouldnt start a game if there is no free server
-		if(server != null) server.setInUse(true);
+		server.setInUse(true);
 		GatherGame game = new GatherGame(DiscordBot.database.reserveGameId(), list, null, null, server, null, null);
 		game.shuffleTeams();
 		runningGames.add(game);
-
-		//create the team roles
-		this.generateAndSetTeamRoles(game);
+		//reset the queue
+		this.clearQueue();
 
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
@@ -492,8 +495,8 @@ public class GatherObject
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
 		game.sendTeamsToServer();
-		//reset the queue
-		this.clearQueue();
+		//create the team roles
+		this.generateAndSetTeamRoles(game);
 		//put the players into the team roles
 		this.addPlayersToTeamRoles(game);
 		//do voice channel stuff
@@ -509,6 +512,7 @@ public class GatherObject
 		{
 			DiscordBot.sendMessage(DiscordBot.getPMChannel(p.getDiscordUserInfo()), "Gather game #"+game.getGameID()+" is starting and you are on the **Red** team");
 		}
+		return 0;
 	}
 
 	/**Gets the GatherGame object for the currently running game on the specified server. 
@@ -615,6 +619,12 @@ public class GatherObject
 		this.deleteTeamRoles(game);
 		//do voice channel stuff
 		movePlayersOutOfTeamRooms(5);
+		//check if there is enough people in queue to start another game (after waiting for the channels to settle)
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		if(this.isQueueFull()) this.startGame();
 		return true;
 	}
 
@@ -704,6 +714,7 @@ public class GatherObject
 	public GatherServer getFreeServer()
 	{
 		// TODO make some kind of server priority? in case of high/low ping servers?
+		// TODO only get servers that the bot is currently connected to (will then also need to check if the queue is full on server (re)connect) (probably want to implement better heartbeat/reconnect system before this)
 		// not important now as there should only be 1 server anyway
 		for(GatherServer server : servers)
 		{
