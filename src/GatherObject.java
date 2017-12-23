@@ -963,7 +963,7 @@ public class GatherObject
 	public void movePlayersIntoTeamRooms(int delay)
 	{
 		String countString = "Moving channels in ";
-		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay, true);
+		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
 
 		try {
 			Thread.sleep(1000);
@@ -1008,7 +1008,7 @@ public class GatherObject
 	public void movePlayersOutOfTeamRooms(int delay)
 	{
 		String countString = "Moving channels in ";
-		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay, true);
+		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
 
 		try {
 			Thread.sleep(1000);
