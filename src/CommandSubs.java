@@ -22,7 +22,7 @@ public class CommandSubs implements CommandExecutor
 		String currentSubs = gather.substitutions.toString();
 		if(!currentSubs.isEmpty())
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There are current sub requests for: "+currentSubs);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There is currently sub requests for: "+currentSubs);
 			return;
 		}
 		else

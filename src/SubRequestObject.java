@@ -28,6 +28,6 @@ public class SubRequestObject {
 	@Override
 	public String toString()
 	{
-		return playerToBeReplaced.toString();
+		return playerToBeReplaced.toString()+" - Game #"+game.getGameID();
 	}
 }
