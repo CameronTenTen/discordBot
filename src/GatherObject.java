@@ -559,7 +559,7 @@ public class GatherObject
 		return Collections.unmodifiableList(this.runningGames);
 	}
 
-	/**Helper function for ending a game by resetting the appropriate server object variables, removing the game from the list of running games, and clearing all subs for the game. 
+	/**Helper function for ending a game by resetting the appropriate server object variables, removing the game from the list of running games, clearing all subs for the game, and clearing team roles. 
 	 * @param game the game that is ending
 	 */
 	public void setGameEnded(GatherGame game)
@@ -572,6 +572,10 @@ public class GatherObject
 		}
 		runningGames.remove(game);
 		substitutions.clearGame(game);
+		
+		//remove the team role from the players
+		this.removePlayerTeamRoles(game);
+		this.deleteTeamRoles(game);
 	}
 
 	/**Helper function for doing all the things necessary at the end of a game. 
@@ -614,9 +618,6 @@ public class GatherObject
 		{
 			setGameEnded(game);
 		}
-		//remove the team role from the players
-		this.removePlayerTeamRoles(game);
-		this.deleteTeamRoles(game);
 		//do voice channel stuff
 		movePlayersOutOfTeamRooms(5);
 		//check if there is enough people in queue to start another game (after waiting for the channels to settle)
