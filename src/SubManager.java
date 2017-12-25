@@ -253,6 +253,7 @@ public class SubManager {
 	 */
 	public boolean removeSubVotes(PlayerObject playerVotedFor)
 	{
+		if(playerVotedFor==null) return false;
 		for(SubVoteObject obj : subVotes)
 		{
 			if(obj.playerToBeSubbed().equals(playerVotedFor))
@@ -262,6 +263,34 @@ public class SubManager {
 			}
 		}
 		return false;
+	}
+
+	/**Wrapper function for removing all the sub votes for a player from discord user object. 
+	 * @param playerVotedFor the player to remove sub votes for
+	 * @return true if votes were removed, false if the player wasn't found
+	 */
+	public boolean removeSubVotes(IUser playerVotedFor)
+	{
+		return removeSubVotes(DiscordBot.players.getObject(playerVotedFor));
+	}
+	
+	/**Wrapper function for removing all sub votes for a game. 
+	 * @param game the game to clear sub votes for
+	 * @return true if any votes were removed, false otherwise
+	 */
+	public boolean removeSubVotes(GatherGame game)
+	{
+		boolean returnVal = false;
+		if(game==null) return returnVal;
+		for(SubVoteObject obj : subVotes)
+		{
+			if(obj.getGame().equals(game))
+			{
+				subVotes.remove(obj);
+				returnVal = true;
+			}
+		}
+		return returnVal;
 	}
 	
 	/**Getter for the SubVoteObject of a player. 
