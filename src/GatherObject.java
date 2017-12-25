@@ -535,7 +535,7 @@ public class GatherObject
 
 	/**Get a gather game object using the id of the game. 
 	 * @param id the id to search for
-	 * @return the first GatherGame object found in the runningGames list that has the id
+	 * @return the first GatherGame object found in the runningGames list that has the id, null if none found
 	 * @see #GatherGame
 	 */
 	public GatherGame getRunningGame(int id)
