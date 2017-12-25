@@ -559,6 +559,15 @@ public class GatherObject
 		return Collections.unmodifiableList(this.runningGames);
 	}
 
+	/**Function for checking if the this GatherObject has any currently running games. 
+	 * @return false if the size of the runningGames list is less than or equal to 0, true otherwise
+	 */
+	public boolean hasRunningGames()
+	{
+		if(this.getRunningGames().size()<=0) return false;
+		return true;
+	}
+
 	/**Helper function for ending a game by resetting the appropriate server object variables, removing the game from the list of running games, clearing all subs for the game, and clearing team roles. 
 	 * @param game the game that is ending
 	 */
