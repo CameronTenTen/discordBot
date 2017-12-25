@@ -197,12 +197,16 @@ public class GatherGame
 			bluePlayerList.set(blueIndex, player);
 			blueDeserted.add(playerBeingReplaced);
 			blueSubbedIn.add(player);
+			DiscordBot.removeRole(playerBeingReplaced.getDiscordUserInfo(), this.getBlueRole());
+			DiscordBot.addRole(player.getDiscordUserInfo(), this.getBlueRole());
 		}
 		else if(redIndex>=0 && redIndex<redPlayerList.size())
 		{
 			redPlayerList.set(redIndex, player);
 			redDeserted.add(playerBeingReplaced);
 			redSubbedIn.add(player);
+			DiscordBot.removeRole(playerBeingReplaced.getDiscordUserInfo(), this.getRedRole());
+			DiscordBot.addRole(player.getDiscordUserInfo(), this.getRedRole());
 		}
 		//seems that the shuffle method (setting team arrays as subLists of the player array)
 		//makes it so that replacing the player in the team list makes the replacement in the players one too
