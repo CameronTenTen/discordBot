@@ -47,6 +47,15 @@ public class SubManager {
 		return !subRequests.isEmpty();
 	}
 	
+	/**Checks if there is a sub request for a specific game
+	 * @return true if subRequests contains a request with the game id, false otherwise
+	 */
+	public boolean hasSubRequest(int gameId)
+	{
+		if(getFirstSubRequest(gameId) != null) return true;
+		else return false;
+	}
+	
 	/**Checks if there is a sub request for a specific player
 	 * @param playerToSub the player to check
 	 * @return true if they are found in the list of sub requests, false otherwise
