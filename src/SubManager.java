@@ -118,11 +118,21 @@ public class SubManager {
 	 */
 	public boolean removeSubRequest(PlayerObject player)
 	{
+		if(player==null) return false;
 		for(SubRequestObject req : subRequests)
 		{
 			if(req.playerToBeReplaced.equals(player)) return subRequests.remove(req);
 		}
 		return false;
+	}
+	
+	/**Wrapper function for removing a sub request from a discord user object. 
+	 * @param user the user that no longer needs to be subbed
+	 * @return true if they were removed, false otherwise
+	 */
+	public boolean removeSubRequest(IUser user)
+	{
+		return removeSubRequest(DiscordBot.players.getObject(user));
 	}
 	
 	/**Wrapper function for removing a sub request using a SubRequestObject. 
