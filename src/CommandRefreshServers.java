@@ -17,7 +17,7 @@ public class CommandRefreshServers implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandRefreshServers
 	 */
-	@Command(aliases = {"!refreshservers"}, description = "Refresh the player list in currently running games, useful in case of a server disconnect")
+	@Command(aliases = {"!refreshservers", "!refreshplayers", "!refresh", "!refreshgames", "!refreshteams"}, description = "Refresh the player list in currently running games, useful in case of a server disconnect")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
@@ -29,9 +29,15 @@ public class CommandRefreshServers implements CommandExecutor
 			return;
 		}
 		List<GatherGame> games = gather.getRunningGames();
+		if(games.isEmpty())
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There is currently **no running games** to refresh");
+			return;
+		}
 		for(GatherGame game : games)
 		{
 			game.updateTeamsOnServer();
+			DiscordBot.sendMessage(gather.getCommandChannel(), "**Sent current teams** to "+game.getServerIp()+":"+game.getServerPort());
 		}
 	}
 }
