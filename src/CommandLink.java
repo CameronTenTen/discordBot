@@ -121,7 +121,12 @@ public class CommandLink implements CommandExecutor
 				//player token is good
 				int result = DiscordBot.database.linkAccounts(username, message.getAuthor().getLongID());
 				Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
-				if(result>=0) DiscordBot.reply(message,"account successfully linked");
+				if(result>=0)
+				{
+					DiscordBot.reply(message,"account successfully linked");
+					//check if the player needs to be updated on any servers
+					DiscordBot.playerChanged(message.getAuthor());
+				}
 				else DiscordBot.reply(message,"an error occured linking your accounts, this message should not be displayed, but if it is you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
 			}
 			else

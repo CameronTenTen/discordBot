@@ -591,4 +591,22 @@ public class DiscordBot {
 		else return doLinkRequest(kagname, user);
 	}
 	
+	public static GatherGame getPlayersGame(IUser user) {
+		for(GatherObject gather : DiscordBot.gatherObjects)
+		{
+			GatherGame game = gather.getPlayersGame(user);
+			if(game != null) return game;
+		}
+		return null;
+	}
+
+	public static void playerChanged(IUser user) {
+		GatherGame game = DiscordBot.getPlayersGame(user);
+		if(game != null)
+		{
+			game.updateTeamsOnServer();
+			DiscordBot.sendMessage(DiscordBot.getGatherObjectForGame(game).getCommandChannel(), "the **link details** of "+user.mention()+" have been **updated** for game #"+game.getGameID());
+		}
+	}
+	
 }
