@@ -24,7 +24,7 @@ public class CommandAdd implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandAdd
 	 */
-	@Command(aliases = {"!add"}, description = "Add yourself to the queue")
+	@Command(aliases = {"!add","!join"}, description = "Add yourself to the queue")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());

@@ -14,7 +14,7 @@ public class CommandList implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandList
 	 */
-	@Command(aliases = {"!list"}, description = "Check the current player list")
+	@Command(aliases = {"!list", "!queue"}, description = "Check the current player list")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
