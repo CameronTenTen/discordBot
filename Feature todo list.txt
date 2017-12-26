@@ -1,21 +1,19 @@
-match id system and history tracking
-!rsub should accept arguments written as names instead of only mentions
 server !freeze vote command
-auto detection of kag server connection loss
 managed voice chat channels
-add voice chat role to allow @voicechat pings
-scramble teams vote
+remove !end and !start commands
+connect discord and server scramble teams votes
 !setgame/!startgame/!setteams/!creategame admin command to create a game with specified teams
 !givewin red/blue should do the right thing
+!freeze command has a timeout
+auto detection of kag server connection loss
 player bans
 proper multi guild support
 better exception handling for optional features such as queue role
-current players/games in member list
-current tickets in member list
 add a water map
 get player rank in !stats command
 better designed gamemode
-advanced statistics
+current tickets in member list
 better ingame user interface
 mmr based match making
-!freeze command has a timeout
+match history details and statistics
+advanced statistics
