@@ -126,6 +126,24 @@ public class SubManager {
 		return false;
 	}
 	
+	/**Wrapper function for removing all sub requests for a game. 
+	 * @param game the game to clear subs for
+	 * @return true if any requests were removed, false otherwise
+	 */
+	public boolean removeSubRequests(GatherGame game)
+	{
+		boolean returnVal = false;
+		if(game==null) return returnVal;
+		for(SubRequestObject req : subRequests)
+		{
+			if(req.game.equals(game))
+			{
+				if(subRequests.remove(req)) returnVal = true;
+			}
+		}
+		return returnVal;
+	}
+	
 	/**Wrapper function for removing a sub request from a discord user object. 
 	 * @param user the user that no longer needs to be subbed
 	 * @return true if they were removed, false otherwise
