@@ -28,17 +28,19 @@ public class GatherServer
 	
 	/**Establish the TCPR connection with this KAG server. 
 	 */
-	public void connect()
+	public boolean connect()
 	{
 		try {
 			serverCheckObject = new KagServerChecker(ip, port, rconPassword);
 			serverCheckObject.addListener(new RconListener());
 			rconThread = new Thread(serverCheckObject);
 			rconThread.start();
+			return true;
 		} catch (IOException e) {
 			Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
 			rconThread = null;
 			serverCheckObject = null;
+			return false;
 		}
 	}
 	
