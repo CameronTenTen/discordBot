@@ -97,7 +97,7 @@ public class CommandClearSubs implements CommandExecutor
 		}
 		if(!doneSomething)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "No sub requests or votes exist for game #"+gameId);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "**No sub requests or votes** exist for game #"+gameId);
 		}
 	}
 }
