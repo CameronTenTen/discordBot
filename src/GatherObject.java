@@ -820,8 +820,8 @@ public class GatherObject
 		}
 		else if(returnVal==1)
 		{
-			this.getServer(ip, port).say("Sub request added for player "+kagName+", use !sub in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for player " + this.fullUserString(playerToBeSubbed) + " use **!sub** to sub into their place! ("+this.getQueueRole().mention()+")");
+			this.getServer(ip, port).say("Sub request added for player "+kagName+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerToBeSubbed.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
 		}
 		return returnVal;
 	}
@@ -869,14 +869,14 @@ public class GatherObject
 			return returnVal;
 		case 0:
 			Discord4J.LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
-			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + this.fullUserString(playerVotedFor) + " use **!sub** to sub into their place! ("+this.getQueueRole().mention()+")");
+			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + this.fullUserString(playerVotedFor) + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
 			return returnVal;
 		}
 		//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
 		//dont put this in case statement because that could cause issues if we changed the number of votes required
-		this.getServer(ip, port).say("Vote to sub " + votedFor + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
-		DiscordBot.sendMessage(this.getCommandChannel(), "Vote to sub " + votedFor + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
+		this.getServer(ip, port).say("Vote to sub " + playerVotedFor.getMentionString() + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
+		DiscordBot.sendMessage(this.getCommandChannel(), "Vote to sub " + playerVotedFor.getMentionString() + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
 		return returnVal;
 	}
 

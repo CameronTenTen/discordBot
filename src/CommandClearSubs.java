@@ -55,7 +55,7 @@ public class CommandClearSubs implements CommandExecutor
 			if(!doneSomething)
 			{
 				//want some kind of feedback if nothing else happened
-				DiscordBot.sendMessage(gather.getCommandChannel(), "No sub request or votes found for that user!");
+				DiscordBot.sendMessage(gather.getCommandChannel(), "**No sub request or votes** found for that user!");
 			}
 			return;
 		}
@@ -68,7 +68,7 @@ public class CommandClearSubs implements CommandExecutor
 		}
 		catch (NumberFormatException e)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Error parsing supplied game id "+message.getAuthor().getDisplayName(message.getGuild()));
+			DiscordBot.sendMessage(gather.getCommandChannel(), "**Error** parsing supplied game id "+message.getAuthor().getDisplayName(message.getGuild()));
 			return;
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -81,18 +81,23 @@ public class CommandClearSubs implements CommandExecutor
 		GatherGame game = gather.getRunningGame(gameId);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "No game found with that id "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "**No game found** with that id "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 			return;
 		}
+		boolean doneSomething = false;
 		if(gather.substitutions.removeSubRequests(game))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub requests cleared for game #"+gameId);
-			return;
+			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub **requests cleared** for game #"+gameId);
+			doneSomething = true;
 		}
 		if(gather.substitutions.removeSubVotes(game))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub votes cleared for game #"+gameId);
-			return;
+			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub **votes cleared** for game #"+gameId);
+			doneSomething = true;
+		}
+		if(!doneSomething)
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "No sub requests or votes exist for game #"+gameId);
 		}
 	}
 }

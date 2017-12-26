@@ -49,7 +49,7 @@ public class CommandSub implements CommandExecutor
 			if(gather.substitutions.getNumSubVotesForPlayer(player)>0)
 			{
 				gather.substitutions.removeSubVotes(player);
-				DiscordBot.reply(message, "all current sub votes for you have been cleared!");
+				DiscordBot.reply(message, "all current sub votes for you have been **cleared**!");
 				return;
 			}
 			else
@@ -66,7 +66,7 @@ public class CommandSub implements CommandExecutor
 		}
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format or number "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "**Invalid** command format or number "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
 			return;
 		}
 		
@@ -74,6 +74,7 @@ public class CommandSub implements CommandExecutor
 		if(gather.getRunningGame(gameId)==null)
 		{
 			DiscordBot.sendMessage(gather.getCommandChannel(), "There is **no current game** with that id " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			return;
 		}
 		
 		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player, gameId);
