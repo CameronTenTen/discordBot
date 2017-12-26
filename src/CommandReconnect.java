@@ -27,7 +27,8 @@ public class CommandReconnect implements CommandExecutor
 			return;
 		
 		}
-		
+
+		DiscordBot.sendMessage(gather.getCommandChannel(), "Disconnecting from and reconnecting to all KAG servers associated with this channel");
 		gather.disconnectKAGServers();
 		gather.connectKAGServers();
 		return;
