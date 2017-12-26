@@ -132,16 +132,16 @@ public class SubManager {
 	 */
 	public boolean removeSubRequests(GatherGame game)
 	{
-		boolean returnVal = false;
-		if(game==null) return returnVal;
+		if(game==null) return false;
+		List<SubRequestObject> requests = new ArrayList<SubRequestObject>();
 		for(SubRequestObject req : subRequests)
 		{
 			if(req.game.equals(game))
 			{
-				if(subRequests.remove(req)) returnVal = true;
+				requests.add(req);
 			}
 		}
-		return returnVal;
+		return subRequests.removeAll(requests);
 	}
 	
 	/**Wrapper function for removing a sub request from a discord user object. 
@@ -305,17 +305,16 @@ public class SubManager {
 	 */
 	public boolean removeSubVotes(GatherGame game)
 	{
-		boolean returnVal = false;
-		if(game==null) return returnVal;
+		if(game==null) return false;
+		List<SubVoteObject> votes = new ArrayList<SubVoteObject>();
 		for(SubVoteObject obj : subVotes)
 		{
 			if(obj.getGame().equals(game))
 			{
-				subVotes.remove(obj);
-				returnVal = true;
+				votes.add(obj);
 			}
 		}
-		return returnVal;
+		return subVotes.removeAll(votes);
 	}
 	
 	/**Getter for the SubVoteObject of a player. 
