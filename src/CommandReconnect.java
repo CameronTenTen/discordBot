@@ -15,7 +15,7 @@ public class CommandReconnect implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandReconnect
 	 */
-	@Command(aliases = {"!reconnect"}, description = "Admin only - reconnect to the kag servers")
+	@Command(aliases = {"!reconnect", "!connect", "!conn", "!con"}, description = "Admin only - reconnect to the kag servers")
 	public void onCommand(IMessage message, String[] args)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
@@ -28,7 +28,6 @@ public class CommandReconnect implements CommandExecutor
 		
 		}
 
-		DiscordBot.sendMessage(gather.getCommandChannel(), "Disconnecting from and reconnecting to all KAG servers associated with this channel");
 		gather.disconnectKAGServers();
 		gather.connectKAGServers();
 		return;
