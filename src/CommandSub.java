@@ -29,6 +29,12 @@ public class CommandSub implements CommandExecutor
 			return;
 		}
 		
+		//check there is actually games running
+		if(!gather.hasRunningGames())
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There is currently **no games** running " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+		}
+		
 		//check there isnt already a sub request for the player trying to sub in
 		if(gather.substitutions.removeSubRequest(player))
 		{
@@ -53,17 +59,29 @@ public class CommandSub implements CommandExecutor
 			}
 		}
 		
-		if(!gather.substitutions.hasSubRequest())
+		int gameId = -1;
+		try
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			gameId = Integer.parseInt(args[0]);
+		}
+		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format or number "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
 			return;
 		}
 		
-		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player);
+		//check the game exists
+		if(gather.getRunningGame(gameId)==null)
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There is **no current game** with that id " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+		}
+		
+		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player, gameId);
 		
 		if(returnObj == null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no sub spaces** available for game #" + gameId + " " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+			return;
 		}
 		else
 		{
@@ -81,8 +99,8 @@ public class CommandSub implements CommandExecutor
 			{
 				teamString = "ERROR";
 			}
-			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into a game for "+returnObj.playerToBeReplaced.toString());
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " on **" + teamString + "** Team!");
+			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into game #"+returnObj.game.getGameID()+" for "+returnObj.playerToBeReplaced.toString());
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " in game #"+returnObj.game.getGameID()+" on **" + teamString + "** Team!");
 			gather.remFromQueue(message.getAuthor());
 		}
 		return;

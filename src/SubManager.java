@@ -163,13 +163,20 @@ public class SubManager {
 		return removeSubRequest(obj.playerToBeReplaced);
 	}
 	
-	/**Get the oldest open sub request
-	 * @return null if there are no sub request, otherwise the first request in the list.
+	/**Get the oldest open sub request for the specified game
+	 * @return null if no sub requests were found with the specified game id, otherwise the first request found in the list.
 	 */
-	private SubRequestObject getFirstSubRequest()
+	private SubRequestObject getFirstSubRequest(int gameId)
 	{
 		if(subRequests.isEmpty()) return null;
-		return subRequests.remove(0);
+		for(SubRequestObject req : subRequests)
+		{
+			if(req.game.getGameID()==gameId)
+			{
+				if(subRequests.remove(req)) return req;
+			}
+		}
+		return null;
 	}
 	
 	/**Make a substitution. Replaces the player in the game, removes the request, and returns a SubstitutionObject of the substitution. 
@@ -189,9 +196,9 @@ public class SubManager {
 	 * @param player the player that is subbing in
 	 * @return null if no subs needed, otherwise the SubstitutionObject describing the substitution that was made
 	 */
-	public SubstitutionObject subPlayerIntoGame(PlayerObject player)
+	public SubstitutionObject subPlayerIntoGame(PlayerObject player, int gameId)
 	{
-		SubRequestObject sub = getFirstSubRequest();
+		SubRequestObject sub = getFirstSubRequest(gameId);
 		if(sub == null) return null;
 		else return makeSub(sub, player);
 	}
