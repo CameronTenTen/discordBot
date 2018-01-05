@@ -19,7 +19,7 @@ import java.util.List;
  * CREATE TABLE playerGames (gameId INT UNSIGNED NOT NULL, kagName VARCHAR(20), team TINYINT, won BOOL, UNIQUE KEY (gameId, kagName));
  * <p>
  * export players table to csv using
- * SELECT *, 2000+(wins*10)-(losses*10) FROM orders WHERE foo = 'bar' INTO OUTFILE '/var/lib/mysql-files/players.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+ * SELECT *, 2000+(wins*10)-(losses*10) FROM players INTO OUTFILE '/var/lib/mysql-files/players.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
  * <p>
  * make copy of players table using
  * CREATE TABLE newtable LIKE players; 
