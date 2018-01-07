@@ -25,7 +25,7 @@ public class CommandLinkServer implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandLinkServer
 	 */
-	@Command(aliases = {"!linkserver"}, description = "Link your KAG account to your discord account by logging into a kag server")
+	@Command(aliases = {"!linkserver", "!serverlink"}, description = "Link your KAG account to your discord account by logging into a kag server")
 	public void onCommand(IMessage message, String[] args)
 	{
 		if(args.length<=0)
