@@ -14,7 +14,7 @@ public class CommandRem implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandRem
 	 */
-	@Command(aliases = {"!rem","!remove"}, description = "Remove yourself from the queue")
+	@Command(aliases = {"!rem","!remove","!leave"}, description = "Remove yourself from the queue")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
