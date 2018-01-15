@@ -883,13 +883,13 @@ public class GatherObject
 		case 0:
 			Discord4J.LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
 			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "A sub has been requested for player " + playerVotedFor.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
+			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerVotedFor.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
 			return returnVal;
 		}
 		//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
 		//dont put this in case statement because that could cause issues if we changed the number of votes required
 		this.getServer(ip, port).say("Vote to sub " + playerVotedFor.getKagName() + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
-		DiscordBot.sendMessage(this.getCommandChannel(), "Vote to sub " + playerVotedFor.getMentionString() + " has been counted for " + voting + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
+		DiscordBot.sendMessage(this.getCommandChannel(), "Vote to sub " + playerVotedFor.getMentionString() + " has been counted for " + playerVoting.toString() + " (" + returnVal +"/"+ this.substitutions.getSubVotesRequired() +")");
 		return returnVal;
 	}
 
