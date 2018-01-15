@@ -38,7 +38,7 @@ public class CommandSub implements CommandExecutor
 		//check there isnt already a sub request for the player trying to sub in
 		if(gather.substitutions.removeSubRequest(player))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **subbed back** into their game!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor()) + " has **subbed back** into their game!");
 			return;
 		}
 		
@@ -101,7 +101,7 @@ public class CommandSub implements CommandExecutor
 				teamString = "ERROR";
 			}
 			Discord4J.LOGGER.info(message.getAuthor().getDisplayName(message.getGuild())+" has subbed into game #"+returnObj.game.getGameID()+" for "+returnObj.playerToBeReplaced.toString());
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild()) + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " in game #"+returnObj.game.getGameID()+" on **" + teamString + "** Team!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), returnObj.playerSubbingIn.toString() + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " in game #"+returnObj.game.getGameID()+" on **" + teamString + "** Team!");
 			gather.remFromQueue(message.getAuthor());
 		}
 		return;
