@@ -790,8 +790,10 @@ public class GatherObject
 	 */
 	public void setBuildingTimeEnded(String ip, int port)
 	{
-		this.getRunningGame(ip, port).setStateInProgress();
-		DiscordBot.sendMessage(this.getCommandChannel(), "Building time ended on server");
+		GatherGame game = this.getRunningGame(ip, port);
+		if(game==null) return;
+		game.setStateInProgress();
+		DiscordBot.sendMessage(this.getCommandChannel(), "Building time ended for game #"+game.getGameID());
 	}
 
 	/**Function called when a start building time message is received from a gather KAG server. 
@@ -800,8 +802,10 @@ public class GatherObject
 	 */
 	public void setRoundStarted(String ip, int port)
 	{
-		this.getRunningGame(ip, port).setStateBuilding();
-		DiscordBot.sendMessage(this.getCommandChannel(), "Building time started on server");
+		GatherGame game = this.getRunningGame(ip, port);
+		if(game==null) return;
+		game.setStateBuilding();
+		DiscordBot.sendMessage(this.getCommandChannel(), "Building time started for game #"+game.getGameID());
 	}
 
 	/**Adds a sub request for a player from server info. 
