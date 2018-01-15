@@ -344,6 +344,7 @@ public class DiscordBot {
 	 */
 	public static void deleteRole(IRole role)
 	{
+		if(role==null) return;
 		RequestBuffer.request(() -> {
 			role.delete();
 		});
