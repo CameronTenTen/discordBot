@@ -44,7 +44,7 @@ public class GatherGame
 
 	private Set<PlayerObject> scrambleVotes;
 
-	private int scrambleVotesReq = 7;
+	private int scrambleVotesReq = 5;
 
 	public enum gameState
 	{
