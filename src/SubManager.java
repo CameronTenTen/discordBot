@@ -16,7 +16,7 @@ public class SubManager {
 	List<SubVoteObject> subVotes;
 	
 	//not possible for this to be less than 1 with current implementation (see add sub vote code)
-	private int subVotesRequired = 3;
+	private int subVotesRequired = 4;
 	
 	SubManager(GatherObject gatherObj)
 	{
