@@ -1,4 +1,3 @@
-server !freeze vote command
 managed voice chat channels
 remove !end and !start commands
 connect discord and server scramble teams votes
@@ -17,3 +16,7 @@ better ingame user interface
 mmr based match making
 match history details and statistics
 advanced statistics
+
+Technical Debt:
+Refactor GatherDB implementation(interface is fine) - lots of copy paste there
+Refactor !rsub so that the same code is run from both discord and server - other commands should be implemented in a way that they can be called elsewhere too
