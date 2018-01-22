@@ -447,6 +447,11 @@ public class GatherObject
 			DiscordBot.sendMessage(this.getCommandChannel(), "There is **no game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
 			return;
 		}
+		if(!game.getCurrState().equals(GatherGame.gameState.PREGAME))
+		{
+			DiscordBot.sendMessage(this.getCommandChannel(), "You cannot vote to scramble once the **game has started** "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			return;
+		}
 		int returnVal = game.addScrambleVote(player);
 		switch(returnVal)
 		{
