@@ -461,6 +461,8 @@ public class GatherObject
 			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 			Discord4J.LOGGER.info("Teams shuffled: "+game.blueMentionList().toString()+game.redMentionList().toString());
 			this.sortTeamRoomsAfterShuffle();
+			this.removePlayerTeamRoles(game);
+			this.addPlayersToTeamRoles(game);
 			return;
 		case -1:
 			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getNicknameForGuild(getGuild())+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
