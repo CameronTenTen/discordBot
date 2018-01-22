@@ -496,8 +496,10 @@ public class GatherObject
 
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
-		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting: ", true);
-		DiscordBot.sendMessage(getCommandChannel(), "http://125.63.63.59/joingame.html");
+		String passwordString = server.getServerPassword();
+		if(passwordString!=null && !passwordString.isEmpty()) passwordString = " with password "+passwordString;
+		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting on "+server.getServerName()+passwordString, true);
+		if(server.getServerLink()!=null && server.getServerLink()!="") DiscordBot.sendMessage(getCommandChannel(), server.getServerLink());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
