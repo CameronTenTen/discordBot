@@ -6,6 +6,7 @@ import sx.blah.discord.Discord4J;
  */
 public class GatherServer
 {
+	private String serverName;
 	private String ip;
 	private int port;
 	private String rconPassword;				//sv_rconpassword
@@ -102,6 +103,20 @@ public class GatherServer
 	public boolean equals(Object obj)
 	{
 		return ((GatherServer)obj).ip.equals(this.ip) && ((GatherServer)obj).port == this.port;
+	}
+
+	/**Getter for the server name string, only used by the bot for allowing players to differentiate servers. The value of this has no effect on the bot behavior. 
+	 * @return the server name string
+	 */
+	public String getServerName() {
+		return serverName;
+	}
+
+	/**Setter for the server name string, only used by the bot for allowing players to differentiate servers. The value of this has no effect on the bot behavior. 
+	 * @param serverName the new server name to use
+	 */
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
 	}
 
 	/**Getter for the server ip address. 
