@@ -76,7 +76,7 @@ public class CommandLink implements CommandExecutor
 		{
 			String token = args[1];
 			//parse the message in case they added extra bits or copied part of/the whole json
-			List<String> tokens = Arrays.asList(message.toString().split("[\" ]"));
+			List<String> tokens = Arrays.asList(message.toString().split("\\s|\""));
 			//use the longest sub string as the token
 			for(String str : tokens)
 			{
