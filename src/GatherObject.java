@@ -296,7 +296,7 @@ public class GatherObject
 	 */
 	public String fullUserString(IUser user)
 	{
-		return user.getDisplayName(getGuild()) + "(" + user.getName() + "#" + user.getDiscriminator() + ")";
+		return user.getDisplayName(getGuild()) + " (" + user.getName() + "#" + user.getDiscriminator() + ")";
 	}
 
 	/**Gets a string representing the specified Discord user. Formatted as DisplayName(Username#Discriminator).
