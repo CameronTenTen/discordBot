@@ -67,7 +67,8 @@ public class RconListener
 				String username = "";
 				try
 				{
-					id = Long.parseLong(args[1]);
+					String idString = args[1].trim();
+					id = Long.parseLong(idString);
 					username = args[2];
 					int returnVal = DiscordBot.doLinkRequest(username, id);
 					switch(returnVal)
