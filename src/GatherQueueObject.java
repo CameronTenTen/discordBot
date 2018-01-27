@@ -9,20 +9,20 @@ import java.util.Vector;
  */
 public class GatherQueueObject extends Vector<PlayerObject>
 {
-	private static int maxQueueSize = 10;
+	private int maxQueueSize = 10;
 	
 	/**
 	 * @return The maximum queue size
 	 */
-	public static int getMaxQueueSize() {
+	public int getMaxQueueSize() {
 		return maxQueueSize;
 	}
 
 	/**
 	 * @param The new max queue size
 	 */
-	public static void setMaxQueueSize(int maxQueueSize) {
-		GatherQueueObject.maxQueueSize = maxQueueSize;
+	public void setMaxQueueSize(int maxQueueSize) {
+		this.maxQueueSize = maxQueueSize;
 	}
 	
 	/** 

@@ -1211,7 +1211,7 @@ public class GatherObject
 	 */
 	public int getMaxQueueSize()
 	{
-		return GatherQueueObject.getMaxQueueSize();
+		return queue.getMaxQueueSize();
 	}
 
 	/**Setter for maximum queue size. 
@@ -1219,7 +1219,7 @@ public class GatherObject
 	 */
 	public void setMaxQueueSize(int size)
 	{
-		GatherQueueObject.setMaxQueueSize(size);
+		queue.setMaxQueueSize(size);
 	}
 
 	/**Function called when an updated ticket count is sent from a server. 
