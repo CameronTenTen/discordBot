@@ -171,6 +171,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandStart());
 		cmdHandler.registerCommand(new CommandClearSubs());
 		cmdHandler.registerCommand(new CommandSubs());
+		cmdHandler.registerCommand(new CommandForceSub());
 		cmdHandler.registerCommand(new CommandLink());
 		cmdHandler.registerCommand(new CommandLinkServer());
 		cmdHandler.registerCommand(new CommandLinkHelp());
