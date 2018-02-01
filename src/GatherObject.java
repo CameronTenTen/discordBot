@@ -676,43 +676,46 @@ public class GatherObject
 			Discord4J.LOGGER.warn("Scoreboard not set!");
 			return;
 		}
-		List<StatsObject> list = DiscordBot.database.getTopPlayers(20);
+		List<StatsObject> list = DiscordBot.database.getTopPlayers(30);
 		if(list == null)
 		{
 			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");
 			return;
 		}
-		String scoreboardString="**Scoreboard:**\n```  |      KAG name      |  Win % |Games| Score\n";
+		String scoreboardString="```md\n" + "# Scoreboard #" + "\n``````diff\n++|      KAG name      |Games|  Win % | Score\n";
 		int i=0;
 		for(StatsObject stats : list)
 		{
 			i++;
-			scoreboardString+=i;
-			if(i<10)scoreboardString+=" ";
-			scoreboardString+="|";
-			//centre the kagname in the column
-			if(stats.kagname.length()%2 != 0)
-			{
-				stats.kagname = stats.kagname + " ";
+			//ranking
+			if(i<10) scoreboardString += " ";
+			scoreboardString += i;
+			scoreboardString += "|";
+			//centred kagname
+			String centredName = "";
+			for(int j = 0; j < Math.floor((20 - stats.kagname.length()) / 2); j++) {
+				centredName += " ";
 			}
-			for(int j = stats.kagname.length()/2; j < 10; j++)
-			{
-				scoreboardString+=" ";
+			centredName += stats.kagname;
+			while(centredName.length() < 20) {
+				centredName += " ";
 			}
-			scoreboardString=scoreboardString+stats.kagname;
-			for(int j = stats.kagname.length()/2; j < 10; j++)
-			{
-				scoreboardString+=" ";
-			}
-			scoreboardString+="|";
-			scoreboardString=scoreboardString+" "+stats.winRateString()+"%";
-			if(stats.winRateString().length()<6)scoreboardString+=" ";
-			scoreboardString=scoreboardString+"| "+stats.gamesplayed;
-			if(stats.gamesplayed<100)scoreboardString+=" ";
-			scoreboardString=scoreboardString+" | "+stats.mmr;
-			scoreboardString=scoreboardString+"\n";
+			scoreboardString += centredName+"| ";
+			//games played
+			if(stats.gamesplayed<10) scoreboardString += "  ";
+			else if(stats.gamesplayed<100) scoreboardString += " ";
+			scoreboardString += stats.gamesplayed+" |";
+			//win percentage
+			if(stats.winRateString().length()==5) scoreboardString += " ";
+			else if(stats.winRateString().length()==4) scoreboardString += "  ";
+			scoreboardString += stats.winRateString()+"% | ";
+			//mmr
+			if(stats.getMmrInteger()<10) scoreboardString += "   ";
+			else if(stats.getMmrInteger()<100) scoreboardString += "  ";
+			else if(stats.getMmrInteger()<1000) scoreboardString += " ";
+			scoreboardString += stats.getMmrInteger()+"\n";
 		}
-		scoreboardString+="```";
+		scoreboardString+="\n           Total games played: " +DiscordBot.database.getGamesPlayed("+numgames+")+ "```";
 		if(scoreboardString.length()>2000) Discord4J.LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());
 		this.getScoreboardMessage().edit(scoreboardString);
 	}
