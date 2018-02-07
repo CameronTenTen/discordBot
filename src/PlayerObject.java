@@ -41,7 +41,7 @@ public class PlayerObject
 	 */
 	PlayerObject(long id, String kagName)
 	{
-		this(DiscordBot.client.fetchUser(id), kagName);
+		this(DiscordBot.fetchUser(id), kagName);
 	}
 	
 	@Override
