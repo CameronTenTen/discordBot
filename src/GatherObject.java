@@ -444,7 +444,7 @@ public class GatherObject
 		GatherGame game = this.getPlayersGame(player);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(this.getCommandChannel(), "There is **no game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "You must be **in a game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
 			return;
 		}
 		if(!game.getCurrState().equals(GatherGame.gameState.PREGAME))
