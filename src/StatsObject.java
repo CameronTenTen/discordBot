@@ -64,7 +64,7 @@ public class StatsObject {
 	@Override
 	public String toString()
 	{
-		return "Games Played: "+gamesplayed+" Win Rate: "+this.winRateString()+"% Wins: "+wins+" Losses: "+losses+" Desertions: "+desertions+" Substitutions: "+substitutions+" Desertion losses: "+desertionlosses+" Substitution wins: "+substitutionwins+" Rank: "+mmr;
+		return "Games Played: "+gamesplayed+" Win Rate: "+this.winRateString()+"% Wins: "+wins+" Losses: "+losses+" Desertions: "+desertions+" Substitutions: "+substitutions+" Desertion losses: "+desertionlosses+" Substitution wins: "+substitutionwins+" Rank: "+this.getMmrInteger();
 	}
 
 	/**Getter for new MMR calculations
