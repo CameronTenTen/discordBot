@@ -71,7 +71,7 @@ public class StatsObject {
 	 * @return MMR as double
 	 */
 	public double getMmrDouble()
-    {
+	{
 		if (mmr.getMmr() == -1) {
 			return calculateMmr(wins - ((desertions + 0.0) / 2), gamesplayed);
 		}
@@ -82,7 +82,7 @@ public class StatsObject {
 	 * @return MMR as integer
 	 */
 	public int getMmrInteger()
-    {
+	{
 		if (mmr.getMmr() == -1) {
 			return (int) (getMmrDouble() * 10000);
 		}
@@ -104,7 +104,7 @@ public class StatsObject {
 		double z;
 		double phat;
         
-        z = 1.96;
+		z = 1.96;
 		phat = 1 * pos / n;
 
 		return (phat + z*z/(2*n) - z * Math.sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n);

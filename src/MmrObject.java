@@ -5,26 +5,26 @@
  */
 public class MmrObject
 {
-    private double mmr;
+	private double mmr;
 
-    MmrObject()
-    {
-        mmr = -1;
-    }
-    
-    /**Getter for MMR as a double
-     * @return MMR as a double
-     */
-    public double getMmr()
-    {
-        return mmr;
-    }
+	MmrObject()
+	{
+		mmr = -1;
+	}
 
-    /**Setter for MMR
-     * @param mmr the MMR to set
-     */
-    public void setmmr(Double mmr)
-    {
-        this.mmr = mmr;
-    }
+	/**Getter for MMR as a double
+	 * @return MMR as a double
+	 */
+	public double getMmr()
+	{
+		return mmr;
+	}
+
+	/**Setter for MMR
+	 * @param mmr the MMR to set
+	 */
+	public void setmmr(Double mmr)
+	{
+		this.mmr = mmr;
+	}
 }
