@@ -207,6 +207,11 @@ public class DiscordBot {
 		
 		players = new PlayerObjectManager();
 		
+		if(args.length<1)
+		{
+			System.err.println("ERROR: no command line arguments detected - you must specify the bot token as an argument");
+			return;
+		}
 		bot.startBot(args[0]);
 		
 		linkRequests = new ArrayList<PlayerObject>();
