@@ -181,6 +181,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandScramble());
 		cmdHandler.registerCommand(new CommandStatus());
 		cmdHandler.registerCommand(new CommandPingMe());
+		cmdHandler.registerCommand(new CommandRandomTeams());
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers
@@ -440,6 +441,16 @@ public class DiscordBot {
 		} catch (MissingPermissionsException e) {
 			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());
 		}
+	}
+
+	/**Wrapper for fetching a Discord user without getting rate limit exceptions. Used for fetching multiple users at once.
+	 * @param id of user to be fetched
+	 * @return Discord user
+	 */
+	public static IUser fetchUser(long id) {
+		return RequestBuffer.request(() -> {
+			return client.fetchUser(id);
+		}).get();
 	}
 
 	/**Does the things needed when a player disconnects. As of writing this it only removes them from any queue they might be in. Called by the PresenceEventListener when a user changes presence state. 
