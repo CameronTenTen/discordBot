@@ -36,8 +36,8 @@ public class CommandForceSub implements CommandExecutor
 		{
 			if(1==gather.substitutions.addSubRequest(user, gather.getPlayersGame(user)))
 			{
-				Discord4J.LOGGER.info("sub requested for: "+message.getAuthor().getDisplayName(message.getGuild()));
-				DiscordBot.sendMessage(gather.getCommandChannel(), "**Sub request** added for " + message.getAuthor().mention() + " use **!sub "+gather.getPlayersGame(message.getAuthor()).getGameID()+"** to sub into their place! ("+gather.getQueueRole().mention()+")");
+				Discord4J.LOGGER.info("sub requested for: "+user.getDisplayName(message.getGuild()));
+				DiscordBot.sendMessage(gather.getCommandChannel(), "**Sub request** added for " + user.mention() + " use **!sub "+gather.getPlayersGame(user).getGameID()+"** to sub into their place! ("+gather.getQueueRole().mention()+")");
 				return;
 			}
 		}
