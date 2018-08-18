@@ -16,6 +16,7 @@ import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -23,6 +24,7 @@ import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
@@ -417,7 +419,8 @@ public class DiscordBot {
 	 */
 	public static void setPlayingText(String newText) {
 		RequestBuffer.request(() -> {
-			client.changePlayingText(newText);
+			//TODO: make this not reset online and playing - I don't know if there is a way to get the current status/activity type
+			client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, newText);
 		});
 	}
 

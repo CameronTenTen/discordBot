@@ -7,6 +7,6 @@
 	<classpathentry kind="lib" path="lib/com.mysql.jdbc_5.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/sdcf4j-core-1.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/sdcf4j-discord4j-1.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/Discord4j-2.9.3-shaded.jar"/>
+	<classpathentry kind="lib" path="lib/Discord4J-2.10.1-shaded.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
