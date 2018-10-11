@@ -82,11 +82,58 @@ public class GatherGame
 	}
 
 	/**Checks if the bot is connected with the server that this game is being played on. 
-	 * @return
+	 * @return false if we have any indication the server is not connected, true otherwise
+	 * @see GatherServer#isConnected()
 	 */
 	public boolean isConnectedToServer()
 	{
 		return server.isConnected();
+	}
+	
+	/** Helper function for generating the command that should be sent to the kag server in order to specify the blue team
+	 * @return a string that the kag server will be able to process in order to set the blue team players
+	 */
+	private String generateBlueTeamMsg() {
+		String msg = "";
+		if(!bluePlayerList.isEmpty())
+		{
+			msg+="string[] blue={'";
+			for(PlayerObject p : bluePlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('blueTeam',blue);";
+		}
+		else
+		{
+			msg="string[] blue={}; getRules().set('blueTeam',blue);";
+		}
+		return msg;
+	}
+	
+	/** Helper function for generating the command that should be sent to the kag server in order to specify the red team
+	 * @return a string that the kag server will be able to process in order to set the red team players
+	 */
+	private String generateRedTeamMsg() {
+		String msg="";
+		if(!redPlayerList.isEmpty())
+		{
+			msg+="string[] red={'";
+			for(PlayerObject p : redPlayerList)
+			{
+				msg+=p.getKagName();
+				msg+="', '";
+			}
+			msg=msg.substring(0, msg.length()-3);
+			msg+="}; getRules().set('redTeam',red);";
+		}
+		else
+		{
+			msg="string[] red={}; getRules().set('redTeam',red);";
+		}
+		return msg;
 	}
 
 	/**Helper function for sending the teams to the KAG server when a game is created
@@ -97,43 +144,23 @@ public class GatherGame
 		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//getRules().set_bool('teamsSet',true);
-		String msg = "";
-		if(!bluePlayerList.isEmpty())
-		{
-			msg+="string[] blue={'";
-			for(PlayerObject p : bluePlayerList)
-			{
-				msg+=p.getKagName();
-				msg+="', '";
-			}
-			msg=msg.substring(0, msg.length()-3);
-			msg+="}; getRules().set('blueTeam',blue);";
-		}
-		else
-		{
-			msg="string[] blue={}; getRules().set('blueTeam',blue);";
-		}
-		server.sendMessage(msg);
+		server.sendMessage(this.generateBlueTeamMsg());
+		server.sendMessage(this.generateRedTeamMsg());
+		server.sendMessage("getRules().set_bool('teamsSet',true);");
+	}
 
-		msg="";
-		if(!redPlayerList.isEmpty())
-		{
-			msg+="string[] red={'";
-			for(PlayerObject p : redPlayerList)
-			{
-				msg+=p.getKagName();
-				msg+="', '";
-			}
-			msg=msg.substring(0, msg.length()-3);
-			msg+="}; getRules().set('redTeam',red);";
-		}
-		else
-		{
-			msg="string[] red={}; getRules().set('redTeam',red);";
-		}
-		server.sendMessage(msg);
-		msg="getRules().set_bool('teamsSet',true);";
-		server.sendMessage(msg);
+	/**Helper function for updating the teams on the KAG server when the teams have been scrambled (forces a check of all players teams). 
+	 */
+	public void sendScrambledTeamsToServer()
+	{
+		//update the teams for the kag server by doing these commands
+		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
+		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
+		//"getRules().set_bool('teamsUpdated',true);"
+		server.sendMessage(this.generateBlueTeamMsg());
+		server.sendMessage(this.generateRedTeamMsg());
+		server.sendMessage("getRules().set_bool('teamsScrambled',true);");
+
 	}
 
 	/**Helper function for updating the teams on the KAG server when the teams are changed or for any other reason. 
@@ -144,43 +171,9 @@ public class GatherGame
 		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//"getRules().set_bool('teamsUpdated',true);"
-		String msg = "";
-		if(!bluePlayerList.isEmpty())
-		{
-			msg+="string[] blue={'";
-			for(PlayerObject p : bluePlayerList)
-			{
-				msg+=p.getKagName();
-				msg+="', '";
-			}
-			msg=msg.substring(0, msg.length()-3);
-			msg+="}; getRules().set('blueTeam',blue);";
-		}
-		else
-		{
-			msg="string[] blue={}; getRules().set('blueTeam',blue);";
-		}
-		server.sendMessage(msg);
-
-		msg="";
-		if(!redPlayerList.isEmpty())
-		{
-			msg+="string[] red={'";
-			for(PlayerObject p : redPlayerList)
-			{
-				msg+=p.getKagName();
-				msg+="', '";
-			}
-			msg=msg.substring(0, msg.length()-3);
-			msg+="}; getRules().set('redTeam',red);";
-		}
-		else
-		{
-			msg="string[] red={}; getRules().set('redTeam',red);";
-		}
-		server.sendMessage(msg);
-		msg="getRules().set_bool('teamsUpdated',true);";
-		server.sendMessage(msg);
+		server.sendMessage(this.generateBlueTeamMsg());
+		server.sendMessage(this.generateRedTeamMsg());
+		server.sendMessage("getRules().set_bool('teamsUpdated',true);");
 
 	}
 
@@ -360,7 +353,7 @@ public class GatherGame
 		if(this.scrambleVotes.size()>=this.scrambleVotesReq)
 		{
 			this.shuffleTeams();
-			this.updateTeamsOnServer();
+			this.sendScrambledTeamsToServer();
 			this.scrambleVotes.clear();
 			return 0;
 		}
