@@ -83,7 +83,7 @@ public class CommandRsub implements CommandExecutor
 				return;
 			}
 			//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Vote to sub " + mentions.get(0) + " has been **counted** for " + DiscordBot.players.getObject(message.getAuthor()).toString() + " (" + returnVal +"/"+ gather.substitutions.getSubVotesRequired() +")");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + " your sub vote has been **counted** (" + returnVal +"/"+ gather.substitutions.getSubVotesRequired() +") "+mentions.get(0) + " can clear the vote using **!sub**");
 			return;
 		}
 	}
