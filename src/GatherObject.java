@@ -1149,14 +1149,10 @@ public class GatherObject
 	}
 
 	private void removePlayerTeamRoles(GatherGame game) {
-		List<PlayerObject> players = game.getBluePlayerList();
+		List<PlayerObject> players = game.getPlayerList();
 		for(PlayerObject player : players)
 		{
 			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getBlueRole());
-		}
-		players = game.getRedPlayerList();
-		for(PlayerObject player : players)
-		{
 			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getRedRole());
 		}
 	}
