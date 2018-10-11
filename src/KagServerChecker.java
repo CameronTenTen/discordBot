@@ -161,7 +161,6 @@ public class KagServerChecker implements Runnable
 				if(in.ready())
 				{
 					lastMsg = in.readLine();
-					System.out.println("msg rd: "+lastMsg);
 					if(lastMsg == null || lastMsg.endsWith("server shutting down."))
 					{
 						Discord4J.LOGGER.info("connection loss detected: "+lastMsg);
