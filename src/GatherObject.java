@@ -465,10 +465,10 @@ public class GatherObject
 			this.addPlayersToTeamRoles(game);
 			return;
 		case -1:
-			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getNicknameForGuild(getGuild())+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
+			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getDisplayName(getGuild())+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
 			return;
 		}
-		DiscordBot.sendMessage(getCommandChannel(), "**Vote to scramble** teams has been counted for "+player.getDiscordUserInfo().getNicknameForGuild(getGuild())+" ("+returnVal+"/"+game.getScrambleVotesReq()+")");
+		DiscordBot.sendMessage(getCommandChannel(), "**Vote to scramble** teams has been counted for "+player.getDiscordUserInfo().getDisplayName(getGuild())+" ("+returnVal+"/"+game.getScrambleVotesReq()+")");
 	}
 
 	/**Function for doing everything needed to start a gather game. 

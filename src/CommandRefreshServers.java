@@ -25,7 +25,7 @@ public class CommandRefreshServers implements CommandExecutor
 
 		if(!gather.isAdmin(message.getAuthor()))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getNicknameForGuild(message.getGuild())+"!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 			return;
 		}
 		List<GatherGame> games = gather.getRunningGames();

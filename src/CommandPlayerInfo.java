@@ -82,7 +82,7 @@ public class CommandPlayerInfo implements CommandExecutor
 		IGuild guild = message.getGuild();
 		if(guild != null)
 		{
-			DiscordBot.sendMessage(message.getChannel(), "**KAG username:** "+kagname+" **Discord ID:** "+user.getLongID()+" **Nick:** "+user.getNicknameForGuild(guild)+" **Name#Discriminator:** "+user.getName()+"#"+user.getDiscriminator());
+			DiscordBot.sendMessage(message.getChannel(), "**KAG username:** "+kagname+" **Discord ID:** "+user.getLongID()+" **Nick:** "+user.getDisplayName(guild)+" **Name#Discriminator:** "+user.getName()+"#"+user.getDiscriminator());
 		}
 		else
 		{
