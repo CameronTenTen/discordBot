@@ -34,15 +34,23 @@ public class CommandGiveWin implements CommandExecutor
 		try
 		{
 			matchId = Integer.parseInt(args[0]);
+		}
+		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
+		{
+			e.printStackTrace();
+			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured parsing the game id, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			return;
+		}
+		try
+		{
 			team = Integer.parseInt(args[1]);
 		}
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured setting win, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured parsing the team number, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
 			return;
 		}
-		
 		
 		if(!gather.endGame(matchId, team))
 		{

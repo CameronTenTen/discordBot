@@ -655,6 +655,7 @@ public class GatherObject
 		if(game.getServer() == null)
 		{
 			//THIS IS A WORKAROUND FOR WHEN WE HAVE NO SERVER LIST AND THERE IS ONLY 1 GAME AT A TIME
+			//TODO: fix this? I don't remember why this is done.
 			Discord4J.LOGGER.warn("Server is null when giving win, clearing running games (if there is more than 1 running game this is a problem)");
 			clearGames();
 		}
