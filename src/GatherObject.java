@@ -436,6 +436,32 @@ public class GatherObject
 		DiscordBot.setChannelCaption(this.getGuild(), this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelString);
 	}
 
+	/**Function for adding a vote to cancel the game the player is currently in. 
+	 * @param player the player making the vote
+	 */
+	public void addCancelVote(PlayerObject player)
+	{
+		GatherGame game = this.getPlayersGame(player);
+		if(game==null)
+		{
+			DiscordBot.sendMessage(this.getCommandChannel(), "You are not **in a game** to cancel "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			return;
+		}
+		int returnVal = game.addCancelVote(player);
+		switch(returnVal)
+		{
+		case 0:
+			DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has been canceled!", true);
+			Discord4J.LOGGER.info("Game cancelled: "+game.getGameID());
+			this.endGame(game, -2);
+			return;
+		case -1:
+			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to cancel the game "+player.getDiscordUserInfo().getDisplayName(getGuild())+"("+game.getNumCancelVotes()+"/"+game.getCancelVotesReq()+")");
+			return;
+		}
+		DiscordBot.sendMessage(getCommandChannel(), "**Vote to cancel** game has been counted for "+player.getDiscordUserInfo().getDisplayName(getGuild())+" ("+returnVal+"/"+game.getCancelVotesReq()+")");
+	}
+
 	/**Function for adding a vote to scramble the teams for the game the player is currently in. 
 	 * @param player the player making the vote
 	 */

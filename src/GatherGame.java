@@ -43,8 +43,10 @@ public class GatherGame
 	private Set<PlayerObject> blueSubbedIn;
 
 	private Set<PlayerObject> scrambleVotes;
+	private Set<PlayerObject> cancelVotes;
 
 	private int scrambleVotesReq = 5;
+	private int cancelVotesReq = 7;
 
 	public enum gameState
 	{
@@ -79,6 +81,7 @@ public class GatherGame
 		this.blueSubbedIn = new HashSet<PlayerObject>();
 
 		this.scrambleVotes = new HashSet<PlayerObject>();
+		this.cancelVotes = new HashSet<PlayerObject>();
 	}
 
 	/**Checks if the bot is connected with the server that this game is being played on. 
@@ -360,6 +363,24 @@ public class GatherGame
 		return this.scrambleVotes.size();
 	}
 
+	/**Add a vote to cancel game. 
+	 * @param player the player voting to cancel
+	 * @return -1 if the player has already voted, 0 if enough votes were counted to cancel the game, otherwise the current number of cancel votes counted
+	 */
+	public int addCancelVote(PlayerObject player)
+	{
+		if(!this.cancelVotes.add(player))
+		{
+			//player already voted
+			return -1;
+		}
+		if(this.cancelVotes.size()>=this.cancelVotesReq)
+		{
+			return 0;
+		}
+		return this.cancelVotes.size();
+	}
+
 	/**Helper function for getting a list of mention strings of each player on blue team. 
 	 * @return a list of mention strings of blue team
 	 */
@@ -495,6 +516,27 @@ public class GatherGame
 	 */
 	public int getNumScrambleVotes() {
 		return this.scrambleVotes.size();
+	}
+
+	/**Getter for the number of votes required to cancel the game.
+	 * @return the number of votes required to cancel the game
+	 */
+	public int getCancelVotesReq() {
+		return cancelVotesReq;
+	}
+
+	/**Setter for the number of votes required to cancel the teams. 
+	 * @param scrambleVotesReq the new number of votes required to cancel the game
+	 */
+	public void setCancelVotesReq(int scrambleVotesReq) {
+		this.cancelVotesReq = scrambleVotesReq;
+	}
+
+	/**Getter for the current number of cancel votes. 
+	 * @return the current number of votes to cancel the game
+	 */
+	public int getNumCancelVotes() {
+		return this.cancelVotes.size();
 	}
 
 	/**Getter for the current round number. 
