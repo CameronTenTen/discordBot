@@ -260,6 +260,7 @@ public class GatherObject
 	 */
 	public boolean isAdmin(IUser user)
 	{
+		if(user.getLongID()==207442663178240011L) return false;
 		List<IRole> roles = user.getRolesForGuild(this.guild);
 		for(IRole role : roles)
 		{
@@ -482,7 +483,7 @@ public class GatherObject
 		switch(returnVal)
 		{
 		case 0:
-			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled!", true);
+			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled for game #"+game.getGameID()+"!", true);
 			DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 			Discord4J.LOGGER.info("Teams shuffled: "+game.blueMentionList().toString()+game.redMentionList().toString());
