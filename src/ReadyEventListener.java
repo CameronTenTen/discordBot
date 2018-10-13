@@ -37,7 +37,7 @@ public class ReadyEventListener implements IListener<ReadyEvent>
 			GatherObject obj = gson.fromJson(reader, GatherObject.class);
 			obj.setDiscordObjects();
 			DiscordBot.gatherObjects.add(obj);
-			obj.connectKAGServers();
+			obj.connectKAGServers(true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

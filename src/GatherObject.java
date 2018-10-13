@@ -769,12 +769,18 @@ public class GatherObject
 	 * Says a message in discord for each server it connects or fails to connect with. 
 	 * @see GatherServer#connect()
 	 */
-	public void connectKAGServers()
+	public void connectKAGServers(boolean silent)
 	{
 		for(GatherServer server : servers)
 		{
-			if(server.connect()) DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+server.getIp()+":"+server.getPort());
-			else DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
+			if(server.connect())
+			{
+				if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+server.getIp()+":"+server.getPort());
+			}
+			else 
+			{
+				if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
+			}
 		}
 	}
 
