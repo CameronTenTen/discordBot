@@ -784,16 +784,19 @@ public class GatherObject
 	 */
 	public void disconnectKAGServers()
 	{
+		boolean connectedServers = false;
 		for(GatherServer server : servers)
 		{
 			if(server.isConnected())
 			{
 				server.disconnect();
 				DiscordBot.sendMessage(this.getCommandChannel(), "Disconnected from "+server.getIp()+":"+server.getPort());
+				connectedServers=true;
 			}
 			//disconnect anyway in case isConnected is wrong, but don't talk about it
 			server.disconnect();
 		}
+		if(!connectedServers) DiscordBot.sendMessage(this.getCommandChannel(), "No connected servers");
 	}
 
 	/**Function called when an end building time message is received from a gather KAG server. 
