@@ -6,6 +6,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import sx.blah.discord.Discord4J;
+
 /**Object for managing the database connection. Provides various useful functions for database interaction. 
  * @author cameron
  * <p>
@@ -115,23 +117,22 @@ public class GatherDB {
 		}
 	}
 	
-	/**Takes a Discord id and returns the corresponding KAG username that is stored in the database. Returns a blank string if they were not found. 
-	 * @param id the Discord id of the player to be found
-	 * @return the KAG username as a string, or a blank string if no user was found
+	private interface SqlStatementObjectReturn<T> {
+		T run(Statement statement, ResultSet result) throws SQLException;
+	}
+
+	/** Takes a lambda function that will 
+	 * @param defaultReturnVal The value that should be returned if no other 
+	 * @param method
+	 * @return whatever object the lambda method returns
 	 */
-	public String getKagName(long id)
+	private <T> T errorHandler(T defaultReturnVal, SqlStatementObjectReturn<T> method)
 	{
 		Statement statement = null;
 		ResultSet result = null;
 		try
 		{
-			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
-
-	        	if (result.next())
-	        	{
-	        		return result.getString("kagname");
-	        	}
+			return method.run(statement, result);
 		}
 		catch (SQLException e)
 		{
@@ -157,7 +158,33 @@ public class GatherDB {
                 		}
                 	}
                 }
-		return "";
+		return defaultReturnVal;
+	}
+	
+	/**Takes a Discord id and returns the corresponding KAG username that is stored in the database. Returns a blank string if they were not found. 
+	 * @param id the Discord id of the player to be found
+	 * @return the KAG username as a string, or a blank string if no user was found
+	 */
+	public String getKagName(long id)
+	{
+		return errorHandler("", (statement, result) ->{
+			statement = connection.createStatement();
+			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
+
+	        	if (result.next())
+	        	{
+	        		if(result.isLast())
+	        		{
+	        			//would also like to print this warning to discord, but not sure how best to handle that
+	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by discord id("+id+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
+	        		}
+	        		return result.getString("kagname");
+	        	}
+	        	else
+	        	{
+	        		return "";
+	        	}
+		});
 	}
 
 	/**Takes a KAG username and returns the corresponding Discord id that is stored in the database. Returns -1 if they were not found. 
@@ -166,43 +193,24 @@ public class GatherDB {
 	 */
 	public long getDiscordID(String kagName)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1L, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \"" + kagName + "\"");
 
 	        	if (result.next())
 	        	{
+	        		if(result.isLast())
+	        		{
+	        			//would also like to print this warning to discord, but not sure how best to handle that
+	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by kagname("+kagName+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
+	        		}
 	        		return result.getLong("discordid");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1L;
+	        	}
+		});
 	}
 	
 	/**Gets the stats of a player from the database. Returns all the stats in a StatsObject. 
@@ -212,12 +220,9 @@ public class GatherDB {
 	 */
 	public StatsObject getStats(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		StatsObject returnObj = new StatsObject();
-		returnObj.kagname = kagname;
-		try
-		{
+		return errorHandler(null, (statement, result) ->{
+			StatsObject returnObj = new StatsObject();
+			returnObj.kagname = kagname;
 			statement = connection.createStatement();
 			// result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE kagname = \""+kagname + "\"");
 			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \""+kagname + "\"");
@@ -236,32 +241,11 @@ public class GatherDB {
 	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
 	        		return returnObj;
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return null;
+	        	else
+	        	{
+	        		return null;
+	        	}
+		});
 	}
 
 	/**Gets the stats of a player from the database. Returns all the stats in a StatsObject. 
@@ -271,12 +255,9 @@ public class GatherDB {
 	 */
 	public StatsObject getStats(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		StatsObject returnObj = new StatsObject();
-		returnObj.discordid = id;
-		try
-		{
+		return errorHandler(null, (statement, result) ->{
+			StatsObject returnObj = new StatsObject();
+			returnObj.discordid = id;
 			statement = connection.createStatement();
 			//result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE discordid = "+id);
 			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
@@ -295,32 +276,11 @@ public class GatherDB {
 	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
 	        		return returnObj;
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return null;
+	        	else
+	        	{
+	        		return null;
+	        	}
+		});
 	}
 
 	/**Gets the number of games played by the player from the database. 
@@ -329,10 +289,7 @@ public class GatherDB {
 	 */
 	public int getGamesPlayed(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT gamesPlayed FROM players WHERE kagname = \"" + kagname + "\"");
 
@@ -340,44 +297,20 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("gamesplayed");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of games played by the player from the database. 
 	 * @param id the Discord id of the player
-	 * @return the number of games played by the player, -1 if the player couldnt be found.
+	 * @return the number of games played by the player, -1 if the player couldn't be found.
 	 */
 	public int getGamesPlayed(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT gamesplayed FROM players WHERE discordid = " + id);
 
@@ -385,32 +318,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("gamesplayed");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of wins of the player from the database. 
@@ -419,10 +331,7 @@ public class GatherDB {
 	 */
 	public int getWins(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT wins FROM players WHERE kagname = \"" + kagname + "\"");
 
@@ -430,32 +339,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("wins");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of wins of the player from the database. 
@@ -464,10 +352,7 @@ public class GatherDB {
 	 */
 	public int getWins(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT wins FROM players WHERE discordid = " + id);
 
@@ -475,32 +360,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("wins");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of losses of the player from the database. 
@@ -509,10 +373,7 @@ public class GatherDB {
 	 */
 	public int getLosses(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT losses FROM players WHERE kagname = \"" + kagname + "\"");
 
@@ -520,32 +381,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("losses");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of losses of the player from the database. 
@@ -554,10 +394,7 @@ public class GatherDB {
 	 */
 	public int getLosses(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT losses FROM players WHERE discordid = " + id);
 
@@ -565,32 +402,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("losses");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of draws of the player from the database. 
@@ -599,10 +415,7 @@ public class GatherDB {
 	 */
 	public int getDraws(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT draws FROM players WHERE kagname = \"" + kagname + "\"");
 
@@ -610,32 +423,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("draws");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of draws of the player from the database. 
@@ -644,10 +436,7 @@ public class GatherDB {
 	 */
 	public int getDraws(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT draws FROM players WHERE discordid = " + id);
 
@@ -655,32 +444,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("draws");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of desertions of the player from the database. 
@@ -689,10 +457,7 @@ public class GatherDB {
 	 */
 	public int getdesertions(String kagname)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT desertions FROM players WHERE kagname = \"" + kagname + "\"");
 
@@ -700,32 +465,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("desertions");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Gets the number of desertions of the player from the database. 
@@ -734,10 +478,7 @@ public class GatherDB {
 	 */
 	public int getdesertions(long id)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT desertions FROM players WHERE discordid = " + id);
 
@@ -745,32 +486,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("desertions");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Adds a win to the player in the database. Also increments their games played. 
@@ -779,30 +499,10 @@ public class GatherDB {
 	 */
 	public int addWin(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a win to the player in the database. Also increments their games played. 
@@ -811,30 +511,10 @@ public class GatherDB {
 	 */
 	public int addWin(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a loss to the player in the database. Also increments their games played. 
@@ -843,30 +523,10 @@ public class GatherDB {
 	 */
 	public int addLoss(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a loss to the player in the database. Also increments their games played. 
@@ -875,30 +535,10 @@ public class GatherDB {
 	 */
 	public int addLoss(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a desertion to the player in the database. 
@@ -907,30 +547,10 @@ public class GatherDB {
 	 */
 	public int addDesertion(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a desertion to the player in the database. 
@@ -939,30 +559,10 @@ public class GatherDB {
 	 */
 	public int addDesertion(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a desertion loss to the player in the database. A desertion loss means that in a game where this player deserted, their team lost. 
@@ -971,30 +571,10 @@ public class GatherDB {
 	 */
 	public int addDesertionLoss(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a desertion loss to the player in the database. A desertion loss means that in a game where this player deserted, their team lost. 
@@ -1003,30 +583,10 @@ public class GatherDB {
 	 */
 	public int addDesertionLoss(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a substitution to the player in the database. 
@@ -1035,30 +595,10 @@ public class GatherDB {
 	 */
 	public int addSubstitution(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a substitution to the player in the database. 
@@ -1067,30 +607,10 @@ public class GatherDB {
 	 */
 	public int addSubstitution(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a substitution win to the player in the database. A substitution win means that in a game where this player subbed in, their team won. 
@@ -1099,30 +619,10 @@ public class GatherDB {
 	 */
 	public int addSubstitutionWin(long id)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE discordid="+id);
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 
 	/**Adds a substitution win to the player in the database. A substitution win means that in a game where this player subbed in, their team won. 
@@ -1131,30 +631,10 @@ public class GatherDB {
 	 */
 	public int addSubstitutionWin(String kagName)
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE kagname=\""+kagName+"\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 	
 	/**Links a KAG username and a Discord id in the database. If one of the two already exists in the database, the entry should be updated to the new values. If both already exist it is likely to return an error(not properly tested since its an unlikely case). 
@@ -1164,32 +644,15 @@ public class GatherDB {
 	 */
 	public int linkAccounts(String kagName, long id)
 	{
-		Statement statement = null;
-		try
-		{
+		int returnVal = errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES(\""+kagName+"\","+id+") ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
-		}
-		catch (SQLException e)
+		});
+		if(returnVal!=-1)
 		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
+			DiscordBot.players.forceUpdate(kagName, id);
 		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	//if there is a local player object update it
-			DiscordBot.players.update(id);
-                }
-		return -1;
+		return returnVal;
 	}
 	
 	/**Increments the total number of gather games played. 
@@ -1197,40 +660,18 @@ public class GatherDB {
 	 */
 	public int incrementGamesPlayed()
 	{
-		Statement statement = null;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET gamesplayed=gamesplayed+1 WHERE kagname=\"+numgames+\"");
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 	
 	/**(not yet implemented) Gets a unique game id from the database and reserves the id for future use (so that it is not returned by this function again). 
 	 * @return the game id that has been reserved
 	 */
-	public int reserveGameId() {
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+	public int reserveGameId()
+	{
+		return errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
 			statement.executeUpdate("INSERT INTO games () VALUES ()");
 			result = statement.executeQuery("SELECT LAST_INSERT_ID();");
@@ -1239,32 +680,11 @@ public class GatherDB {
 	        	{
 	        		return result.getInt("LAST_INSERT_ID()");
 	        	}
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+	        	else
+	        	{
+	        		return -1;
+	        	}
+		});
 	}
 
 	/**Adds the data of a game to the database. 
@@ -1273,10 +693,8 @@ public class GatherDB {
 	 */
 	public int addGame(GatherGame game)
 	{
-		Statement statement = null;
-		int rowsChanged=-1;
-		try
-		{
+		return errorHandler(-1, (statement, result) ->{
+			int rowsChanged=-1;
 			statement = connection.createStatement();
 			//game into games table
 			rowsChanged = statement.executeUpdate("INSERT INTO games (gameId, gameLengthSeconds) VALUES ("+game.getGameID()+","+game.getGameLengthSeconds()+") ON DUPLICATE KEY UPDATE gameLengthSeconds="+game.getGameLengthSeconds());
@@ -1295,25 +713,7 @@ public class GatherDB {
 			}
 			
 			return rowsChanged;
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return -1;
+		});
 	}
 	
 	/**Returns a list of players ordered based on their rank, followed by win percentage, then games played. Players with less than 10 games are ignored. 
@@ -1322,10 +722,7 @@ public class GatherDB {
 	 */
 	public List<StatsObject> getTopPlayers(int numPlayers)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(null, (statement, result) ->{
 			statement = connection.createStatement();
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT "+numPlayers+")"
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT "+numPlayers+")"
@@ -1350,40 +747,12 @@ public class GatherDB {
 	        		returnList.add(returnObj);
 	        	}
         		return returnList;
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return null;
+		});
 	}
 	
 	public List<StatsObject> getRandomPlayers(int numPlayers)
 	{
-		Statement statement = null;
-		ResultSet result = null;
-		try
-		{
+		return errorHandler(null, (statement, result) ->{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 AS winrate, ((1*(wins-(desertions/2))/gamesplayed)+1.96*1.96/(2*gamesplayed)-1.96*SQRT(((1*(wins-(desertions/2))/gamesplayed)*(1-(1*(wins-(desertions/2))/gamesplayed))+1.96*1.96/(4*gamesplayed))/gamesplayed))/(1+1.96*1.96/gamesplayed) AS mmr FROM players WHERE kagname<>'+numgames+' ORDER BY RAND() LIMIT "+numPlayers);
 
@@ -1404,31 +773,6 @@ public class GatherDB {
 	        		returnList.add(returnObj);
 	        	}
         		return returnList;
-		}
-		catch (SQLException e)
-		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
-		return null;
+		});
 	}
 }
