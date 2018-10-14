@@ -121,9 +121,9 @@ public class GatherDB {
 		T run(Statement statement, ResultSet result) throws SQLException;
 	}
 
-	/** Takes a lambda function that will 
-	 * @param defaultReturnVal The value that should be returned if no other 
-	 * @param method
+	/** Takes a lambda function that will execute some SQL statement(s), if the sql does not error, this will simply return whatever the lambda returns, otherwise, this error handler will catch any SQL errors that occur and return the specified return value.
+	 * @param defaultReturnVal The value that should be returned if no other return is triggered (i.e. when there is an exception caught)
+	 * @param method The lambda to execute
 	 * @return whatever object the lambda method returns
 	 */
 	private <T> T errorHandler(T defaultReturnVal, SqlStatementObjectReturn<T> method)
@@ -173,7 +173,7 @@ public class GatherDB {
 
 	        	if (result.next())
 	        	{
-	        		if(result.isLast())
+	        		if(!result.isLast())
 	        		{
 	        			//would also like to print this warning to discord, but not sure how best to handle that
 	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by discord id("+id+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
@@ -199,7 +199,7 @@ public class GatherDB {
 
 	        	if (result.next())
 	        	{
-	        		if(result.isLast())
+	        		if(!result.isLast())
 	        		{
 	        			//would also like to print this warning to discord, but not sure how best to handle that
 	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by kagname("+kagName+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
