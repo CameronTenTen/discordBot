@@ -655,6 +655,28 @@ public class GatherDB {
 		return returnVal;
 	}
 	
+	/** Checks if the specified link details are valid. This is done by fetching the user from the database both by kagname and discord id, then checking everything agrees.
+	 * Invalidity indicates that the user has multiple entries, and that there is an issue with the database definition (which should prevent all duplicates)
+	 * If this invalidity occurs, it will most likely need to be fixed by someone with database access.
+	 * @param kagName the user to check the linking for
+	 * @param id the user to check the linking for
+	 * @return false if any error in link information found, true otherwise
+	 */
+	public boolean checkValidLink(String kagName, long id)
+	{
+		return errorHandler(false, (statement, result) ->{
+			statement = connection.createStatement();
+			if(this.getDiscordID(kagName)!=id)
+			{
+				return false;
+			}
+			if(this.getKagName(id)!=kagName) {
+				return false;
+			}
+			return true;
+		});
+	}
+	
 	/**Increments the total number of gather games played. 
 	 * @return the number of rows changed by the requeset, -1 if something went wrong. 
 	 */

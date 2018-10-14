@@ -124,6 +124,10 @@ public class CommandLink implements CommandExecutor
 				if(result>=0)
 				{
 					DiscordBot.reply(message,"account successfully linked");
+					if(!DiscordBot.database.checkValidLink(username, message.getAuthor().getLongID()))
+					{
+						DiscordBot.reply(message,"WARNING: problem with linked information detected, there maybe more than one entry for you. **Please share this error with someone that has database access.** (This should not prevent you playing in the short term, but may cause issues long term)");
+					}
 					//check if the player needs to be updated on any servers
 					DiscordBot.playerChanged(message.getAuthor());
 				}
