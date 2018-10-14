@@ -154,5 +154,27 @@ public class PlayerObjectManager
 		//could add their player object here, but will do lazy approach and only do that when the object is needed
 		//addObject(discordid);
 	}
+	/**Called when someones player info has been changed, and we want to force the bot to recognise it without checking the database.
+	 * This is done in case the database table is not forcing discord ids and kag usernames to be unique, which would cause problems if we retrive from the database on update.
+	 * If we force the bot to recognise the new info, at least they will be able to play for now, although there will probably be problems when the data is next retrieved from the database.
+	 * @param kagName the KAG username of the player that has changed
+	 */
+	public void forceUpdate(String kagName, long discordid)
+	{
+		PlayerObject p = checkExists(kagName);
+		if(p==null)
+		{
+			p = new PlayerObject(discordid, kagName);
+			//add the new player object to the list for next time its needed
+			playerObjects.add(p);
+			return;
+		}
+		else
+		{
+			p.setKagName(kagName);
+			p.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
+			return;
+		}
+	}
 
 }
