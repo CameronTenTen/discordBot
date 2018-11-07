@@ -125,6 +125,7 @@ public class KagServerChecker implements Runnable
 			socket.close();
 			in.close();
 			out.close();
+			setConnected(false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
