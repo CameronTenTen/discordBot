@@ -670,7 +670,7 @@ public class GatherDB {
 			{
 				return false;
 			}
-			if(this.getKagName(id)!=kagName) {
+			if(!this.getKagName(id).equals(kagName)) {
 				return false;
 			}
 			return true;
