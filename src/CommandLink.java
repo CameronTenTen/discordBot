@@ -74,10 +74,15 @@ public class CommandLink implements CommandExecutor
 		}
 		else if(args.length>=2)
 		{
-			String token = args[1];
+			//this ideally how it would be done if users didn't make mistakes
+			//String token = args[1];
+			//but that is not the world we live in
+			String token = "";
 			//parse the message in case they added extra bits or copied part of/the whole json
 			List<String> tokens = Arrays.asList(message.toString().split("\\s|\""));
 			//use the longest sub string as the token
+			//this is a safe assumption because the token is really long(usernames are restricted to 20 characters, and the link command is also shorter than that)
+			//still a bit of a hack, but people who dont know how to read json are going to make a mistake copying the token 90% of the time, so it is necessary
 			for(String str : tokens)
 			{
 				if(str.length()>token.length())
