@@ -55,15 +55,7 @@ public class KagServerChecker implements Runnable
 	 */
 	public void setConnected(boolean val)
 	{
-		if(connected == true && val == false)
-		{
-			connected = val;
-			connectionLost();
-		}
-		else
-		{
-			connected = val;
-		}
+		connected = val;
 	}
 	
 	/**Triggered whenever the connection is lost. Disconnects the socket and sets up a task to reconnect later. 
@@ -165,7 +157,7 @@ public class KagServerChecker implements Runnable
 					if(lastMsg == null || lastMsg.endsWith("server shutting down."))
 					{
 						Discord4J.LOGGER.info("connection loss detected: "+lastMsg);
-						setConnected(false);
+						connectionLost();
 					}
 					else
 					{
