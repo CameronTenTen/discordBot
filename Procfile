@@ -1,2 +1,2 @@
 compile:  ./compile.sh
-run: ./run.sh TOKEN
+run: ./run.sh <(echo $TOKEN)
