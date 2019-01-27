@@ -795,6 +795,7 @@ public class GatherObject
 
 	/**Helper function for establishing the TCPR connection with all the gather KAG servers. 
 	 * Says a message in discord for each server it connects or fails to connect with. 
+	 * @param silent if true, this function will not print any connnection messages to the command channel
 	 * @see GatherServer#connect()
 	 */
 	public void connectKAGServers(boolean silent)
@@ -808,6 +809,29 @@ public class GatherObject
 			else 
 			{
 				if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
+			}
+		}
+	}
+
+	/**Helper function for establishing the TCPR connection with all currently disconnected gather KAG servers (i.e. tries to connect to any servers it thinks it is disconnected from). 
+	 * Says a message in discord for each server it connects or fails to connect with. 
+	 * @see GatherServer#connect()
+	 */
+	public void connectKAGServersIfDisconnected()
+	{
+		for(GatherServer server : servers)
+		{
+			if(server.isConnected())
+			{
+				DiscordBot.sendMessage(this.getCommandChannel(), "Already connected to "+server.getIp()+":"+server.getPort());
+			}
+			else if(server.connect())
+			{
+				DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+server.getIp()+":"+server.getPort());
+			}
+			else 
+			{
+				DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
 			}
 		}
 	}
