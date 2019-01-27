@@ -19,7 +19,7 @@ public class CommandPingMe implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandPingMe
 	 */
-	@Command(aliases = {"!pingme","!softqueue","!softadd","!soft","!interested","!interest","!int"}, description = "Add or remove yourself from the soft queue")
+	@Command(aliases = {"!pingme","!softqueue","!softadd","!soft","!interested","!interest","!int","!uninterested","!uninterest", "!unint"}, description = "Add or remove yourself from the soft queue")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
@@ -37,16 +37,16 @@ public class CommandPingMe implements CommandExecutor
 		switch(val)
 		{
 		case 2:
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **removed** from the **soft queue**");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" is no longer **interested**");
 			return;
 		case 1:
-			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+") they are now in the **soft queue**!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+"), but they are still **interested**!");
 			return;
 		case -1:
 			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" an unexpected error occured retrievng your player info");
 			return;
 		case 0:
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" has been **added** to the **soft queue**, type the same command again to leave it");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" is **interested** they want to be notified when there is enough players for a game!");
 			return;
 			
 		}
