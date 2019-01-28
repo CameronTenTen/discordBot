@@ -144,9 +144,11 @@ public class GatherGame
 	public void sendTeamsToServer()
 	{
 		//set the teams for the kag server by doing these commands
+		//getRules().set_s32('numPlayers',10);			//if we want to adjust the game size
 		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//getRules().set_bool('teamsSet',true);
+		server.sendMessage("getRules().set_s32('numPlayers',"+this.getPlayerCount()+");");
 		server.sendMessage(this.generateBlueTeamMsg());
 		server.sendMessage(this.generateRedTeamMsg());
 		server.sendMessage("getRules().set_bool('teamsSet',true);");
@@ -157,9 +159,11 @@ public class GatherGame
 	public void sendScrambledTeamsToServer()
 	{
 		//update the teams for the kag server by doing these commands
+		//getRules().set_s32('numPlayers',10);			//if we want to adjust the game size
 		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//"getRules().set_bool('teamsUpdated',true);"
+		server.sendMessage("getRules().set_s32('numPlayers',"+this.getPlayerCount()+");");
 		server.sendMessage(this.generateBlueTeamMsg());
 		server.sendMessage(this.generateRedTeamMsg());
 		server.sendMessage("getRules().set_bool('teamsScrambled',true);");
@@ -171,9 +175,11 @@ public class GatherGame
 	public void updateTeamsOnServer()
 	{
 		//update the teams for the kag server by doing these commands
+		//getRules().set_s32('numPlayers',10);			//if we want to adjust the game size
 		//string[] blue={'player1', 'player2', 'etc'}; getRules().set('blueTeam',blue);
 		//string[] red={'player1', 'player2', 'etc'}; getRules().set('redTeam',red);
 		//"getRules().set_bool('teamsUpdated',true);"
+		server.sendMessage("getRules().set_s32('numPlayers',"+this.getPlayerCount()+");");
 		server.sendMessage(this.generateBlueTeamMsg());
 		server.sendMessage(this.generateRedTeamMsg());
 		server.sendMessage("getRules().set_bool('teamsUpdated',true);");
@@ -692,6 +698,11 @@ public class GatherGame
 	public List<PlayerObject> getRedPlayerList()
 	{
 		return Collections.unmodifiableList(this.redPlayerList);
+	}
+
+	public int getPlayerCount()
+	{
+		return this.getPlayerList().size();
 	}
 
 	/**Getter for blue team role associated with this game (for showing teams in members list)
