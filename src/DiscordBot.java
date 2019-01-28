@@ -339,6 +339,27 @@ public class DiscordBot {
 		});
 	}
 	
+	/**Wrapper for removing a role from a user without getting rate limit exceptions. 
+	 * Checks the user acutally has the role before removing it. 
+	 * @param user - the user to be changed
+	 * @param role - the role to take away
+	 * @see Discord4J: {@link IUser#removeRole(IRole)}
+	 * @see Discord4J: {@link IUser#getRolesForGuild(IGuild)}
+	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
+	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 */
+	public static void removeRoleIfPresent(IUser user, IRole role)
+	{
+		if(user == null || role == null) return;
+		List<IRole> roles = RequestBuffer.request(() -> {
+			return user.getRolesForGuild(role.getGuild());
+		}).get();
+		if(roles.contains(role))
+		{
+			removeRole(user, role);
+		}
+	}
+	
 	/**Wrapper function for creating a role on a guild. The role object should then be manipulated as needed. 
 	 * @param guild the guild for the role
 	 * @return IRole object representing the new role

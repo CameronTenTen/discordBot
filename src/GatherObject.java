@@ -1213,8 +1213,8 @@ public class GatherObject
 		List<PlayerObject> players = game.getPlayerList();
 		for(PlayerObject player : players)
 		{
-			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getBlueRole());
-			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getRedRole());
+			DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getBlueRole());
+			DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getRedRole());
 		}
 	}
 	
