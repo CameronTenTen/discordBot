@@ -1188,8 +1188,8 @@ public class GatherObject
 		roles.remove(red);
 		roles.remove(blue);
 		int queueIndex = roles.indexOf(this.getQueueRole());
-		roles.add(queueIndex+1, red);
 		roles.add(queueIndex+1, blue);
+		roles.add(queueIndex+1, red);
 		DiscordBot.reorderRoles(this.getGuild(), roles);
 		
 		//set the roles on the game object
