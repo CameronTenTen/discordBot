@@ -849,6 +849,7 @@ public class GatherObject
 			{
 				server.disconnect();
 				DiscordBot.sendMessage(this.getCommandChannel(), "Disconnected from "+server.getIp()+":"+server.getPort());
+				Discord4J.LOGGER.info("Disconnected from server (discord command): "+server.getIp()+":"+server.getPort());
 				connectedServers=true;
 			}
 			//disconnect anyway in case isConnected is wrong, but don't talk about it
