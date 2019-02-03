@@ -91,6 +91,9 @@ public class RconListener
 					case -3:
 						gather.getServer(ip, port).say("Could not find a user for that discord id, did you type it correctly?");
 						break;
+					case -4:
+						DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserByID(id).mention()+"WARNING: fatal problem with linked information detected, you maybe trying to cross link. **Please share this error with someone that has database access.**");
+						break;
 					}
 				}
 				catch (NumberFormatException e)

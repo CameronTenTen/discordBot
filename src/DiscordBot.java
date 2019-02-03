@@ -596,7 +596,7 @@ public class DiscordBot {
 	/** Complete a server link request checks if the first half of the request already exists and the details are correct, then links the accounts. 
 	 * @param kagname to be linked
 	 * @param user to be linked
-	 * @return Returns -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, and 1 if the link was successful
+	 * @return Returns -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, -4 if a cross link was detected, and 1 if the link was successful
 	 * @see GatherDB#linkAccounts(String, long)
 	 * @see DiscordBot#addLinkRequest(IUser, String)
 	 * @see DiscordBot#doLinkRequest(String, long)
@@ -617,6 +617,7 @@ public class DiscordBot {
 			int result = database.linkAccounts(kagname, user.getLongID());
 			Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
 			linkRequests.remove(p);
+			if(result==-2) return -4;
 			return 1;
 		}
 		return -1;

@@ -136,7 +136,7 @@ public class CommandLink implements CommandExecutor
 					//check if the player needs to be updated on any servers
 					DiscordBot.playerChanged(message.getAuthor());
 				}
-				else DiscordBot.reply(message,"an error occured linking your accounts, this message should not be displayed, but if it is you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
+				else DiscordBot.reply(message,"an error occured linking your accounts, this message should not be displayed, you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
 			}
 			else
 			{

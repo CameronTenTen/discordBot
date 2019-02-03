@@ -8,7 +8,7 @@ import java.util.Timer;
 
 import sx.blah.discord.handle.obj.IUser;
 
-/**class to keep track of player objects so that they can be updated when player data is changed (for example when a user links their accounts). All player objects should be created here. If they are created elsewhere they will become invalid if a player changes their linked accounts. 
+/**class to keep track of player objects so that they can be updated when player data is changed (for example when a user links their accounts). All player objects should be created here. If they are created elsewhere they will become invalid if a player changes their linked accounts.
  * also periodically checks the last used time of each of the player objects and frees them for garbage collection if they have not been used for some time.
  * @author cameron
  *
@@ -97,13 +97,13 @@ public class PlayerObjectManager
 		discordidToPlayerObjectMap = new HashMap<Long, PlayerObject>();
 		weakKagNameToPlayerObjectMap = new HashMap<String, WeakReference<PlayerObject>>();
 		weakDiscordidToPlayerObjectMap = new HashMap<Long, WeakReference<PlayerObject>>();
-		
+
 		//initialise the task for cleaning up old player objects
 		timer = new Timer(true);
 		timer.scheduleAtFixedRate(wrap(() -> this.weakenOldReferences()), CACHE_CLEAN_FREQUENCY, CACHE_CLEAN_FREQUENCY);
 	}
 
-	/**Returns a player if they exist, null otherwise. 
+	/**Returns a player if they exist, null otherwise.
 	 * @param discordid the Discord id of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
@@ -136,7 +136,7 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Returns a player if they exist, null otherwise. 
+	/**Returns a player if they exist, null otherwise.
 	 * @param kagName the KAG username of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
@@ -169,7 +169,7 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Create a new managed PlayerObject. Takes their KAG username and gets their Discord id from the database. 
+	/**Create a new managed PlayerObject. Takes their KAG username and gets their Discord id from the database.
 	 * @param kagName the KAG username of the user to instantiate
 	 * @return null if no Discord id was found for this KAG username (the player is not linked), or the new PlayerObject if creation is successful
 	 */
@@ -188,7 +188,7 @@ public class PlayerObjectManager
 		return p;
 	}
 
-	/**Create a new managed PlayerObject. Takes their Discord id and gets their KAG username from the database. 
+	/**Create a new managed PlayerObject. Takes their Discord id and gets their KAG username from the database.
 	 * @param discordid the Discord id of the user to instantiate
 	 * @return null if no KAG username was found for this Discord id (the player is not linked), or the new PlayerObject if creation is successful
 	 */
@@ -207,7 +207,7 @@ public class PlayerObjectManager
 		return p;
 	}
 
-	/**Wrapper for getting a players PlayerObject by discord user object. Creates the player object if they don't already have one. 
+	/**Wrapper for getting a players PlayerObject by discord user object. Creates the player object if they don't already have one.
 	 * @param user the Discord User object of the wanted player
 	 * @return their PlayerObject
 	 * @see #getObject(long)
@@ -217,7 +217,7 @@ public class PlayerObjectManager
 		return getObject(user.getLongID());
 	}
 
-	/**Getter for a players player object. Creates the player object if they don't already have one. 
+	/**Getter for a players player object. Creates the player object if they don't already have one.
 	 * @param kagName the KAG username of the wanted player
 	 * @return their PlayerObject
 	 */
@@ -229,7 +229,7 @@ public class PlayerObjectManager
 		return addObject(kagName);
 	}
 
-	/**Getter for a players player object. Creates the player object if they don't already have one. 
+	/**Getter for a players player object. Creates the player object if they don't already have one.
 	 * @param discordid the Discord id of the wanted player
 	 * @return their PlayerObject
 	 */
@@ -241,7 +241,7 @@ public class PlayerObjectManager
 		return addObject(discordid);
 	}
 
-	/**Wrapper for update(long discordid). Called when someones player info changes. 
+	/**Wrapper for update(long discordid). Called when someones player info changes.
 	 * @param user the user object of the player that has changed
 	 * @see #update(long)
 	 */
@@ -250,7 +250,7 @@ public class PlayerObjectManager
 		update(user.getLongID());
 	}
 
-	/**Called when someones player info is changed on the database. Gets their new info from the database. 
+	/**Called when someones player info is changed on the database. Gets their new info from the database.
 	 * @param kagName the KAG username of the player that has changed
 	 */
 	public void refresh(String kagName)
@@ -267,7 +267,7 @@ public class PlayerObjectManager
 		//addObject(kagName);
 	}
 
-	/**Called when someones player info is changed on the database. Gets their new info from the database. 
+	/**Called when someones player info is changed on the database. Gets their new info from the database.
 	 * @param discordid the Discord id of the player that has changed
 	 */
 	public void update(long discordid)
@@ -287,23 +287,38 @@ public class PlayerObjectManager
 	 * This is done in case the database table is not forcing discord ids and kag usernames to be unique, which would cause problems if we retrive from the database on update.
 	 * If we force the bot to recognise the new info, at least they will be able to play for now, although there will probably be problems when the data is next retrieved from the database.
 	 * @param kagName the KAG username of the player that has changed
+	 * @return returns false if the force update failed
 	 */
-	public void forceUpdate(String kagName, long discordid)
+	public boolean forceUpdate(String kagName, long discordid)
 	{
-		PlayerObject p = checkExists(kagName);
-		if(p==null)
+		PlayerObject playerByKagname = checkExists(kagName);
+		PlayerObject playerByDiscordid = checkExists(discordid);
+		if(playerByKagname==null && playerByDiscordid==null)
 		{
-			p = new PlayerObject(discordid, kagName);
+			PlayerObject p = new PlayerObject(discordid, kagName);
 			//add the new player object to the list for next time its needed
 			kagNameToPlayerObjectMap.put(kagName, p);
 			discordidToPlayerObjectMap.put(discordid, p);
-			return;
+			return true;
 		}
 		else
 		{
-			p.setKagName(kagName);
-			p.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
-			return;
+			if(playerByKagname!=null && playerByDiscordid!=null && playerByKagname != playerByDiscordid)
+			{
+				//two different players and discord accounts are linked, and one of the discord users is trying to link with some other account
+				//not much we can do to recover from this situation, need to remove one of the player objects, but that is difficult to guarantee (they might be in a queue, need to check everything)
+				//the false return should be used to tell the user off
+				return false;
+			}
+			if(playerByKagname!=null)
+			{
+				playerByKagname.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
+			}
+			if(playerByDiscordid!=null)
+			{
+				playerByDiscordid.setKagName(kagName);
+			}
+			return true;
 		}
 	}
 }

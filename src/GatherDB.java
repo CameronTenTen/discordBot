@@ -638,19 +638,25 @@ public class GatherDB {
 	}
 	
 	/**Links a KAG username and a Discord id in the database. If one of the two already exists in the database, the entry should be updated to the new values. If both already exist it is likely to return an error(not properly tested since its an unlikely case). 
+	 * Returns -2 if the user is cross linking two linked accounts, not much we can do to recover from this situation, should tell the user off, probably need manual intervention if they are doing something valid.
 	 * @param kagName the KAG username to link
 	 * @param id the Discord id to link
-	 * @return the number of rows changed by the request, -1 if the user couldnt be found. 
+	 * @return the number of rows changed by the request, -1 if the user couldnt be found, -2 if the user is trying to cross link accounts.
 	 */
 	public int linkAccounts(String kagName, long id)
 	{
 		int returnVal = errorHandler(-1, (statement, result) ->{
 			statement = connection.createStatement();
+			//this query can lead to duplicated links if the database constraints aren't correct
+			//could fix this by manually checking for existing entries first and updating the, but then I am just making my own version of "ON DUPLICATE KEY UPDATE"
 			return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES(\""+kagName+"\","+id+") ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
 		});
 		if(returnVal!=-1)
 		{
-			DiscordBot.players.forceUpdate(kagName, id);
+			if(!DiscordBot.players.forceUpdate(kagName, id))
+			{
+				return -2;
+			}
 		}
 		return returnVal;
 	}
