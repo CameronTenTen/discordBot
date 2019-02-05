@@ -40,12 +40,10 @@ public class CommandRandomTeams implements CommandExecutor
 			{
 				case 1:
 					DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(player.getDiscordUserInfo())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-					gather.setNotInterested(player.getDiscordUserInfo());
 					Discord4J.LOGGER.info("Adding player to queue: "+player.getDiscordUserInfo().getDisplayName(message.getGuild()));
 					continue;
 				case 2:
 					DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(player.getDiscordUserInfo())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-					gather.setNotInterested(player.getDiscordUserInfo());
 					Discord4J.LOGGER.info("Adding player to queue: "+player.getDiscordUserInfo().getDisplayName(message.getGuild()));
 					gather.startGame();
 					continue;

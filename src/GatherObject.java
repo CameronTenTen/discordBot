@@ -1024,7 +1024,7 @@ public class GatherObject
 		}
 		//otherwise give them the role
 		setInterested(user);
-		return this.remFromQueue(user);
+		return 0;
 	}
 
 	/**Function for clearing all running games and ending them. 
