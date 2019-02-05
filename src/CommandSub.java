@@ -1,3 +1,5 @@
+import java.util.List;
+
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.Discord4J;
@@ -60,21 +62,46 @@ public class CommandSub implements CommandExecutor
 		}
 		
 		int gameId = -1;
-		try
-		{
-			gameId = Integer.parseInt(args[0]);
-		}
-		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "**Invalid** command format or number "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
-			return;
-		}
 		
-		//check the game exists
-		if(gather.getRunningGame(gameId)==null)
+		if(args.length<1)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There is **no current game** with that id " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
-			return;
+			//if no args passed, and there is only one game to sub into, then we can assume they want to get into that game
+			List<GatherGame> games = gather.getRunningGames();
+			if(games.size()>1)
+			{
+				//you must specify which game you want to sub into
+				DiscordBot.sendMessage(gather.getCommandChannel(), "You must specify the game you want to sub for "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
+				return;
+			}
+			else if(games.size()==1)
+			{
+				gameId = games.get(0).getGameID();
+			}
+			else
+			{
+				//no games to sub into
+				DiscordBot.sendMessage(gather.getCommandChannel(), "There are **no games** to sub for "+message.getAuthor().getDisplayName(message.getGuild())+"!");
+				return;
+			}
+		}
+		else
+		{
+			try
+			{
+				gameId = Integer.parseInt(args[0]);
+			}
+			catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
+			{
+				DiscordBot.sendMessage(gather.getCommandChannel(), "**Invalid** command format or number "+message.getAuthor().getDisplayName(message.getGuild())+"! usage is **!sub gameID**");
+				return;
+			}
+			
+			//check the game exists
+			if(gather.getRunningGame(gameId)==null)
+			{
+				DiscordBot.sendMessage(gather.getCommandChannel(), "There is **no current game** with that id " + message.getAuthor().getDisplayName(message.getGuild()) + "!");
+				return;
+			}
 		}
 		
 		SubstitutionObject returnObj = gather.substitutions.subPlayerIntoGame(player, gameId);
