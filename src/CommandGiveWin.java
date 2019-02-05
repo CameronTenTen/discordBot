@@ -29,7 +29,11 @@ public class CommandGiveWin implements CommandExecutor
 			return;
 		
 		}
-		int team = -2;
+		if(args.length<2)
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", not enough arguments, command usage is !givewin matchid red/blue/draw/cancel!");
+			return;
+		}
 		int matchId = -1;
 		try
 		{
@@ -38,25 +42,37 @@ public class CommandGiveWin implements CommandExecutor
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured parsing the game id, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", an error occured parsing the game id, command usage is !givewin matchid red/blue/draw/cancel!");
 			return;
 		}
-		try
+		GatherGame game = gather.getRunningGame(matchId);
+		if(game == null)
 		{
-			team = Integer.parseInt(args[1]);
-		}
-		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
-		{
-			e.printStackTrace();
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured parsing the team number, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			DiscordBot.sendMessage(gather.getCommandChannel(), "No game found with the id "+matchId+"!");
 			return;
 		}
-		
-		if(!gather.endGame(matchId, team))
+		else
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured setting win, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
+			String team = args[1].toLowerCase();
+			switch(team)
+			{
+				case "blue":
+					gather.endGame(game, 0);
+					break;
+				case "red":
+					gather.endGame(game, 1);
+					break;
+				case "draw":
+					gather.endGame(game, -1);
+					break;
+				case "cancel":
+					gather.endGame(game, -2);
+					break;
+				default:
+					DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", team did not match any known values! (red/blue/draw/cancel)");
+					break;
+			}
 		}
-		
 		return;
 	}
 }
