@@ -29,8 +29,6 @@ public class CommandRem implements CommandExecutor
 				Discord4J.LOGGER.info("Removing player from queue: "+message.getAuthor().getDisplayName(message.getGuild()));
 				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
 				return;
-			//-1 means they are not linked
-			case -1:
 			case 0:
 				DiscordBot.sendMessage(gather.getCommandChannel(), "You are already not in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
 				return;

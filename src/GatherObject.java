@@ -377,17 +377,26 @@ public class GatherObject
 			return 0;
 		}
 	}
+	
+	public PlayerObject checkInQueue(IUser user)
+	{
+		for(PlayerObject p : queue.asList())
+		{
+			if(p.getDiscordid()==user.getLongID()) return p;
+		}
+		return null;
+	}
 
-	/**Wrapper function for removing a discord user from the queue
+	/**Searches the queue for a player with a matching discord id, then removes that player object if the player is found
 	 * @param user the user to be removed from the queue
-	 * @return 1 if the player was removed from the queue, -1 if the user wasnt found, 0 otherwise
+	 * @return 1 if the player was removed from the queue, 0 if the player was not in the queue
 	 * @see #remFromQueue(PlayerObject)
 	 */
 	public int remFromQueue(IUser user)
 	{
-		PlayerObject player = DiscordBot.players.getObject(user);
-		//player is null if they are not linked
-		if(player==null) return -1;
+		//check the queue by discord user first, so that we don't create unnecessary player objects
+		PlayerObject player = checkInQueue(user);
+		if(player==null) return 0;
 		return this.remFromQueue(player);
 	}
 
