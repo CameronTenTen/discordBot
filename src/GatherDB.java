@@ -139,6 +139,7 @@ public class GatherDB {
 		catch (SQLException e1)
 		{
 			Discord4J.LOGGER.info("Exception: "+e1.getMessage()+" thrown when running a database query, retrying...");
+			//retry because the the auto reconnect doesn't work until after one query has failed
 			try
 			{
 				return method.run(statement, result);
