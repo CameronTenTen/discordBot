@@ -107,7 +107,7 @@ public class GatherDB {
 		}
 		
                 try {
-                	connection = DriverManager.getConnection(url, username, password);
+                	connection = DriverManager.getConnection(url+"?autoReconnect=true", username, password);
                 	
                 } catch (SQLException e) {
 			System.out.println("SQLException: " + e.getMessage());
