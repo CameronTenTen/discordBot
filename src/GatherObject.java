@@ -495,7 +495,7 @@ public class GatherObject
 			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled for game #"+game.getGameID()+"!", true);
 			DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
-			Discord4J.LOGGER.info("Teams shuffled: "+game.blueMentionList().toString()+game.redMentionList().toString());
+			Discord4J.LOGGER.info("Teams shuffled: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
 			this.sortTeamRoomsAfterShuffle();
 			this.removePlayerTeamRoles(game);
 			this.addPlayersToTeamRoles(game);
@@ -538,7 +538,7 @@ public class GatherObject
 		if(server.getServerLink()!=null && server.getServerLink()!="") DiscordBot.sendMessage(getCommandChannel(), server.getServerLink());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
-		Discord4J.LOGGER.info("Game started: "+game.blueMentionList().toString()+game.redMentionList().toString());
+		Discord4J.LOGGER.info("Game started: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
 		game.sendTeamsToServer();
 		//create the team roles
 		this.generateAndSetTeamRoles(game);
