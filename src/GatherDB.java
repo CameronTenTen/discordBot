@@ -1,3 +1,5 @@
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -134,12 +136,22 @@ public class GatherDB {
 		{
 			return method.run(statement, result);
 		}
-		catch (SQLException e)
+		catch (SQLException e1)
 		{
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
+			Discord4J.LOGGER.info("Exception: "+e1.getMessage()+" thrown when running a database query, retrying...");
+			try
+			{
+				return method.run(statement, result);
+			}
+			catch (SQLException e2)
+			{
+				Discord4J.LOGGER.error("SQLException: " + e2.getMessage());
+				Discord4J.LOGGER.error("SQLState: " + e2.getSQLState());
+				Discord4J.LOGGER.error("VendorError: " + e2.getErrorCode());
+				StringWriter writer = new StringWriter();
+				e2.printStackTrace(new PrintWriter(writer));
+				Discord4J.LOGGER.error(writer.toString());
+			}
 		}
         	finally
                 {
