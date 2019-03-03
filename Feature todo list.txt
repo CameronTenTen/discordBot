@@ -1,8 +1,10 @@
-managed voice chat channels
+change server connect etc. commands to specify the server. Need some kind of server reference id system?
+managed voice chat channels - configure channel category, create two channels in the category (configure name), configure whether it is locked for player not in that team
+add way for players to force remove their cached player object !clearcache/!clear_cache @name ?
 remove !end and !start commands
 connect discord and server scramble teams votes
 !setgame/!startgame/!setteams/!creategame admin command to create a game with specified teams
-!givewin red/blue should do the right thing
+!forcecancel #matchid command
 !freeze command has a timeout
 auto detection of kag server connection loss
 player bans
@@ -18,5 +20,8 @@ match history details and statistics
 advanced statistics
 
 Technical Debt:
-Refactor GatherDB implementation(interface is fine) - lots of copy paste there
 Refactor !rsub so that the same code is run from both discord and server - other commands should be implemented in a way that they can be called elsewhere too
+Rename PlayerObject.update() to PlayerObject.refresh() (I think that is a better name for it)
+move some discord user functionality into the player object (so we are less attached to the current library)(probably not worth the effort unless actually changing library)
+make failed db access different to not finding something - specifically for the when the add command tries to get a player object
+update existing vote systems to use the new vote manager
