@@ -55,6 +55,16 @@ public class GatherServer
 		return true;
 	}
 	
+	/**Check if this connection thinks it is still trying to reestablish a previous connection
+	 * @return false if the reconnecting variables indicate the server is not connected, true otherwise
+	 * @see KagServerChecker#isReconnecting()
+	 */
+	public boolean isReconnecting()
+	{
+		if(rconThread == null || serverCheckObject.isReconnecting()) return false;
+		else return true;
+	}
+	
 	/**Interrupts the connection listener, triggering a disconnect from the KAG server. 
 	 */
 	public void disconnect()

@@ -23,6 +23,7 @@ public class KagServerChecker implements Runnable
 	private BufferedReader in;
 	private String lastMsg;
 	private boolean connected;
+	private boolean reconnecting;
 	private int reconnectTimer;			//milliseconds
 	
 	private String ip;
@@ -50,7 +51,7 @@ public class KagServerChecker implements Runnable
 		return connected;
 	}
 	
-	/**Changes the connection status of this object. If the connection is changed from true to false, it also triggers a connectionLost() call. 
+	/**Changes the connection status of this object. 
 	 * @param val true connected, false otherwise
 	 */
 	public void setConnected(boolean val)
@@ -58,7 +59,24 @@ public class KagServerChecker implements Runnable
 		connected = val;
 	}
 	
+	/**Checks if this object thinks it is currently disconnected, but will try to reconnect soon.
+	 * @return the value of the reconnecting variable
+	 */
+	public boolean isReconnecting()
+	{
+		return reconnecting;
+	}
+	
+	/**Changes the reconnecting status of this object. 
+	 * @param val true if attempting to reconnect, false otherwise
+	 */
+	public void setReconnecting(boolean val)
+	{
+		reconnecting = val;
+	}
+	
 	/**Triggered whenever the connection is lost. Disconnects the socket and sets up a task to reconnect later. 
+	 * If the sleep is interrupted, the reconnect attempt is canceled
 	 */
 	public void connectionLost()
 	{
@@ -67,8 +85,12 @@ public class KagServerChecker implements Runnable
 		//reconnect later
 		try {
 			Discord4J.LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer+" milliseconds");
+			this.setReconnecting(true);
 			Thread.sleep(reconnectTimer);
 		} catch (InterruptedException e) {
+			//if the sleep is interrupted then we want to stay disconnected
+			this.setReconnecting(false);
+			return;
 		}
 		try {
 			connect();
@@ -90,7 +112,8 @@ public class KagServerChecker implements Runnable
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		Discord4J.LOGGER.info("Connected to KAG server: "+ip+":"+port);
 		out.println(rconPassword);
-		connected=true;
+		this.setReconnecting(false);
+		this.setConnected(true);
 	}
 	
 	/**Sends text to the KAG server. 

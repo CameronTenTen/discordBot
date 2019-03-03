@@ -855,7 +855,7 @@ public class GatherObject
 		boolean connectedServers = false;
 		for(GatherServer server : servers)
 		{
-			if(server.isConnected())
+			if(server.isConnected() || server.isReconnecting())
 			{
 				server.disconnect();
 				DiscordBot.sendMessage(this.getCommandChannel(), "Disconnected from "+server.getIp()+":"+server.getPort());
