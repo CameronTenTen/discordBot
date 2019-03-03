@@ -43,7 +43,6 @@ public class CommandSetQueue implements CommandExecutor
 		catch (NumberFormatException e)
 		{
 			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
-			e.printStackTrace();
 			return;
 		}
 		if(newSize<=gather.numPlayersInQueue())
