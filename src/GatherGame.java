@@ -16,7 +16,6 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class GatherGame
 {
-	//currently unused
 	private int gameID;
 	private int currentRound;
 	private gameState currState;
@@ -42,11 +41,9 @@ public class GatherGame
 	private Set<PlayerObject> redSubbedIn;
 	private Set<PlayerObject> blueSubbedIn;
 
-	private Set<PlayerObject> scrambleVotes;
-	private Set<PlayerObject> cancelVotes;
-
-	private int scrambleVotesReq = 5;
-	private int cancelVotesReq = 7;
+	private final String SCRAMBLE_VOTE_TYPE = "scramble";
+	private final String CANCEL_VOTE_TYPE = "cancel";
+	private VoteManager voteManager;
 
 	public enum gameState
 	{
@@ -80,8 +77,9 @@ public class GatherGame
 		this.redSubbedIn = new HashSet<PlayerObject>();
 		this.blueSubbedIn = new HashSet<PlayerObject>();
 
-		this.scrambleVotes = new HashSet<PlayerObject>();
-		this.cancelVotes = new HashSet<PlayerObject>();
+		voteManager = new VoteManager();
+		voteManager.addVoteType(this.SCRAMBLE_VOTE_TYPE, 5);
+		voteManager.addVoteType(this.CANCEL_VOTE_TYPE, 7);
 	}
 
 	/**Checks if the bot is connected with the server that this game is being played on. 
@@ -347,6 +345,12 @@ public class GatherGame
 		bluePlayerList = players.subList(0, players.size()/2);
 		redPlayerList = players.subList(players.size()/2, players.size());
 	}
+	
+	public void doShuffle()
+	{
+		this.shuffleTeams();
+		this.sendScrambledTeamsToServer();
+	}
 
 	/**Add a vote to scramble teams. 
 	 * @param player the player voting to scramble
@@ -354,19 +358,7 @@ public class GatherGame
 	 */
 	public int addScrambleVote(PlayerObject player)
 	{
-		if(!this.scrambleVotes.add(player))
-		{
-			//player already voted
-			return -1;
-		}
-		if(this.scrambleVotes.size()>=this.scrambleVotesReq)
-		{
-			this.shuffleTeams();
-			this.sendScrambledTeamsToServer();
-			this.scrambleVotes.clear();
-			return 0;
-		}
-		return this.scrambleVotes.size();
+		return voteManager.addVote(this.SCRAMBLE_VOTE_TYPE, player);
 	}
 
 	/**Add a vote to cancel game. 
@@ -375,16 +367,7 @@ public class GatherGame
 	 */
 	public int addCancelVote(PlayerObject player)
 	{
-		if(!this.cancelVotes.add(player))
-		{
-			//player already voted
-			return -1;
-		}
-		if(this.cancelVotes.size()>=this.cancelVotesReq)
-		{
-			return 0;
-		}
-		return this.cancelVotes.size();
+		return voteManager.addVote(this.CANCEL_VOTE_TYPE, player);
 	}
 
 	/**Helper function for getting a list of mention strings of each player on blue team. 
@@ -507,42 +490,42 @@ public class GatherGame
 	 * @return the number of votes required to scramble the teams
 	 */
 	public int getScrambleVotesReq() {
-		return scrambleVotesReq;
+		return this.voteManager.getRequiredVotesCount(this.SCRAMBLE_VOTE_TYPE);
 	}
 
 	/**Setter for the number of votes required to scramble the teams. 
 	 * @param scrambleVotesReq the new number of votes required to scramble the teams
 	 */
 	public void setScrambleVotesReq(int scrambleVotesReq) {
-		this.scrambleVotesReq = scrambleVotesReq;
+		this.voteManager.addVoteType(this.SCRAMBLE_VOTE_TYPE, scrambleVotesReq);
 	}
 
 	/**Getter for the current number of scramble votes. 
 	 * @return the current number of votes to scramble the teams
 	 */
 	public int getNumScrambleVotes() {
-		return this.scrambleVotes.size();
+		return this.voteManager.currentVoteCount(this.SCRAMBLE_VOTE_TYPE);
 	}
 
 	/**Getter for the number of votes required to cancel the game.
 	 * @return the number of votes required to cancel the game
 	 */
 	public int getCancelVotesReq() {
-		return cancelVotesReq;
+		return this.voteManager.getRequiredVotesCount(this.CANCEL_VOTE_TYPE);
 	}
 
 	/**Setter for the number of votes required to cancel the teams. 
 	 * @param scrambleVotesReq the new number of votes required to cancel the game
 	 */
-	public void setCancelVotesReq(int scrambleVotesReq) {
-		this.cancelVotesReq = scrambleVotesReq;
+	public void setCancelVotesReq(int cancelVotesReq) {
+		this.voteManager.addVoteType(this.CANCEL_VOTE_TYPE, cancelVotesReq);
 	}
 
 	/**Getter for the current number of cancel votes. 
 	 * @return the current number of votes to cancel the game
 	 */
 	public int getNumCancelVotes() {
-		return this.cancelVotes.size();
+		return this.voteManager.currentVoteCount(this.CANCEL_VOTE_TYPE);
 	}
 
 	/**Getter for the current round number. 

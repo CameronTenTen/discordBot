@@ -492,6 +492,7 @@ public class GatherObject
 		switch(returnVal)
 		{
 		case 0:
+			game.doShuffle();
 			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled for game #"+game.getGameID()+"!", true);
 			DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
