@@ -13,7 +13,7 @@ public class CommandPlayers implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandPlayers
 	 */
-	@Command(aliases = {"!players"}, description = "Check players currently playing")
+	@Command(aliases = {"!players", "!teams"}, description = "Check players currently playing")
 	public void onCommand(IMessage message)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
