@@ -346,6 +346,10 @@ public class GatherGame
 		redPlayerList = players.subList(players.size()/2, players.size());
 	}
 	
+	/**Shuffles the current teams, then sends the new teams to the gather server.
+	 * @see GatherGame#shuffleTeams()
+	 * @see GatherGame#sendScrambledTeamsToServer()
+	 */
 	public void doShuffle()
 	{
 		this.shuffleTeams();
