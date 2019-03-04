@@ -26,9 +26,10 @@ public class VoteManager {
 		this.voteTypes.put(voteType, numVotesRequired);
 	}
 
-	public void removeVoteType(String voteType, Integer numVotesRequired)
+	public void removeVoteType(String voteType)
 	{
 		this.voteTypes.remove(voteType);
+		this.currentVotes.remove(voteType);
 	}
 
 	public int getRequiredVotesCount(String voteType)
@@ -36,11 +37,11 @@ public class VoteManager {
 		return this.voteTypes.get(voteType);
 	}
 
-	public int addVote(String voteType, PlayerObject player, String voteInfo, boolean clearIfSufficientVotes)
+	public int addVote(String voteType, PlayerObject player, String voteInfo)
 	{
 		if(!voteTypes.containsKey(voteType))
 		{
-			Discord4J.LOGGER.warn("Bot attempted to add a vote for a vote type that doesnt exist! someone did some bad programming!: "+voteType+" with stack trace: "+Thread.currentThread().getStackTrace());
+			Discord4J.LOGGER.error("Bot attempted to add a vote for a vote type that doesnt exist! someone did some bad programming!: "+voteType+" with stack trace: "+Thread.currentThread().getStackTrace());
 			return -2;
 		}
 		Map<PlayerObject, String> votes = currentVotes.get(voteType);
@@ -56,7 +57,9 @@ public class VoteManager {
 		{
 			return -1;
 		}
-		else if(votes.size() >= voteTypes.get(voteType))
+		//if the required votes is null, that means we shouldn't track it for this vote type
+		Integer numVotesRequired = voteTypes.get(voteType);
+		if(numVotesRequired != null && votes.size() >= numVotesRequired)
 		{
 			this.clearAllVotes(voteType);
 			return 0;
@@ -65,11 +68,6 @@ public class VoteManager {
 		{
 			return votes.size();
 		}
-	}
-
-	public int addVote(String voteType, PlayerObject player, String voteInfo)
-	{
-		return this.addVote(voteType, player, voteInfo, true);
 	}
 
 	public int addVote(String voteType, PlayerObject player)
@@ -81,10 +79,14 @@ public class VoteManager {
 	{
 		Map<PlayerObject, String> votes = currentVotes.get(voteType);
 		if(votes == null) {
-			return -2;
+			if(!voteTypes.containsKey(voteType))
+			{
+				return -2;
+			}
 		}
-		else if(votes.remove(player) != null)
+		else if(votes.containsKey(player))
 		{
+			votes.remove(player);
 			return votes.size();
 		}
 		return -1;
@@ -97,7 +99,8 @@ public class VoteManager {
 
 	public boolean clearAllVotes(String voteType)
 	{
-		if(currentVotes.remove(voteType) != null)
+		Map<PlayerObject, String> votes = currentVotes.remove(voteType);
+		if(votes != null && votes.size() > 0)
 		{
 			return true;
 		}
