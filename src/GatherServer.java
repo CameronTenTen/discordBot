@@ -175,7 +175,8 @@ public class GatherServer
 	 * @return the server link
 	 */
 	public String getServerLink() {
-		return serverLink;
+		if(this.serverLink != null) return this.serverLink;
+		else return "<kag://"+this.getIp()+":"+this.getPort()+"/"+this.getServerPassword()+">";
 	}
 
 	/**Setter for the http:// or kag:// link players can use to connect with this server. 
