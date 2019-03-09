@@ -9,15 +9,14 @@ import sx.blah.discord.handle.obj.IUser;
  *
  */
 public class SubManager {
-	
+
 	GatherObject gather;
-	
+
 	List<SubRequestObject> subRequests;
 	List<SubVoteObject> subVotes;
-	
-	//not possible for this to be less than 1 with current implementation (see add sub vote code)
+
 	private int subVotesRequired = 4;
-	
+
 	SubManager(GatherObject gatherObj)
 	{
 		gather = gatherObj;
@@ -234,36 +233,30 @@ public class SubManager {
 		
 		if(hasSubRequest(playerVotedFor)) return -4;
 		SubVoteObject votes = getSubVotesForPlayer(playerVotedFor);
-		if(votes != null)
+		if(votes == null)
 		{
-			if(!votes.addSubVote(playerVoting))
-			{
-				//gets here if failed to add the sub vote, which probably means the voter has already voted to sub this player
-				return -5;
-			}
-			else
-			{
-				if(votes.numVotes() >= getSubVotesRequired())
-				{
-					removeSubVotes(playerVotedFor);
-					addSubRequest(playerVotedFor, votedGame);
-					//votes filled and sub request added
-					return 0;
-				}
-				return votes.numVotes();
-			}
+			votes = new SubVoteObject(playerVotedFor, votedGame, playerVoting);
+			subVotes.add(votes);
 		}
-		else
+		else if(!votes.addSubVote(playerVoting))
 		{
-			subVotes.add(new SubVoteObject(playerVotedFor, votedGame, playerVoting));
-			return 1;
+			return -5;
 		}
+
+		if(votes.numVotes() >= getSubVotesRequired())
+		{
+			removeSubVotes(playerVotedFor);
+			addSubRequest(playerVotedFor, votedGame);
+			//votes filled and sub request added
+			return 0;
+		}
+		return votes.numVotes();
 	}
 	
 	/**Wrapper function for adding a sub vote from Discord User objects. 
 	 * @param votedFor the user object of the player to sub
 	 * @param playerVoting the user object of the player voting for a sub
-	  * @return -1 if the voter is not in a game, -2 if the voted is not in a game, -3 if the players are in different games, -4 if this player already has a sub request, -5 if the voter has already voted to sub them, 
+	 * @return -1 if the voter is not in a game, -2 if the voted is not in a game, -3 if the players are in different games, -4 if this player already has a sub request, -5 if the voter has already voted to sub them, 
 	 * 0 if sufficient votes have been made to request a sub, or a number greater than 0 representing the total number of sub votes that have been made for the player. 
 	 * @see #addSubVote(PlayerObject, PlayerObject)
 	 */
