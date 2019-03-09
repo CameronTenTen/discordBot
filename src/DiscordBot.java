@@ -187,6 +187,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandDisconnect());
 		cmdHandler.registerCommand(new CommandCancelGame());
 		cmdHandler.registerCommand(new CommandConnect());
+		cmdHandler.registerCommand(new CommandCachedPlayerInfo());
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers

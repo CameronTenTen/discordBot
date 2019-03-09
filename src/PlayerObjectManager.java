@@ -85,6 +85,11 @@ public class PlayerObjectManager
 				this.weakDiscordidToPlayerObjectMap.put(playerObj.getDiscordid(), new WeakReference<PlayerObject>(playerObj));
 			}
 		}
+		this.printMaps();
+	}
+	
+	public void printMaps()
+	{
 		System.out.println(kagNameToPlayerObjectMap);
 		System.out.println(discordidToPlayerObjectMap);
 		System.out.println(weakKagNameToPlayerObjectMap);
