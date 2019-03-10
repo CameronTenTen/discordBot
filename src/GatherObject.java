@@ -354,7 +354,7 @@ public class GatherObject
 	 */
 	public int addToQueue(IUser user)
 	{
-		PlayerObject player = DiscordBot.players.getObject(user);
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(user);
 		//player is null if they are not linked
 		if(player==null) return -1;
 		return this.addToQueue(player);
@@ -422,7 +422,7 @@ public class GatherObject
 	 */
 	public GatherGame getPlayersGame(IUser user)
 	{
-		return getPlayersGame(DiscordBot.players.getObject(user));
+		return getPlayersGame(DiscordBot.players.getOrCreatePlayerObject(user));
 	}
 
 	/**Wrapper of getPlayersGame() that returns true if they are found, or false otherwise
@@ -480,7 +480,7 @@ public class GatherObject
 		GatherGame game = this.getPlayersGame(player);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(this.getCommandChannel(), "You must be **in a game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "You must be **in the game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
 			return;
 		}
 		if(!game.getCurrState().equals(GatherGame.gameState.PREGAME))
@@ -533,6 +533,7 @@ public class GatherObject
 
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
+		//gather game announcement message is separate because it is text to speech
 		String passwordString = server.getServerPassword();
 		if(passwordString!=null && !passwordString.isEmpty()) passwordString = " with password "+passwordString;
 		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting on "+server.getServerName()+passwordString, true);
@@ -896,12 +897,17 @@ public class GatherObject
 	 * @param kagName the KAG username of the player to be subbed
 	 * @param ip the ip address of the server the request was made on
 	 * @param port the port of the server the request was made on
-	 * @return -1 if no game was found or if the player isnt playing on the server, 1 if a sub was requested
+	 * @return -1 if no game was found or if the player isnt playing on the server, 1 if a sub was requested, 0 if the sub request already existed
 	 * @see SubManager#addSubRequest(PlayerObject, GatherGame)
 	 */
 	public int addSubRequest(String kagName, String ip, int port)
 	{
-		PlayerObject playerToBeSubbed = DiscordBot.players.getObject(kagName);
+		PlayerObject playerToBeSubbed = DiscordBot.players.getIfExists(kagName);
+		if(playerToBeSubbed==null)
+		{
+			this.getServer(ip, port).say(kagName+" is not in this game!");
+			return -1;
+		}
 
 		GatherGame game = this.getRunningGame(ip, port);
 		if(game==null)
@@ -913,12 +919,17 @@ public class GatherObject
 		int returnVal = substitutions.addSubRequest(playerToBeSubbed, game);
 		if(returnVal==-1)
 		{
+			Discord4J.LOGGER.error("adding server sub request encountered an error: "+returnVal+" for player: "+playerToBeSubbed+" game: "+game);
 			this.getServer(ip, port).say("An error occured adding sub request for "+kagName+", this player isn't playing?");
 		}
 		else if(returnVal==1)
 		{
 			this.getServer(ip, port).say("Sub request added for player "+kagName+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
 			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerToBeSubbed.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
+		}
+		else if(returnVal==0)
+		{
+			this.getServer(ip, port).say("You are already requesting a sub "+kagName+"!");
 		}
 		return returnVal;
 	}
@@ -935,8 +946,8 @@ public class GatherObject
 	 */
 	public int addSubVote(String votedFor, String voting, String ip, int port)
 	{
-		PlayerObject playerVotedFor = DiscordBot.players.getObject(votedFor);
-		PlayerObject playerVoting = DiscordBot.players.getObject(voting);
+		PlayerObject playerVotedFor = DiscordBot.players.getIfExists(votedFor);
+		PlayerObject playerVoting = DiscordBot.players.getIfExists(voting);
 
 		GatherGame game = this.getRunningGame(ip, port);
 		if(playerVotedFor==null)

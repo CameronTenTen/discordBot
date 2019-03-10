@@ -34,7 +34,7 @@ public class CommandRandomTeams implements CommandExecutor
 		List<StatsObject> stats = DiscordBot.database.getRandomPlayers(gather.getMaxQueueSize());
 		for(StatsObject stat : stats)
 		{
-			PlayerObject player = DiscordBot.players.getObject(stat.discordid);
+			PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(stat.discordid);
 			int addReturnVal = gather.addToQueue(player);
 			switch(addReturnVal)
 			{

@@ -2,7 +2,6 @@ import java.util.List;
 
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -31,19 +30,19 @@ public class CommandCachedPlayerInfo implements CommandExecutor
 		if(args.length==0)
 		{
 			//if they just did !playerinfo without any argument, just get stats for them
-			player = DiscordBot.players.getObject(message.getAuthor().getLongID());
+			player = DiscordBot.players.checkCache(message.getAuthor().getLongID());
 		}
 		else if(!mentions.isEmpty())
 		{
-			player = DiscordBot.players.getObject(mentions.get(0).getLongID());
+			player = DiscordBot.players.checkCache(mentions.get(0).getLongID());
 		}
 		else
 		{
-			player = DiscordBot.players.getObject(args[0]);
+			player = DiscordBot.players.checkCache(args[0]);
 			if(player==null)
 			{
 				//if the username wasnt a kag name, try it as a discord id
-				player = DiscordBot.players.getObject(args[0]);
+				player = DiscordBot.players.checkCache(args[0]);
 			}
 		}
 

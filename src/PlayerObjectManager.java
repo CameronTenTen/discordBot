@@ -112,7 +112,65 @@ public class PlayerObjectManager
 	 * @param discordid the Discord id of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
-	private PlayerObject checkExists(long discordid)
+	public PlayerObject checkCache(long discordid)
+	{
+		PlayerObject p = discordidToPlayerObjectMap.get(discordid);
+		if(p!=null)
+		{
+			return p;
+		}
+		WeakReference<PlayerObject> weakRef = weakDiscordidToPlayerObjectMap.get(discordid);
+		if(weakRef!=null)
+		{
+			p = weakRef.get();
+			if(p!=null)
+			{
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/**Returns a player if they exist, null otherwise.
+	 * @param kagName the KAG username of the player to find
+	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
+	 */
+	public PlayerObject checkCache(String kagName)
+	{
+		kagName = kagName.toLowerCase();
+		PlayerObject p = kagNameToPlayerObjectMap.get(kagName);
+		if(p!=null)
+		{
+			return p;
+		}
+		WeakReference<PlayerObject> weakRef = weakKagNameToPlayerObjectMap.get(kagName);
+		if(weakRef!=null)
+		{
+			p = weakRef.get();
+			if(p!=null)
+			{
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	private void moveFromWeakToStrongMap(PlayerObject p)
+	{
+		//no longer want to delete this player so move them out of the weak map
+		weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
+		weakKagNameToPlayerObjectMap.remove(p.getKagName());
+		//and add them back to the strong map
+		discordidToPlayerObjectMap.put(p.getDiscordid(), p);
+		kagNameToPlayerObjectMap.put(p.getKagName(), p);
+		p.used();
+	}
+
+	/**Returns a player if they exist, null otherwise.
+	 * @param discordid the Discord id of the player to find
+	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
+	 */
+	public PlayerObject getIfExists(long discordid)
 	{
 		PlayerObject p = discordidToPlayerObjectMap.get(discordid);
 		//System.out.println("discordid in strong map?"+p);
@@ -128,13 +186,7 @@ public class PlayerObjectManager
 			//System.out.println("discordid in weak map?"+p);
 			if(p!=null)
 			{
-				//no longer want to delete this player so move them out of the weak map
-				weakDiscordidToPlayerObjectMap.remove(discordid);
-				weakKagNameToPlayerObjectMap.remove(p.getKagName());
-				//and add them back to the strong map
-				discordidToPlayerObjectMap.put(discordid, p);
-				kagNameToPlayerObjectMap.put(p.getKagName(), p);
-				p.used();
+				moveFromWeakToStrongMap(p);
 				return p;
 			}
 		}
@@ -145,8 +197,9 @@ public class PlayerObjectManager
 	 * @param kagName the KAG username of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
-	private PlayerObject checkExists(String kagName)
+	public PlayerObject getIfExists(String kagName)
 	{
+		kagName = kagName.toLowerCase();
 		PlayerObject p = kagNameToPlayerObjectMap.get(kagName);
 		//System.out.println("kagName in strong map?"+p);
 		if(p!=null)
@@ -161,17 +214,20 @@ public class PlayerObjectManager
 			//System.out.println("kagName in weak map?"+p);
 			if(p!=null)
 			{
-				//no longer want to delete this player so move them out of the weak map
-				weakKagNameToPlayerObjectMap.remove(kagName);
-				weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
-				//and add them back to the strong map
-				kagNameToPlayerObjectMap.put(kagName, p);
-				discordidToPlayerObjectMap.put(p.getDiscordid(), p);
-				p.used();
+				moveFromWeakToStrongMap(p);
 				return p;
 			}
 		}
 		return null;
+	}
+
+	/**Returns a player if they exist, null otherwise.
+	 * @param kagName the KAG username of the player to find
+	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
+	 */
+	public PlayerObject getIfExists(IUser user)
+	{
+		return getIfExists(user.getLongID());
 	}
 
 	/**Create a new managed PlayerObject. Takes their KAG username and gets their Discord id from the database.
@@ -182,13 +238,15 @@ public class PlayerObjectManager
 	{
 		//get their info from sql
 		long id = DiscordBot.database.getDiscordID(kagName);
+		//also get the kag name incase the provided string was not the right case
+		kagName = DiscordBot.database.getKagName(id);
 		//return null if they have no sql entry
 		if(id==-1) return null;
 		//we dont need to check the player doesnt already exist with the new data, this should be prevented by update
 		//p = checkExists(id);
 		PlayerObject p = new PlayerObject(id, kagName);
 		//add the new player object to the maps for next time its needed
-		kagNameToPlayerObjectMap.put(kagName, p);
+		kagNameToPlayerObjectMap.put(kagName.toLowerCase(), p);
 		discordidToPlayerObjectMap.put(id, p);
 		return p;
 	}
@@ -208,27 +266,27 @@ public class PlayerObjectManager
 		PlayerObject p = new PlayerObject(discordid, kagname);
 		//add the new player object to the list for next time its needed
 		discordidToPlayerObjectMap.put(discordid, p);
-		kagNameToPlayerObjectMap.put(kagname, p);
+		kagNameToPlayerObjectMap.put(kagname.toLowerCase(), p);
 		return p;
 	}
 
 	/**Wrapper for getting a players PlayerObject by discord user object. Creates the player object if they don't already have one.
 	 * @param user the Discord User object of the wanted player
 	 * @return their PlayerObject
-	 * @see #getObject(long)
+	 * @see #getOrCreatePlayerObject(long)
 	 */
-	public PlayerObject getObject(IUser user)
+	public PlayerObject getOrCreatePlayerObject(IUser user)
 	{
-		return getObject(user.getLongID());
+		return getOrCreatePlayerObject(user.getLongID());
 	}
 
 	/**Getter for a players player object. Creates the player object if they don't already have one.
 	 * @param kagName the KAG username of the wanted player
 	 * @return their PlayerObject
 	 */
-	public PlayerObject getObject(String kagName)
+	public PlayerObject getOrCreatePlayerObject(String kagName)
 	{
-		PlayerObject p = checkExists(kagName);
+		PlayerObject p = getIfExists(kagName);
 		if(p!=null) return p;
 		//if the player doesnt have an object, create one
 		return addObject(kagName);
@@ -238,9 +296,9 @@ public class PlayerObjectManager
 	 * @param discordid the Discord id of the wanted player
 	 * @return their PlayerObject
 	 */
-	public PlayerObject getObject(long discordid)
+	public PlayerObject getOrCreatePlayerObject(long discordid)
 	{
-		PlayerObject p = checkExists(discordid);
+		PlayerObject p = getIfExists(discordid);
 		if(p!=null) return p;
 		//if the player doesnt have an object, create one
 		return addObject(discordid);
@@ -260,7 +318,7 @@ public class PlayerObjectManager
 	 */
 	public void refresh(String kagName)
 	{
-		PlayerObject p = checkExists(kagName);
+		PlayerObject p = getIfExists(kagName);
 		//if the player exists update them based on current sql data
 		if(p!=null)
 		{
@@ -277,7 +335,7 @@ public class PlayerObjectManager
 	 */
 	public void update(long discordid)
 	{
-		PlayerObject p = checkExists(discordid);
+		PlayerObject p = getIfExists(discordid);
 		//if the player exists update them based on current sql data
 		if(p!=null)
 		{
@@ -296,13 +354,13 @@ public class PlayerObjectManager
 	 */
 	public boolean forceUpdate(String kagName, long discordid)
 	{
-		PlayerObject playerByKagname = checkExists(kagName);
-		PlayerObject playerByDiscordid = checkExists(discordid);
+		PlayerObject playerByKagname = getIfExists(kagName);
+		PlayerObject playerByDiscordid = getIfExists(discordid);
 		if(playerByKagname==null && playerByDiscordid==null)
 		{
 			PlayerObject p = new PlayerObject(discordid, kagName);
 			//add the new player object to the list for next time its needed
-			kagNameToPlayerObjectMap.put(kagName, p);
+			kagNameToPlayerObjectMap.put(kagName.toLowerCase(), p);
 			discordidToPlayerObjectMap.put(discordid, p);
 			return true;
 		}

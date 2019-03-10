@@ -70,11 +70,11 @@ public class SubManager {
 	
 	/**Add a sub request for a player
 	 * @param subObj a SubRequestObject specifing who should be subbed and the game they are in
-	 * @return -1 if the game is null, 0 if a sub request already exists for this player, 1 if the sub request was added.
+	 * @return -1 if the game or player is null, 0 if a sub request already exists for this player, 1 if the sub request was added.
 	 */
 	public int addSubRequest(SubRequestObject subObj)
 	{
-		if(subObj.game==null)
+		if(subObj.game==null || subObj.playerToBeReplaced==null)
 		{
 			//player isnt playing a game
 			return -1;
@@ -108,7 +108,7 @@ public class SubManager {
 	 */
 	public int addSubRequest(IUser user, GatherGame game)
 	{
-		return addSubRequest(DiscordBot.players.getObject(user), game);
+		return addSubRequest(DiscordBot.players.getIfExists(user), game);
 	}
 	
 	/**Remove the a players sub request. 
@@ -149,7 +149,7 @@ public class SubManager {
 	 */
 	public boolean removeSubRequest(IUser user)
 	{
-		return removeSubRequest(DiscordBot.players.getObject(user));
+		return removeSubRequest(DiscordBot.players.getIfExists(user));
 	}
 	
 	/**Wrapper function for removing a sub request using a SubRequestObject. 
@@ -262,7 +262,7 @@ public class SubManager {
 	 */
 	public int addSubVote(IUser votedFor, IUser playerVoting)
 	{
-		return addSubVote(DiscordBot.players.getObject(votedFor), DiscordBot.players.getObject(playerVoting));
+		return addSubVote(DiscordBot.players.getIfExists(votedFor), DiscordBot.players.getIfExists(playerVoting));
 	}
 
 	/**Remove all the sub votes for a player. 
@@ -289,7 +289,7 @@ public class SubManager {
 	 */
 	public boolean removeSubVotes(IUser playerVotedFor)
 	{
-		return removeSubVotes(DiscordBot.players.getObject(playerVotedFor));
+		return removeSubVotes(DiscordBot.players.getIfExists(playerVotedFor));
 	}
 	
 	/**Wrapper function for removing all sub votes for a game. 

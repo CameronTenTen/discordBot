@@ -29,7 +29,7 @@ public class CommandRsub implements CommandExecutor
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
 		if(gather==null) return;
 
-		PlayerObject player = DiscordBot.players.getObject(message.getAuthor());
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(message.getAuthor());
 		if(player==null)
 		{
 			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to request a sub" + message.getAuthor().getDisplayName(message.getGuild()) + "! Use !link to get started or !linkhelp for more information");
