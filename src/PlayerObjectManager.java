@@ -88,6 +88,8 @@ public class PlayerObjectManager
 		this.printMaps();
 	}
 	
+	/**Helper for printing the current state of the cache to std out
+	 */
 	public void printMaps()
 	{
 		System.out.println(kagNameToPlayerObjectMap);
@@ -109,6 +111,8 @@ public class PlayerObjectManager
 	}
 
 	/**Returns a player if they exist, null otherwise.
+	 * <p>
+	 * Doesn't modify the cache in any way, useful for debug (the returned player object will update its used timer as normal)
 	 * @param discordid the Discord id of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
@@ -131,7 +135,9 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Returns a player if they exist, null otherwise.
+	/**Returns a player if they exist, null otherwise. 
+	 * <p>
+	 * Doesn't modify the cache in any way, useful for debug (the returned player object will update its used timer as normal)
 	 * @param kagName the KAG username of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
@@ -155,6 +161,10 @@ public class PlayerObjectManager
 		return null;
 	}
 	
+	/**Helper function for moving a player from the weak map to the strong map. 
+	 * Should be called whenever a player object is requested and it is found in the weak map
+	 * @param p the player object to move
+	 */
 	private void moveFromWeakToStrongMap(PlayerObject p)
 	{
 		//no longer want to delete this player so move them out of the weak map
@@ -199,6 +209,7 @@ public class PlayerObjectManager
 	 */
 	public PlayerObject getIfExists(String kagName)
 	{
+		if(kagName == null) return null;
 		kagName = kagName.toLowerCase();
 		PlayerObject p = kagNameToPlayerObjectMap.get(kagName);
 		//System.out.println("kagName in strong map?"+p);
@@ -221,12 +232,13 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Returns a player if they exist, null otherwise.
-	 * @param kagName the KAG username of the player to find
+	/**Wrapper for getting a players PlayerObject by discord user object if they exist, null otherwise.
+	 * @param user the discord user object of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
 	public PlayerObject getIfExists(IUser user)
 	{
+		if(user == null) return null;
 		return getIfExists(user.getLongID());
 	}
 

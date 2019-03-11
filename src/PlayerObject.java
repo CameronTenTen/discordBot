@@ -85,6 +85,7 @@ public class PlayerObject
 	}
 
 	/**Getter for the players Discord user object. 
+	 * Updates the players last used time.
 	 * @return the IUser object associated with this player
 	 */
 	public IUser getDiscordUserInfo() {
@@ -93,6 +94,7 @@ public class PlayerObject
 	}
 
 	/**Setter for the players Discord user object. 
+	 * Updates the players last used time.
 	 * @param user the IUser object to be associated with this player
 	 */
 	public void setDiscordUserInfo(IUser user) {
@@ -101,6 +103,7 @@ public class PlayerObject
 	}
 
 	/**Getter for the players KAG Username. 
+	 * Updates the players last used time.
 	 * @return the players KAG Username as a string
 	 */
 	public String getKagName() {
@@ -109,6 +112,7 @@ public class PlayerObject
 	}
 
 	/**Setter for the players KAG Username. 
+	 * Updates the players last used time.
 	 * @param kagName the KAG username to set
 	 */
 	public void setKagName(String kagName) {
@@ -172,6 +176,7 @@ public class PlayerObject
 	}
 
 	/**Getter for the users mention string for use in discord messages. 
+	 * Updates the players last used time.
 	 * @return the mention string
 	 */
 	public String getMentionString()
@@ -181,6 +186,7 @@ public class PlayerObject
 	}
 
 	/**Get a player as a string formated as KAG Username(Discord Name#Discord Discriminator). 
+	 * Does not update the players last used time.
 	 * @return the players string
 	 * @see java.lang.Object#toString()
 	 */
