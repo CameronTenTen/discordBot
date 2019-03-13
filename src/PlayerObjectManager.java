@@ -81,7 +81,7 @@ public class PlayerObjectManager
 				i.remove();
 				this.discordidToPlayerObjectMap.remove(playerObj.getDiscordid());
 				//keep it in the weak map
-				this.weakKagNameToPlayerObjectMap.put(playerObj.getKagName(), new WeakReference<PlayerObject>(playerObj));
+				this.weakKagNameToPlayerObjectMap.put(playerObj.getKagName().toLowerCase(), new WeakReference<PlayerObject>(playerObj));
 				this.weakDiscordidToPlayerObjectMap.put(playerObj.getDiscordid(), new WeakReference<PlayerObject>(playerObj));
 			}
 		}
@@ -172,7 +172,7 @@ public class PlayerObjectManager
 		weakKagNameToPlayerObjectMap.remove(p.getKagName());
 		//and add them back to the strong map
 		discordidToPlayerObjectMap.put(p.getDiscordid(), p);
-		kagNameToPlayerObjectMap.put(p.getKagName(), p);
+		kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
 		p.used();
 	}
 
