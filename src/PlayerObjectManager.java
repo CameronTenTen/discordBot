@@ -318,11 +318,11 @@ public class PlayerObjectManager
 
 	/**Wrapper for update(long discordid). Called when someones player info changes.
 	 * @param user the user object of the player that has changed
-	 * @see #update(long)
+	 * @see #refresh(long)
 	 */
-	public void update(IUser user)
+	public void refresh(IUser user)
 	{
-		update(user.getLongID());
+		refresh(user.getLongID());
 	}
 
 	/**Called when someones player info is changed on the database. Gets their new info from the database.
@@ -345,7 +345,7 @@ public class PlayerObjectManager
 	/**Called when someones player info is changed on the database. Gets their new info from the database.
 	 * @param discordid the Discord id of the player that has changed
 	 */
-	public void update(long discordid)
+	public void refresh(long discordid)
 	{
 		PlayerObject p = getIfExists(discordid);
 		//if the player exists update them based on current sql data

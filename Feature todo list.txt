@@ -21,7 +21,6 @@ advanced statistics
 
 Technical Debt:
 Refactor !rsub so that the same code is run from both discord and server - other commands should be implemented in a way that they can be called elsewhere too
-Rename PlayerObject.update() to PlayerObject.refresh() (I think that is a better name for it)
 move some discord user functionality into the player object (so we are less attached to the current library)(probably not worth the effort unless actually changing library)
 make failed db access different to not finding something - specifically for the when the add command tries to get a player object
 update existing vote systems to use the new vote manager
