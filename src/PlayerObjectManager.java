@@ -316,6 +316,40 @@ public class PlayerObjectManager
 		return addObject(discordid);
 	}
 
+	/**Updates a player object in the cache with a new value for their discord id. 
+	 * <p>
+	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getDiscordid()}, 
+	 * then updates the discord id stored in the player object, 
+	 * and re-adds the player object to the map using the new discord id value as the map key.
+	 * @param p the player object to update
+	 * @param discordid the new discord id
+	 */
+	private void update(PlayerObject p, long discordid) {
+		//remove the player from the map (we need to update the key they are stored under)
+		discordidToPlayerObjectMap.remove(p.getDiscordid());
+		weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
+		p.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
+		//add them back into the map with the new key
+		discordidToPlayerObjectMap.put(discordid, p);
+	}
+
+	/**Updates a player object in the cache with a new value for their kagName. 
+	 * <p>
+	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getKagName()}, 
+	 * then updates the kagName stored in the player object, 
+	 * and re-adds the player object to the map using the new kagName value as the map key.
+	 * @param p the player object to update
+	 * @param discordid the new discord id
+	 */
+	private void update(PlayerObject p, String kagName) {
+		//remove the player from the map (we need to update the key they are stored under)
+		kagNameToPlayerObjectMap.remove(p.getKagName());
+		weakKagNameToPlayerObjectMap.remove(p.getKagName());
+		p.setKagName(kagName);
+		//add them back into the map with the new key
+		kagNameToPlayerObjectMap.put(kagName, p);
+	}
+	
 	/**Wrapper for update(long discordid). Called when someones player info changes.
 	 * @param user the user object of the player that has changed
 	 * @see #refresh(long)
@@ -336,7 +370,7 @@ public class PlayerObjectManager
 		{
 			//get their info from sql
 			long id = DiscordBot.database.getDiscordID(kagName);
-			p.setDiscordUserInfo(DiscordBot.client.getUserByID(id));
+			this.update(p, id);
 		}
 		//could add their player object here, but will do lazy approach and only do that when the object is needed
 		//addObject(kagName);
@@ -352,8 +386,8 @@ public class PlayerObjectManager
 		if(p!=null)
 		{
 			//get their info from sql
-			String kagname = DiscordBot.database.getKagName(discordid);
-			p.setKagName(kagname);
+			String kagName = DiscordBot.database.getKagName(discordid);
+			this.update(p, kagName);
 		}
 		//could add their player object here, but will do lazy approach and only do that when the object is needed
 		//addObject(discordid);
@@ -387,11 +421,11 @@ public class PlayerObjectManager
 			}
 			if(playerByKagname!=null)
 			{
-				playerByKagname.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
+				this.update(playerByKagname, discordid);
 			}
 			if(playerByDiscordid!=null)
 			{
-				playerByDiscordid.setKagName(kagName);
+				this.update(playerByDiscordid, kagName);
 			}
 			return true;
 		}
