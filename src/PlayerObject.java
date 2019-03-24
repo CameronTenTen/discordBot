@@ -38,8 +38,6 @@ public class PlayerObject
 		this(user);
 		this.setKagName(kagName);
 		this.used();
-		System.out.println("Creating player: "+this.getDiscordid()+" "+this.getKagName()+" dumping stack: ");
-		Thread.dumpStack();
 	}
 
 	/**WARNING: DO NOT USE: PLAYER OBJECTS SHOULD NOT BE INSTANTIATED OUTSIDE OF THE PLAYER OBJECT MANAGER. Player objects instantiated outside of the manager will not be updated when a player changes their linked accounts. 
