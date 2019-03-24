@@ -3,21 +3,20 @@ import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**Admin only command for ending the current game. Must be used in command channel. 
- * Parses the first argument as an int, if any error occurs doing this it gives a vague error.
  * <p>
- * 0 is blue team, 1 is red team, -1 is a draw, -2 will wipe the game with no results recorded
+ * Parses the first argument as the match id, and the second as the team to credit the win to. Valid values are red, blue, draw or cancel.
  * @author cameron
  *
  */
-public class CommandGiveWin implements CommandExecutor
+public class CommandEndGame implements CommandExecutor
 {
 
 	/**The function that is called when the command is used
 	 * @param message
 	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandGiveWin
+	 * @see #CommandEndGame
 	 */
-	@Command(aliases = {"!givewin"}, description = "Admin only - give win in the current game to a particular team")
+	@Command(aliases = {"!endgame", "!givewin"}, description = "Admin only - end the specified game, crediting the win to a particular team, or no team")
 	public void onCommand(IMessage message, String[] args)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
@@ -31,7 +30,7 @@ public class CommandGiveWin implements CommandExecutor
 		}
 		if(args.length<2)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", not enough arguments, command usage is !givewin matchid red/blue/draw/cancel!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", not enough arguments, command usage is !endgame matchid red/blue/draw/cancel!");
 			return;
 		}
 		int matchId = -1;
@@ -42,7 +41,7 @@ public class CommandGiveWin implements CommandExecutor
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", an error occured parsing the game id, command usage is !givewin matchid red/blue/draw/cancel!");
+			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", an error occured parsing the game id, command usage is !endgame matchid red/blue/draw/cancel!");
 			return;
 		}
 		GatherGame game = gather.getRunningGame(matchId);

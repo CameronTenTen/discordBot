@@ -165,7 +165,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandEnd());
 		cmdHandler.registerCommand(new CommandClearGames());
 		cmdHandler.registerCommand(new CommandSetQueue());
-		cmdHandler.registerCommand(new CommandGiveWin());
+		cmdHandler.registerCommand(new CommandEndGame());
 		cmdHandler.registerCommand(new CommandPlayers());
 		cmdHandler.registerCommand(new CommandReconnect());
 		cmdHandler.registerCommand(new CommandRsub());

@@ -1,6 +1,5 @@
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
-import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
@@ -29,36 +28,7 @@ public class CommandCancelGame implements CommandExecutor
 			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to do that " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
 			return;
 		}
-		if(args.length<=0)
-		{
-			gather.addCancelVote(player);
-			return;
-		}
-		else
-		{
-			int matchId = -1;
-			try
-			{
-				matchId = Integer.parseInt(args[0]);
-			}
-			catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
-			{
-				e.printStackTrace();
-				DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured parsing the game id, did you type the command correctly "+message.getAuthor().getDisplayName(message.getGuild())+"?");
-				return;
-			}
-			
-			if(gather.endGame(matchId, -2))
-			{
-				DiscordBot.sendMessage(gather.getCommandChannel(), "Game #"+matchId+" has been canceled!", true);
-				Discord4J.LOGGER.info("Game cancelled: "+matchId);
-				return;
-			}
-			else
-			{
-				DiscordBot.sendMessage(gather.getCommandChannel(), "An error occured ending the game, does that match exist "+message.getAuthor().getDisplayName(message.getGuild())+"?");
-				return;
-			}
-		}
+		gather.addCancelVote(player);
+		return;
 	}
 }
