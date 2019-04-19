@@ -182,7 +182,7 @@ public class DiscordBot {
 		cmdHandler.registerCommand(new CommandRefreshServers());
 		cmdHandler.registerCommand(new CommandScramble());
 		cmdHandler.registerCommand(new CommandStatus());
-		cmdHandler.registerCommand(new CommandPingMe());
+		//cmdHandler.registerCommand(new CommandPingMe());
 		//cmdHandler.registerCommand(new CommandRandomTeams());
 		cmdHandler.registerCommand(new CommandDisconnect());
 		cmdHandler.registerCommand(new CommandCancelGame());
