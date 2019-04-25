@@ -81,22 +81,28 @@ public class KagServerChecker implements Runnable
 	public void connectionLost()
 	{
 		//disconnect
-		disconnect();
+		this.disconnect();
 		//reconnect later
-		try {
-			Discord4J.LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer+" milliseconds");
-			this.setReconnecting(true);
-			Thread.sleep(reconnectTimer);
-		} catch (InterruptedException e) {
-			//if the sleep is interrupted then we want to stay disconnected
-			this.setReconnecting(false);
-			return;
-		}
-		try {
-			connect();
-		} catch (IOException e) {
-			Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
-			connectionLost();
+		this.setReconnecting(true);
+		while(this.isReconnecting())
+		{
+			if(Thread.interrupted()) return;
+			try {
+				Discord4J.LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer/60.0f+" seconds");
+				Thread.sleep(reconnectTimer);
+				try {
+					this.connect();
+				} catch (IOException e) {
+					this.disconnect();
+					Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
+				}
+			} catch (InterruptedException e) {
+				//if the sleep is interrupted then we want to stay disconnected
+				this.setReconnecting(false);
+				//have to recreate the interrupt because sleep consumes it when it throws the interrupted exception
+				Thread.currentThread().interrupt();
+				return;
+			}
 		}
 	}
 	
@@ -137,6 +143,7 @@ public class KagServerChecker implements Runnable
 	public void disconnect()
 	{
 		try {
+			Discord4J.LOGGER.info("Disconnecting from KAG server: "+ip+":"+port);
 			socket.close();
 			in.close();
 			out.close();
@@ -174,6 +181,7 @@ public class KagServerChecker implements Runnable
 		while(!Thread.interrupted())
 		{
 			try {
+				//check if there is any incoming messages from the server
 				if(in.ready())
 				{
 					lastMsg = in.readLine();
@@ -193,6 +201,7 @@ public class KagServerChecker implements Runnable
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			//check for any messages waiting to be sent to the server
 			while(sendMessageQueue.peek() != null)
 			{
 				out.println(sendMessageQueue.poll());

@@ -32,8 +32,13 @@ public class GatherServer
 	public boolean connect()
 	{
 		try {
+			//check for and stop any existing connections
+			if(rconThread != null) rconThread.interrupt();
+			//now create the new connection
 			serverCheckObject = new KagServerChecker(ip, port, rconPassword);
+			//add an rcon listener to process any received messages
 			serverCheckObject.addListener(new RconListener());
+			//create a thread for running the checker
 			rconThread = new Thread(serverCheckObject);
 			rconThread.start();
 			return true;
