@@ -1,8 +1,13 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import com.google.gson.JsonSyntaxException;
 
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.IChannel;
@@ -47,14 +52,19 @@ public class GatherObject
 
 	public SubManager substitutions = null;
 
-	public Set<GatherServer> servers;
+	//this list comes from the config - it is only for importing the server list and should never be used
+	public Set<GatherServer> serverList;
+	//the list from the config is translated into a map for easy lookup and duplicate checking
+	//TODO: unify both lists so that the config specifies a case insensitive duplicate checked key map
+	public Map<String, GatherServer> servers;
 
 	private List<GatherGame> runningGames;
 
 	GatherObject()
 	{
 		queue = new GatherQueueObject();
-		servers = new HashSet<GatherServer>();
+		serverList = new HashSet<GatherServer>();
+		servers = new HashMap<String, GatherServer>();
 		runningGames = new ArrayList<GatherGame>();
 		substitutions = new SubManager(this);
 	}
@@ -102,6 +112,18 @@ public class GatherObject
 
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
+	}
+
+	public void initialiseServers()
+	{
+		for(GatherServer server : serverList)
+		{
+			if (servers.containsKey(server.getServerID().toUpperCase()))
+			{
+				throw new JsonSyntaxException("duplicate key: "+server.getServerID()+" - server's must all have unique id's");
+			}
+			servers.put(server.getServerID().toUpperCase(), server);
+		}
 	}
 
 	/**
@@ -516,7 +538,8 @@ public class GatherObject
 	 */
 	public int startGame()
 	{
-		GatherServer server = this.getFreeServer();
+		String serverId = this.getFreeServer();
+		GatherServer server = this.getServer(serverId);
 		if(server == null)
 		{
 			DiscordBot.sendMessage(getCommandChannel(), "There are currently **no servers** to play on! A game will be **started when** a server becomes **available**!");
@@ -534,10 +557,12 @@ public class GatherObject
 		//announce the game
 		//do the team messages in separate lines so that it highlights the players team
 		//gather game announcement message is separate because it is text to speech
-		String passwordString = server.getServerPassword();
-		if(passwordString!=null && !passwordString.isEmpty()) passwordString = " with password "+passwordString;
+		String serverIdString = "";
+		if(serverId != null && !serverId.isEmpty()) serverIdString = serverId+": ";
+		String passwordString = "";
+		if(server.getServerPassword()!=null && !server.getServerPassword().isEmpty()) passwordString = " with password "+server.getServerPassword();
 		DiscordBot.sendMessage(getCommandChannel(), "Gather game #"+game.getGameID()+" starting on "+server.getServerName()+passwordString, true);
-		if(server.getServerLink()!=null && server.getServerLink()!="") DiscordBot.sendMessage(getCommandChannel(), server.getServerLink());
+		if(server.getServerLink()!=null && server.getServerLink()!="") DiscordBot.sendMessage(getCommandChannel(), serverIdString + server.getServerLink());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
 		Discord4J.LOGGER.info("Game started: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
@@ -768,19 +793,18 @@ public class GatherObject
 		this.getScoreboardMessage().edit(scoreboardString);
 	}
 
-	/**Gets a server from the server list that is not in use. 
-	 * @return a GatherServer object representing the server that can be used
-	 * @see #GatherServer
+	/**Gets a server from the server list that is not in use. Returns the server id. 
+	 * @return a String representing the server id of the server that can be used
 	 */
-	public GatherServer getFreeServer()
+	public String getFreeServer()
 	{
 		// TODO make some kind of server priority? in case of high/low ping servers?
 		// TODO only get servers that the bot is currently connected to (will then also need to check if the queue is full on server (re)connect) (probably want to implement better heartbeat/reconnect system before this)
 		// not important now as there should only be 1 server anyway
-		for(GatherServer server : servers)
+		for(Entry<String, GatherServer> entry : servers.entrySet())
 		{
-			if (!server.isInUse()) {
-				return server;
+			if (!entry.getValue().isInUse()) {
+				return entry.getKey();
 			}
 		}
 		return null;
@@ -794,7 +818,7 @@ public class GatherObject
 	 */
 	public GatherServer getServer(String ip, int port)
 	{
-		for(GatherServer server : servers)
+		for(GatherServer server : servers.values())
 		{
 			if(server.getIp().equals(ip) && server.getPort() == port)
 			{
@@ -804,46 +828,117 @@ public class GatherObject
 		return null;
 	}
 
+	/**Gets the GatherServer object for the requested server. Loops through the list of servers and compares the given string with the server id case insensitively.
+	 * @param the server id to look for
+	 * @return the GatherServer object if it was found, null otherwise
+	 * @see #GatherServer
+	 */
+	public GatherServer getServer(String serverId)
+	{
+		return this.servers.get(serverId.toUpperCase());
+		/*if(serverId == null) return null;
+		for(GatherServer server : servers.values())
+		{
+			if(serverId.equalsIgnoreCase(server.getServerID()))
+			{
+				return server;
+			}
+		}
+		return null;*/
+	}
+
+	/**Connect to the specified gather server if it is not currently connected. 
+	 * <p>
+	 * Outputs a message saying either connected, already connected, or failed to connect in the command channel depending on what happens.
+	 * @param serverId - the gather server id of the server to connect with
+	 * @return true if attempted connection, false if no server found for specified id
+	 */
+	public boolean connectToServer(String serverId)
+	{
+		return this.connectToServer(serverId, false);
+	}
+	
+	/**Connect to the specified gather server if it is not currently connected. 
+	 * <p>
+	 * Outputs a message saying either connected, already connected, or failed to connect in the command channel depending on what happens, unless silent is set to true.
+	 * @param serverId - the gather server id of the server to connect with
+	 * @param silent - prevents status messages from being sent to the gather channel if true
+	 * @return true if attempted connection, false if no server found for specified id
+	 */
+	public boolean connectToServer(String serverId, boolean silent)
+	{
+		GatherServer server = this.getServer(serverId);
+		if(server == null)
+		{
+			return false;
+		}
+		if(server.isConnected())
+		{
+			if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Already connected to "+serverId+" ("+server.getIp()+":"+server.getPort()+")");
+		}
+		else if(server.connect())
+		{
+			if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+serverId+" ("+server.getIp()+":"+server.getPort()+")");
+		}
+		else 
+		{
+			if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+serverId+" ("+server.getIp()+":"+server.getPort()+")");
+		}
+		return true;
+	}
+
+	/**Disconnect from the specified gather server. 
+	 * <p>
+	 * Says either disconnecting, or not connected in the command channel depending on what happens.
+	 * <p>
+	 * Always tries to disconnect, even if no connection was detected and a "not connected" message was sent to the discord channel. (Just in case the connected status was wrong)
+	 * @param serverId - the gather server id of the server to disconnect from
+	 * @return true if attempted disconnection, false if no server found for specified id
+	 */
+	public boolean disconnectFromServer(String serverId)
+	{
+		return this.disconnectFromServer(serverId, false);
+	}
+
+	/**Disconnect from the specified gather server. 
+	 * <p>
+	 * Says either disconnecting, or not connected in the command channel depending on what happens, unless silent is set to true.
+	 * <p>
+	 * Always tries to disconnect, even if no connection was detected and a "not connected" message was sent to the discord channel. (Just in case the connected status was wrong)
+	 * @param server - the gather server object to disconnect from
+	 * @param silent - prevents status messages from being sent to the gather channel if true
+	 * @return true if attempted disconnection, false if no server found for specified id
+	 */
+	public boolean disconnectFromServer(String serverId, boolean silent)
+	{
+		GatherServer server = this.getServer(serverId);
+		if(server == null)
+		{
+			return false;
+		}
+		if(server.isConnected() || server.isReconnecting())
+		{
+			if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Disconnecting from "+serverId+" ("+server.getIp()+":"+server.getPort()+")");
+		}
+		else
+		{
+			if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Not connected to "+serverId+" ("+server.getIp()+":"+server.getPort()+")");
+		}
+		//disconnect either way (in case isConnected is wrong)
+		server.disconnect();
+		return true;
+	}
+
 	/**Helper function for establishing the TCPR connection with all the gather KAG servers. 
-	 * Says a message in discord for each server it connects or fails to connect with. 
+	 * Says a message in discord for each server it connects, fails to connect, or is already connected to. Unless silent is set to true.
 	 * @param silent if true, this function will not print any connnection messages to the command channel
 	 * @see GatherServer#connect()
 	 */
 	public void connectKAGServers(boolean silent)
 	{
-		for(GatherServer server : servers)
+		for(String serverId : servers.keySet())
 		{
-			if(server.connect())
-			{
-				if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+server.getIp()+":"+server.getPort());
-			}
-			else 
-			{
-				if(!silent) DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
-			}
-		}
-	}
-
-	/**Helper function for establishing the TCPR connection with all currently disconnected gather KAG servers (i.e. tries to connect to any servers it thinks it is disconnected from). 
-	 * Says a message in discord for each server it connects or fails to connect with. 
-	 * @see GatherServer#connect()
-	 */
-	public void connectKAGServersIfDisconnected()
-	{
-		for(GatherServer server : servers)
-		{
-			if(server.isConnected())
-			{
-				DiscordBot.sendMessage(this.getCommandChannel(), "Already connected to "+server.getIp()+":"+server.getPort());
-			}
-			else if(server.connect())
-			{
-				DiscordBot.sendMessage(this.getCommandChannel(), "Connected to "+server.getIp()+":"+server.getPort());
-			}
-			else 
-			{
-				DiscordBot.sendMessage(this.getCommandChannel(), "Failed to connect to "+server.getIp()+":"+server.getPort());
-			}
+			this.connectToServer(serverId, silent);
 		}
 	}
 
@@ -853,20 +948,10 @@ public class GatherObject
 	 */
 	public void disconnectKAGServers()
 	{
-		boolean connectedServers = false;
-		for(GatherServer server : servers)
+		for(String serverId : servers.keySet())
 		{
-			if(server.isConnected() || server.isReconnecting())
-			{
-				server.disconnect();
-				DiscordBot.sendMessage(this.getCommandChannel(), "Disconnected from "+server.getIp()+":"+server.getPort());
-				Discord4J.LOGGER.info("Disconnected from server (discord command): "+server.getIp()+":"+server.getPort());
-				connectedServers=true;
-			}
-			//disconnect anyway in case isConnected is wrong, but don't talk about it
-			server.disconnect();
+			this.disconnectFromServer(serverId);
 		}
-		if(!connectedServers) DiscordBot.sendMessage(this.getCommandChannel(), "No connected servers");
 	}
 
 	/**Function called when an end building time message is received from a gather KAG server. 

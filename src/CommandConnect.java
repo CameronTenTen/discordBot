@@ -2,10 +2,10 @@ import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
 
-/**Rough admin command for making the discord bot connect to all disconnected KAG servers(only tries if it knows that it is disconnected). Must be used in command channel. 
+/**Admin command for making the discord bot connect to one or all disconnected KAG servers(only tries if it knows that it is disconnected). Must be used in command channel. 
  * @author cameron
- * @see GatherObject#disconnectKAGServers()
  * @see GatherObject#connectKAGServers()
+ * @see GatherObject#connectToServer(serverId)
  */
 public class CommandConnect implements CommandExecutor
 {
@@ -15,7 +15,7 @@ public class CommandConnect implements CommandExecutor
 	 * @see https://github.com/BtoBastian/sdcf4j
 	 * @see #CommandReconnect
 	 */
-	@Command(aliases = {"!connect", "!conn", "!con"}, description = "Admin only - connect to any disconnected kag servers")
+	@Command(aliases = {"!connect", "!conn", "!con"}, description = "Admin only - connect to a kag server, or all kag servers")
 	public void onCommand(IMessage message, String[] args)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
@@ -27,8 +27,26 @@ public class CommandConnect implements CommandExecutor
 			return;
 		
 		}
-
-		gather.connectKAGServersIfDisconnected();
-		return;
+		if(args.length==0)
+		{
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Incorrect parameters, usage is: !connect serverID or !connect ALL");
+			return;
+		}
+		else if(args.length>0)
+		{
+			String serverID = args[0];
+			if("ALL".equalsIgnoreCase(serverID)) {
+				DiscordBot.sendMessage(gather.getCommandChannel(), "Connecting to all servers:");
+				gather.connectKAGServers(false);
+				return;
+			}
+			else
+			{
+				if(!gather.connectToServer(serverID))
+				{
+					DiscordBot.sendMessage(gather.getCommandChannel(), "Could not find server id \""+serverID+"\", usage is !connect serverID or !connect ALL");
+				}
+			}
+		}
 	}
 }

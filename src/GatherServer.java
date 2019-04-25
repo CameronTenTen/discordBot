@@ -7,6 +7,7 @@ import sx.blah.discord.Discord4J;
 public class GatherServer
 {
 	private String serverName;
+	private String serverID;
 	private String ip;
 	private int port;
 	private String rconPassword;				//sv_rconpassword
@@ -132,6 +133,20 @@ public class GatherServer
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
+	}
+
+	/**Getter for the server id string, a reference id for passing to commands that need a server specified.
+	 * @return the server id string
+	 */
+	public String getServerID() {
+		return serverID;
+	}
+
+	/**Setter for the server id string, a reference id for passing to commands that need a server specified.
+	 * @param serverName the new server id to use
+	 */
+	public void setServerID(String serverID) {
+		this.serverID = serverID;
 	}
 
 	/**Getter for the server ip address. 

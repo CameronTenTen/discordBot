@@ -37,6 +37,8 @@ public class ReadyEventListener implements IListener<ReadyEvent>
 			GatherObject obj = gson.fromJson(reader, GatherObject.class);
 			obj.setDiscordObjects();
 			DiscordBot.gatherObjects.add(obj);
+			//TODO: this step is unneccessary if the config can specify a case insensitive duplicate checked key map
+			obj.initialiseServers();
 			obj.connectKAGServers(true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
