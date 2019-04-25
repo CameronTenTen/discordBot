@@ -1,12 +1,12 @@
-change server connect etc. commands to specify the server. Need some kind of server reference id system?
+command !setserver #matchid serverid
 managed voice chat channels - configure channel category, create two channels in the category (configure name), configure whether it is locked for player not in that team
 add way for players to force remove their cached player object !clearcache/!clear_cache @name ?
 remove !end and !start commands
 connect discord and server scramble teams votes
 !setgame/!startgame/!setteams/!creategame admin command to create a game with specified teams
-!forcecancel #matchid command
 !freeze command has a timeout
 auto detection of kag server connection loss
+!rsub bans or permission system
 player bans
 proper multi guild support
 better exception handling for optional features such as queue role
@@ -24,3 +24,4 @@ Refactor !rsub so that the same code is run from both discord and server - other
 move some discord user functionality into the player object (so we are less attached to the current library)(probably not worth the effort unless actually changing library)
 make failed db access different to not finding something - specifically for the when the add command tries to get a player object
 update existing vote systems to use the new vote manager
+update to discord4j 3
