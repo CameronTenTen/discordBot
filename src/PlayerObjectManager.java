@@ -1,9 +1,12 @@
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 import java.util.Timer;
 
 import sx.blah.discord.handle.obj.IUser;
@@ -41,14 +44,17 @@ public class PlayerObjectManager
 	  };
 	}
 
+	//the age threshold after which entries should be weakened
 	private static int AGE_TO_DELETE = 129600000;			//1.5 days
+	//how often to check the cache for old entries
 	private static int CACHE_CLEAN_FREQUENCY = 7200000;		//2 hours
 
 	/**Checks the last used time of all the currently cached player objects and changes them to a weak reference if they are too old
 	 * The weak reference allows java to remove the object if no other part of the code is still using it too
 	 */
-	private void weakenOldReferences()
+	private void cleanCacheAndweakenOldReferences()
 	{
+		//check if any of the current weak references have been garbage collected yet
 		Iterator<Entry<Long, WeakReference<PlayerObject>>> weakDiscordidIterator = this.weakDiscordidToPlayerObjectMap.entrySet().iterator();
 		while(weakDiscordidIterator.hasNext())
 		{
@@ -67,16 +73,22 @@ public class PlayerObjectManager
 				weakKagNameIterator.remove();
 			}
 		}
+		this.weakenOldReferences(false);
+		this.printMaps();
+	}
 
+	/**Weaken all player object references that are older than {@value #AGE_TO_DELETE} milliseconds
+	 * @param force override the last used age check - just weaken all the references anyway
+	 */
+	private void weakenOldReferences(boolean force)
+	{
 		long currentTime = System.currentTimeMillis();
 		Iterator<Entry<String, PlayerObject>> i = this.kagNameToPlayerObjectMap.entrySet().iterator();
 		while(i.hasNext())
 		{
 			PlayerObject playerObj = i.next().getValue();
-			//System.out.println(currentTime +" "+ playerObj.getLastUsed() +" "+ (currentTime - playerObj.getLastUsed()) +" "+ AGE_TO_DELETE);
-			if(currentTime - playerObj.getLastUsed() > AGE_TO_DELETE)
+			if(force || currentTime - playerObj.getLastUsed() > AGE_TO_DELETE)
 			{
-				System.out.println("moving player to weak map: "+playerObj);
 				//remove it from both strong maps
 				i.remove();
 				this.discordidToPlayerObjectMap.remove(playerObj.getDiscordid());
@@ -85,9 +97,8 @@ public class PlayerObjectManager
 				this.weakDiscordidToPlayerObjectMap.put(playerObj.getDiscordid(), new WeakReference<PlayerObject>(playerObj));
 			}
 		}
-		this.printMaps();
 	}
-	
+
 	/**Helper for printing the current state of the cache to std out
 	 */
 	public void printMaps()
@@ -96,6 +107,20 @@ public class PlayerObjectManager
 		System.out.println(discordidToPlayerObjectMap);
 		System.out.println(weakKagNameToPlayerObjectMap);
 		System.out.println(weakDiscordidToPlayerObjectMap);
+	}
+
+	/**Helper for getting a set containing all currently cached player objects
+	 * @return a set containing all currently cached player objects
+	 */
+	public Set<PlayerObject> listPlayerCache()
+	{
+		Set<PlayerObject> returnSet = new HashSet<PlayerObject>();
+		returnSet.addAll(kagNameToPlayerObjectMap.values());
+		returnSet.addAll(discordidToPlayerObjectMap.values());
+		returnSet.addAll(weakKagNameToPlayerObjectMap.values().stream().map(weakRef -> weakRef.get()).collect(Collectors.toSet()));
+		returnSet.addAll(weakDiscordidToPlayerObjectMap.values().stream().map(weakRef -> weakRef.get()).collect(Collectors.toSet()));
+		return returnSet;
+
 	}
 
 	PlayerObjectManager()
@@ -107,7 +132,7 @@ public class PlayerObjectManager
 
 		//initialise the task for cleaning up old player objects
 		timer = new Timer(true);
-		timer.scheduleAtFixedRate(wrap(() -> this.weakenOldReferences()), CACHE_CLEAN_FREQUENCY, CACHE_CLEAN_FREQUENCY);
+		timer.scheduleAtFixedRate(wrap(() -> this.cleanCacheAndweakenOldReferences()), CACHE_CLEAN_FREQUENCY, CACHE_CLEAN_FREQUENCY);
 	}
 
 	/**Returns a player if they exist, null otherwise.
@@ -135,7 +160,7 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Returns a player if they exist, null otherwise. 
+	/**Returns a player if they exist, null otherwise.
 	 * <p>
 	 * Doesn't modify the cache in any way, useful for debug (the returned player object will update its used timer as normal)
 	 * @param kagName the KAG username of the player to find
@@ -160,8 +185,8 @@ public class PlayerObjectManager
 		}
 		return null;
 	}
-	
-	/**Helper function for moving a player from the weak map to the strong map. 
+
+	/**Helper function for moving a player from the weak map to the strong map.
 	 * Should be called whenever a player object is requested and it is found in the weak map
 	 * @param p the player object to move
 	 */
@@ -174,6 +199,29 @@ public class PlayerObjectManager
 		discordidToPlayerObjectMap.put(p.getDiscordid(), p);
 		kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
 		p.used();
+	}
+
+	public void clearPlayerCache()
+	{
+		this.printMaps();
+		//weaken everything currently in the cache
+		this.weakenOldReferences(true);
+		//garbage collect anything that can be collected
+		System.gc();
+		//move everything that didn't get collected back from the weak to the strong map
+		for(WeakReference<PlayerObject> w : weakKagNameToPlayerObjectMap.values())
+		{
+			PlayerObject p = w.get();
+			if(p != null)
+			{
+				discordidToPlayerObjectMap.put(p.getDiscordid(), p);
+				kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
+			}
+		}
+		//clear the weak map
+		weakKagNameToPlayerObjectMap.clear();
+		weakDiscordidToPlayerObjectMap.clear();
+		this.printMaps();
 	}
 
 	/**Returns a player if they exist, null otherwise.
@@ -316,10 +364,10 @@ public class PlayerObjectManager
 		return addObject(discordid);
 	}
 
-	/**Updates a player object in the cache with a new value for their discord id. 
+	/**Updates a player object in the cache with a new value for their discord id.
 	 * <p>
-	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getDiscordid()}, 
-	 * then updates the discord id stored in the player object, 
+	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getDiscordid()},
+	 * then updates the discord id stored in the player object,
 	 * and re-adds the player object to the map using the new discord id value as the map key.
 	 * @param p the player object to update
 	 * @param discordid the new discord id
@@ -333,10 +381,10 @@ public class PlayerObjectManager
 		discordidToPlayerObjectMap.put(discordid, p);
 	}
 
-	/**Updates a player object in the cache with a new value for their kagName. 
+	/**Updates a player object in the cache with a new value for their kagName.
 	 * <p>
-	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getKagName()}, 
-	 * then updates the kagName stored in the player object, 
+	 * Removes any existing strong/weak discord map entries for {@link PlayerObject#getKagName()},
+	 * then updates the kagName stored in the player object,
 	 * and re-adds the player object to the map using the new kagName value as the map key.
 	 * @param p the player object to update
 	 * @param discordid the new discord id
@@ -349,7 +397,7 @@ public class PlayerObjectManager
 		//add them back into the map with the new key
 		kagNameToPlayerObjectMap.put(kagName, p);
 	}
-	
+
 	/**Wrapper for update(long discordid). Called when someones player info changes.
 	 * @param user the user object of the player that has changed
 	 * @see #refresh(long)
