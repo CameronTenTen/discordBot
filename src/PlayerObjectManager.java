@@ -93,8 +93,7 @@ public class PlayerObjectManager
 				i.remove();
 				this.discordidToPlayerObjectMap.remove(playerObj.getDiscordid());
 				//keep it in the weak map
-				this.weakKagNameToPlayerObjectMap.put(playerObj.getKagName().toLowerCase(), new WeakReference<PlayerObject>(playerObj));
-				this.weakDiscordidToPlayerObjectMap.put(playerObj.getDiscordid(), new WeakReference<PlayerObject>(playerObj));
+				this.addToWeakMap(playerObj);
 			}
 		}
 	}
@@ -120,7 +119,55 @@ public class PlayerObjectManager
 		returnSet.addAll(weakKagNameToPlayerObjectMap.values().stream().map(weakRef -> weakRef.get()).collect(Collectors.toSet()));
 		returnSet.addAll(weakDiscordidToPlayerObjectMap.values().stream().map(weakRef -> weakRef.get()).collect(Collectors.toSet()));
 		return returnSet;
+	}
 
+	/**Helper function for moving a player from the weak map to the strong map.
+	 * Should be called whenever a player object is requested and it is found in the weak map
+	 * @param p the player object to move
+	 */
+	private void moveFromWeakToStrongMap(PlayerObject p)
+	{
+		this.removeFromWeakMap(p);
+		this.addToStrongMap(p);
+		p.used();
+	}
+
+	/**Helper function for adding a player to the weak map
+	 * @param p the player object to add
+	 */
+	private void addToWeakMap(PlayerObject p)
+	{
+		if(p==null) return;
+		this.weakKagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), new WeakReference<PlayerObject>(p));
+		this.weakDiscordidToPlayerObjectMap.put(p.getDiscordid(), new WeakReference<PlayerObject>(p));
+	}
+
+	/**Helper function for removing a player from the weak map
+	 * @param p the player object to remove
+	 */
+	private void removeFromWeakMap(PlayerObject p)
+	{
+		weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
+		weakKagNameToPlayerObjectMap.remove(p.getKagName());
+	}
+
+	/**Helper function for adding a player to the strong map
+	 * @param p the player object to add
+	 */
+	private void addToStrongMap(PlayerObject p)
+	{
+		if(p==null) return;
+		this.kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
+		this.discordidToPlayerObjectMap.put(p.getDiscordid(), p);
+	}
+
+	/**Helper function for removing a player from the strong map
+	 * @param p the player object to remove
+	 */
+	private void removeFromStrongMap(PlayerObject p)
+	{
+		this.discordidToPlayerObjectMap.remove(p.getDiscordid());
+		this.kagNameToPlayerObjectMap.remove(p.getKagName().toLowerCase());
 	}
 
 	PlayerObjectManager()
@@ -186,42 +233,52 @@ public class PlayerObjectManager
 		return null;
 	}
 
-	/**Helper function for moving a player from the weak map to the strong map.
-	 * Should be called whenever a player object is requested and it is found in the weak map
-	 * @param p the player object to move
+	/**Clear the current player object cache of all unused objects.
+	 * If a discord id is specified, only that player is removed from the cache, otherwise the whole cache is cleared
+	 * @param discordid the player to clear
+	 * @return false either the player is not cached, or the specified player was not removed from the cache
 	 */
-	private void moveFromWeakToStrongMap(PlayerObject p)
-	{
-		//no longer want to delete this player so move them out of the weak map
-		weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
-		weakKagNameToPlayerObjectMap.remove(p.getKagName());
-		//and add them back to the strong map
-		discordidToPlayerObjectMap.put(p.getDiscordid(), p);
-		kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
-		p.used();
-	}
-
-	public void clearPlayerCache()
+	public boolean clearPlayerCache(Long discordid)
 	{
 		this.printMaps();
-		//weaken everything currently in the cache
-		this.weakenOldReferences(true);
+		if(discordid != null)
+		{
+			//if an id was specified, weaken the reference to this user
+			PlayerObject p = discordidToPlayerObjectMap.get(discordid);
+			if(p==null)
+			{
+				//trying to remove a user that is not currently cached
+				return false;
+			}
+			this.removeFromStrongMap(p);
+			this.addToWeakMap(p);
+		}
+		else
+		{
+			//otherwise, weaken everything currently in the cache
+			this.weakenOldReferences(true);
+		}
 		//garbage collect anything that can be collected
 		System.gc();
 		//move everything that didn't get collected back from the weak to the strong map
 		for(WeakReference<PlayerObject> w : weakKagNameToPlayerObjectMap.values())
 		{
 			PlayerObject p = w.get();
-			if(p != null)
-			{
-				discordidToPlayerObjectMap.put(p.getDiscordid(), p);
-				kagNameToPlayerObjectMap.put(p.getKagName().toLowerCase(), p);
-			}
+			addToStrongMap(p);
 		}
 		//clear the weak map
 		weakKagNameToPlayerObjectMap.clear();
 		weakDiscordidToPlayerObjectMap.clear();
 		this.printMaps();
+		if(discordid != null && discordidToPlayerObjectMap.containsKey(discordid))
+		{
+			//a player to remove was specified, but they are still in the cache
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	/**Returns a player if they exist, null otherwise.
@@ -306,8 +363,7 @@ public class PlayerObjectManager
 		//p = checkExists(id);
 		PlayerObject p = new PlayerObject(id, kagName);
 		//add the new player object to the maps for next time its needed
-		kagNameToPlayerObjectMap.put(kagName.toLowerCase(), p);
-		discordidToPlayerObjectMap.put(id, p);
+		addToStrongMap(p);
 		return p;
 	}
 
@@ -325,8 +381,7 @@ public class PlayerObjectManager
 		//p = checkExists(kagname);
 		PlayerObject p = new PlayerObject(discordid, kagname);
 		//add the new player object to the list for next time its needed
-		discordidToPlayerObjectMap.put(discordid, p);
-		kagNameToPlayerObjectMap.put(kagname.toLowerCase(), p);
+		addToStrongMap(p);
 		return p;
 	}
 
@@ -454,8 +509,7 @@ public class PlayerObjectManager
 		{
 			PlayerObject p = new PlayerObject(discordid, kagName);
 			//add the new player object to the list for next time its needed
-			kagNameToPlayerObjectMap.put(kagName.toLowerCase(), p);
-			discordidToPlayerObjectMap.put(discordid, p);
+			addToStrongMap(p);
 			return true;
 		}
 		else

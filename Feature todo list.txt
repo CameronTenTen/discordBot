@@ -1,6 +1,5 @@
 command !setserver #matchid serverid
 managed voice chat channels - configure channel category, create two channels in the category (configure name), configure whether it is locked for player not in that team
-add way for players to force remove their cached player object !clearcache/!clear_cache @name ?
 remove !end and !start commands
 connect discord and server scramble teams votes
 !setgame/!startgame/!setteams/!creategame admin command to create a game with specified teams

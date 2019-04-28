@@ -1,6 +1,9 @@
+import java.util.List;
+
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Admin command for clearing the current player cache of all unused player objects. Must be used in command channel. 
  * @author cameron
@@ -26,7 +29,25 @@ public class CommandClearPlayerCache implements CommandExecutor
 			return;
 		
 		}
-		DiscordBot.players.clearPlayerCache();
-		DiscordBot.sendMessage(gather.getCommandChannel(), "Cleared Cache: " + DiscordBot.players.listPlayerCache());
+		List<IUser> mentions = message.getMentions();
+		if(!mentions.isEmpty())
+		{
+			for(IUser mention : mentions)
+			{
+				if(DiscordBot.players.clearPlayerCache(mention.getLongID()))
+				{
+					DiscordBot.sendMessage(gather.getCommandChannel(), "Removed user from cache: " + gather.fullUserString(mention));
+				}
+				else
+				{
+					DiscordBot.sendMessage(gather.getCommandChannel(), "Failed to remove user from cache: " + gather.fullUserString(mention));
+				}
+			}
+		}
+		else
+		{
+			DiscordBot.players.clearPlayerCache(null);
+			DiscordBot.sendMessage(gather.getCommandChannel(), "Cleared Cache: " + DiscordBot.players.listPlayerCache());
+		}
 	}
 }
