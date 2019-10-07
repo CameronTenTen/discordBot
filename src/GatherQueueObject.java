@@ -7,7 +7,7 @@ import java.util.Vector;
  * @author cameron
  *
  */
-public class GatherQueueObject extends Vector<PlayerObject>
+public class GatherQueueObject extends ArrayList<PlayerObject>
 {
 	private int maxQueueSize = 10;
 	
