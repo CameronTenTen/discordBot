@@ -95,7 +95,22 @@ public class CommandLink implements CommandExecutor
 			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
 			if(info==null || info.username.equals(""))
 			{
-				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");
+				//check if the argument looks like a discord id (probably means they were supposed to paste the link to ingame chat)
+				try
+				{
+					//I have no idea what the minimum length of a discord id is
+					//just guessing a reasonable length and putting a small sanity check here
+					//doesnt matter too much, just tring to filter out anything that might be a discord id so we can help the user
+					if(args[0].length()>15)
+					{
+						Long.parseLong(args[0]);
+						DiscordBot.reply(message, "Could not find a kag username matching "+args[0]+", but that looks like a valid discord id.  Were you supposed to paste that message to ingame chat?");
+					}
+				}
+				catch (Exception e)
+				{
+				}
+				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");	
 				return;
 			}
 			else if(info.gold==false)

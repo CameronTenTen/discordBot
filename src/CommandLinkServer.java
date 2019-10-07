@@ -58,7 +58,7 @@ public class CommandLinkServer implements CommandExecutor
 				switch(returnVal)
 				{
 				case 1:
-					DiscordBot.reply(message,"please connect to a gather KAG server and paste this message in chat: !link "+message.getAuthor().getLongID());
+					DiscordBot.reply(message,"please connect to a gather KAG server and paste this message to ingame chat: !link "+message.getAuthor().getLongID());
 					return;
 				case 0:
 					DiscordBot.reply(message,"your link request has been updated for a new kag username, please connect to a gather KAG server and paste this message to ingame chat: !link "+message.getAuthor().getLongID());
