@@ -90,7 +90,7 @@ public class GatherObject
 		setQueueRole(DiscordBot.client.getRoleByID(queueRoleID));
 		setSoftQueueRole(DiscordBot.client.getRoleByID(softQueueRoleID));
 
-		if(scoreboardChannelID!=0 && scoreboardMessageID==0)
+		if(scoreboardChannelID!=0)
 		{
 			IChannel chan = DiscordBot.client.getChannelByID(scoreboardChannelID);
 			if(chan == null)
@@ -98,14 +98,14 @@ public class GatherObject
 				Discord4J.LOGGER.warn("Error getting scoreboard channel, null returned");
 				return;
 			}
-			scoreboardMessageID = chan.sendMessage("scoreboard").getLongID();
-			setScoreboardMessage(DiscordBot.client.getMessageByID(scoreboardMessageID));
-			this.updateScoreboard();
-			System.out.println("new scoreboard message has been created, please enter the message id in the config or a scoreboard will be created each time the bot starts: "+scoreboardMessageID);
-		}
-		else
-		{
-			setScoreboardMessage(DiscordBot.client.getMessageByID(scoreboardMessageID));
+
+			if(scoreboardMessageID==0)
+			{
+				scoreboardMessageID = chan.sendMessage("scoreboard").getLongID();
+				System.out.println("new scoreboard message has been created, please enter the message id in the config or a scoreboard will be created each time the bot starts: "+scoreboardMessageID);
+			}
+
+			setScoreboardMessage(chan.fetchMessage(scoreboardMessageID));
 		}
 
 		if(this.getScoreboardMessage()!=null)this.updateScoreboard();
