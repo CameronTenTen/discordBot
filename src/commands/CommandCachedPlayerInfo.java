@@ -1,7 +1,12 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherDB;
+import core.PlayerObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -12,25 +17,24 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherDB#getKagName(long)
  * @see GatherDB#getDiscordID(String)
  */
-public class CommandCachedPlayerInfo implements CommandExecutor
+public class CommandCachedPlayerInfo extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @param args
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandPlayerInfo
-	 */
-	@Command(aliases = {"!cachedplayerinfo"}, description = "Check the information of a player stored in the bot cache")
-	public void onCommand(IMessage message, String[] args)
+	public CommandCachedPlayerInfo(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	{
+		super(commands, Arrays.asList("cachedplayerinfo"), "Check the information of a player stored in the bot cache", "cachedplayerinfo KAGName/@user");
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
 	{
 		DiscordBot.players.printMaps();
 
-		List<IUser> mentions = message.getMentions();
+		List<IUser> mentions = messageObject.getMentions();
 		PlayerObject player;
-		if(args.length==0)
+		if(splitMessage.length<=1)
 		{
 			//if they just did !playerinfo without any argument, just get stats for them
-			player = DiscordBot.players.checkCache(message.getAuthor().getLongID());
+			player = DiscordBot.players.checkCache(user.getLongID());
 		}
 		else if(!mentions.isEmpty())
 		{
@@ -38,23 +42,22 @@ public class CommandCachedPlayerInfo implements CommandExecutor
 		}
 		else
 		{
-			player = DiscordBot.players.checkCache(args[0]);
+			player = DiscordBot.players.checkCache(splitMessage[1]);
 			if(player==null)
 			{
 				//if the username wasnt a kag name, try it as a discord id
-				player = DiscordBot.players.checkCache(args[0]);
+				//TODO: this is not doing what the above comment says it is doing?
+				player = DiscordBot.players.checkCache(splitMessage[1]);
 			}
 		}
 
 		if(player==null)
 		{
-			DiscordBot.reply(message,"Could not find a record of that player, either you typed their name incorrectly, or they are not linked");
-			return;
+			return user.mention()+", Could not find a record of that player, either you typed their name incorrectly, or they are not linked";
 		}
 		else
 		{
-			DiscordBot.sendMessage(message.getChannel(), "**KAG username:** "+player.getKagName()+" **Discord ID:** "+player.getDiscordid());
+			return "**KAG username:** "+player.getKagName()+" **Discord ID:** "+player.getDiscordid();
 		}
-		return;
 	}
 }

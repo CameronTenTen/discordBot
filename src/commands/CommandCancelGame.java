@@ -1,6 +1,13 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
+import core.PlayerObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * Command players can use to cancel a game if something went wrong. Must be used in command channel. 
@@ -9,26 +16,32 @@ import sx.blah.discord.handle.obj.IMessage;
  * @author cameron
  * @see GatherObject#clearGames()
  */
-public class CommandCancelGame implements CommandExecutor
+public class CommandCancelGame extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandClearGames
-	 */
-	@Command(aliases = {"!cancelgame", "!cancel"}, description = "Vote to cancel the game you are currently playing")
-	public void onCommand(IMessage message, String[] args)
+	public CommandCancelGame(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("cancelgame", "cancel"), "Vote to cancel the game you are currently playing");
+	}
 
-		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(message.getAuthor());
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(user);
 		if(player==null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to do that " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
-			return;
+			return "You must be linked to do that " + user.getDisplayName(guild) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
 		}
 		gather.addCancelVote(player);
-		return;
+		return null;
 	}
 }

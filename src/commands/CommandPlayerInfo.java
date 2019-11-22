@@ -1,7 +1,10 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherDB;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
@@ -13,81 +16,76 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherDB#getKagName(long)
  * @see GatherDB#getDiscordID(String)
  */
-public class CommandPlayerInfo implements CommandExecutor
+public class CommandPlayerInfo extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @param args
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandPlayerInfo
-	 */
-	@Command(aliases = {"!playerinfo"}, description = "Check the information of a player stored in the database")
-	public void onCommand(IMessage message, String[] args)
+	public CommandPlayerInfo(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	{
+		super(commands, Arrays.asList("playerinfo"), "Check the information of a player stored in the database", "playerinfo <@user/KAGName/discordName/discordNick>");
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
 	{
 		
-		List<IUser> mentions = message.getMentions();
-		String kagname = "";
-		IUser user = null;
-		if(args.length==0)
+		List<IUser> mentions = messageObject.getMentions();
+		String kagnameToGetStatsFor = "";
+		IUser userToGetStatsFor = null;
+		if(splitMessage.length<=1)
 		{
 			//if they just did !playerinfo without any argument, just get stats for them
-			user = message.getAuthor();
-			kagname = DiscordBot.database.getKagName(user.getLongID());
+			userToGetStatsFor = user;
+			kagnameToGetStatsFor = DiscordBot.database.getKagName(userToGetStatsFor.getLongID());
 		}
 		else if(!mentions.isEmpty())
 		{
-			user = mentions.get(0);
-			kagname = DiscordBot.database.getKagName(user.getLongID());
+			userToGetStatsFor = mentions.get(0);
+			kagnameToGetStatsFor = DiscordBot.database.getKagName(userToGetStatsFor.getLongID());
 		}
 		else
 		{
-			long id = DiscordBot.database.getDiscordID(args[0]);
-			user = DiscordBot.client.getUserByID(id);
-			if(user!=null)
+			//first try to interpret the argument as a kagname
+			long id = DiscordBot.database.getDiscordID(splitMessage[1]);
+			userToGetStatsFor = DiscordBot.client.getUserByID(id);
+			if(userToGetStatsFor!=null)
 			{
-				kagname= args[0];
+				kagnameToGetStatsFor= splitMessage[1];
 			}
-			else if(user==null)
+			else if(userToGetStatsFor==null)
 			{
 				//if the username wasnt a kag name, maybe it was a discord username
-				//TODO this only check for their username, not their nick
-				List<IUser> users = DiscordBot.client.getUsersByName(args[0],true);
+				List<IUser> users = DiscordBot.client.getUsersByName(splitMessage[1],true);
 				if(!users.isEmpty())
 				{
-					user = users.get(0);
-					kagname = DiscordBot.database.getKagName(user.getLongID());
+					userToGetStatsFor = users.get(0);
+					kagnameToGetStatsFor = DiscordBot.database.getKagName(userToGetStatsFor.getLongID());
 				}
 				else
 				{
 					//the argument isnt a recognised kag name or discord name, try nicks for this guild
-					IGuild guild = message.getGuild();
 					if(guild!=null)
 					{
-						users = guild.getUsersByName(args[0], true);
+						users = guild.getUsersByName(splitMessage[1], true);
 						if(!users.isEmpty())
 						{
-							user = users.get(0);
-							kagname = DiscordBot.database.getKagName(user.getLongID());
+							userToGetStatsFor = users.get(0);
+							kagnameToGetStatsFor = DiscordBot.database.getKagName(userToGetStatsFor.getLongID());
 						}
 					}
 				}
 			}
 		}
 
-		if(kagname=="" || user==null)
+		if(kagnameToGetStatsFor=="" || userToGetStatsFor==null)
 		{
-			DiscordBot.reply(message,"Could not find a record of that player, either you typed their name incorrectly, or they are not linked");
-			return;
+			return"Could not find a record of that player, either you typed their name incorrectly, or they are not linked";
 		}
-		IGuild guild = message.getGuild();
 		if(guild != null)
 		{
-			DiscordBot.sendMessage(message.getChannel(), "**KAG username:** "+kagname+" **Discord ID:** "+user.getLongID()+" **Nick:** "+user.getDisplayName(guild)+" **Name#Discriminator:** "+user.getName()+"#"+user.getDiscriminator());
+			return "**KAG username:** "+kagnameToGetStatsFor+" **Discord ID:** "+userToGetStatsFor.getLongID()+" **Nick:** "+userToGetStatsFor.getDisplayName(guild)+" **Name#Discriminator:** "+userToGetStatsFor.getName()+"#"+userToGetStatsFor.getDiscriminator();
 		}
 		else
 		{
-			DiscordBot.sendMessage(message.getChannel(), "**KAG username:** "+kagname+" **Discord ID:** "+user.getLongID()+" **Name#Discriminator:** "+user.getName()+"#"+user.getDiscriminator());
+			return "**KAG username:** "+kagnameToGetStatsFor+" **Discord ID:** "+userToGetStatsFor.getLongID()+" **Name#Discriminator:** "+userToGetStatsFor.getName()+"#"+userToGetStatsFor.getDiscriminator();
 		}
-		return;
 	}
 }

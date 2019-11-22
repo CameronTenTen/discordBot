@@ -1,3 +1,4 @@
+package core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1111,10 +1112,9 @@ public class GatherObject
 	}
 	
 	/**Toggles the users current interested state. Checks if they currently have the interested role, and removes them from it if they do, returning 2.
-	 * If they do not already have the role, they are given the role and removed from the queue. The result of {@link GatherObject#remFromQueue(IUser)} is reuturned. 
-	 * 1 if the player was removed, -1 if the user wasn't found (only if they are not linked?) or 0 otherwise. 
+	 * If they do not already have the role, they are given the role returning 0. 
 	 * @param user
-	 * @return 2 if the user was changed to not interested, 1 if the player was set to interested and removed from the queue, -1 if the player wasnt found, 0 otherwise
+	 * @return 2 if the user was changed to not interested, 0 otherwise
 	 */
 	public int toggleInterested(IUser user) {
 		//check if the player has the role

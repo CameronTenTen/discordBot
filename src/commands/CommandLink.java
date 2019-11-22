@@ -1,3 +1,4 @@
+package commands;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -6,10 +7,15 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherDB;
+import core.PlayerInfoObject;
+import core.TokenCheckObject;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Command for users to link their KAG usernames with their discord account. 
  * <p>
@@ -31,57 +37,54 @@ import sx.blah.discord.handle.obj.IMessage;
  * @see DiscordBot#getCorrectCase(String)
  * @see GatherDB#linkAccounts(String, long)
  */
-public class CommandLink implements CommandExecutor
+public class CommandLink extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandLink
-	 */
-	@Command(aliases = {"!link"}, description = "Link your KAG account to your discord account")
-	public void onCommand(IMessage message)
+	public CommandLink(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		String[] input = message.getContent().split("\\s+");
-		String[] args = Arrays.copyOfRange(input, 1, input.length);
-		if(args.length<=0)
+		super(commands, Arrays.asList("link"), "Link your KAG account to your discord account", "link <KAGName> <playerTokenHere>");
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		if(splitMessage.length<=1)
 		{
-			DiscordBot.reply(message,"in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp");
+			return user.mention()+", in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp";
 		}
-		else if(args.length<=1)
+		else if(splitMessage.length==2)
 		{
+			String submittedUsername = splitMessage[1];
 			//check the username is small enough, if its too big they probably forgot the space between username and token
-			if(args[0].length()>20)
+			if(submittedUsername.length()>20)
 			{
-				DiscordBot.reply(message,"your username is too long! Did you forget a space somewhere?");
-				return;
+				return user.mention()+", your username is too long! Did you forget a space somewhere in your message?";
 			}
 			//quick sanity check on their username before giving them the link
-			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
+			PlayerInfoObject info = DiscordBot.getPlayerInfo(submittedUsername);
 			if(info==null || info.username.equals(""))
 			{
-				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");
-				return;
+				return user.mention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
 			}
 			else if(info.gold==false)
 			{
-				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should **use your game account**, if you **have not set your password for that account** there is a **button in the main menu** of the game to do so. \nIf you **do not want to setup your account** you can use the command **!linkserver KAGUsernameHere** instead");
-				return;
+				//TODO: should remove this check due to f2p?
+				return user.mention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should **use your game account**, if you **have not set your password for that account** there is a **button in the main menu** of the game to do so. \nIf you **do not want to setup your account** you can use the command **!linkserver KAGUsernameHere** instead";
 			}
 			else
 			{
-				DiscordBot.reply(message,"please go to https://api.kag2d.com/v1/player/"+info.username+"/token/new to get a token, and then link using the command **!link "+info.username+" PlayerTokenHere**");
+				return user.mention()+", please go to https://api.kag2d.com/v1/player/"+info.username+"/token/new to get a token, and then link using the command **!link "+info.username+" PlayerTokenHere**";
 			}
 		}
-		else if(args.length>=2)
+		else if(splitMessage.length>=3)
 		{
 			//this ideally how it would be done if users didn't make mistakes
-			//String token = args[1];
+			//String token = splitMessage[2];
 			//but that is not the world we live in
 			String token = "";
-			//parse the message in case they added extra bits or copied part of/the whole json
-			List<String> tokens = Arrays.asList(message.toString().split("\\s|\""));
+			//parse the message with quotes as an extra delimiter in case they added extra bits or copied part of/the whole json
+			List<String> tokens = Arrays.asList(messageString.toString().split("\\s|\""));
 			//use the longest sub string as the token
-			//this is a safe assumption because the token is really long(usernames are restricted to 20 characters, and the link command is also shorter than that)
+			//this is a safe assumption because the token is really long (while usernames are restricted to 20 characters, and the link command is also much shorter than that)
 			//still a bit of a hack, but people who dont know how to read json are going to make a mistake copying the token 90% of the time, so it is necessary
 			for(String str : tokens)
 			{
@@ -91,8 +94,9 @@ public class CommandLink implements CommandExecutor
 				}
 			}
 
+			String submittedUsername = splitMessage[1];
 			//check the right case for their name early rather than late
-			PlayerInfoObject info = DiscordBot.getPlayerInfo(args[0]);
+			PlayerInfoObject info = DiscordBot.getPlayerInfo(submittedUsername);
 			if(info==null || info.username.equals(""))
 			{
 				//check if the argument looks like a discord id (probably means they were supposed to paste the link to ingame chat)
@@ -101,22 +105,21 @@ public class CommandLink implements CommandExecutor
 					//I have no idea what the minimum length of a discord id is
 					//just guessing a reasonable length and putting a small sanity check here
 					//doesnt matter too much, just tring to filter out anything that might be a discord id so we can help the user
-					if(args[0].length()>15)
+					if(submittedUsername.length()>15)
 					{
-						Long.parseLong(args[0]);
-						DiscordBot.reply(message, "Could not find a kag username matching "+args[0]+", but that looks like a valid discord id.  Were you supposed to paste that message to ingame chat?");
+						Long.parseLong(submittedUsername);
+						return user.mention()+", Could not find a kag username matching "+submittedUsername+", but that looks like a valid discord id.  Were you supposed to paste that message to ingame chat?";
 					}
 				}
 				catch (Exception e)
 				{
 				}
-				DiscordBot.reply(message,"an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+args[0]+"/info)");	
-				return;
+				return user.mention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
 			}
 			else if(info.gold==false)
 			{
-				DiscordBot.reply(message,"the username you entered does not own the game! If you are a steam user you may have made seperate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.");
-				return;
+				//TODO: should remove this check due to f2p?
+				return user.mention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.";
 			}
 			String username = info.username;
 			
@@ -139,26 +142,26 @@ public class CommandLink implements CommandExecutor
 			if(tokenCheck.playerTokenStatus)
 			{
 				//player token is good
-				int result = DiscordBot.database.linkAccounts(username, message.getAuthor().getLongID());
+				int result = DiscordBot.database.linkAccounts(username, user.getLongID());
 				Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
 				if(result>=0)
 				{
-					DiscordBot.reply(message,"account successfully linked");
-					if(!DiscordBot.database.checkValidLink(username, message.getAuthor().getLongID()))
+					this.reply(messageObject, "account successfully linked");
+					if(!DiscordBot.database.checkValidLink(username, user.getLongID()))
 					{
-						DiscordBot.reply(message,"WARNING: problem with linked information detected, there maybe more than one entry for you. **Please share this error with someone that has database access.** (This should not prevent you playing in the short term, but may cause issues long term)");
+						this.reply(messageObject, "WARNING: problem with linked information detected, there maybe more than one entry for you. **Please share this error with someone that has database access.** (This should not prevent you playing in the short term, but may cause issues long term)");
 					}
 					//check if the player needs to be updated on any servers
-					DiscordBot.playerChanged(message.getAuthor());
+					DiscordBot.playerChanged(user);
 				}
-				else DiscordBot.reply(message,"an error occured linking your accounts, this message should not be displayed, you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link");
+				else return user.mention()+", an error occured linking your accounts, this message should not be displayed, you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link";
 			}
 			else
 			{
 				//tell them that the token is not good
-				DiscordBot.reply(message,"an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed");
+				return user.mention()+", an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed";
 			}
 		}
-		return;
+		return null;
 	}
 }

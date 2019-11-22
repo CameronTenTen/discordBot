@@ -1,10 +1,26 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
 
-public class CommandPing implements CommandExecutor
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
+
+public class CommandPing extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	@Command(aliases = {"!ping"}, description = "Pong!")
-	public String onCommand(String command, String[] args) {
+	public CommandPing(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	{
+		super(commands, Arrays.asList("ping"), "Pong!");
+	}
+	
+	@Override
+	public boolean showInHelp() {
+		return false;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
 		return "Pong!";
 	}
 }

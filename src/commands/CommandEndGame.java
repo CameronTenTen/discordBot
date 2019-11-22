@@ -1,6 +1,13 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherGame;
+import core.GatherObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Admin only command for ending the current game. Must be used in command channel. 
  * <p>
@@ -8,51 +15,56 @@ import sx.blah.discord.handle.obj.IMessage;
  * @author cameron
  *
  */
-public class CommandEndGame implements CommandExecutor
+public class CommandEndGame extends Command<IMessage, IUser, IChannel, IGuild>
 {
-
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandEndGame
-	 */
-	@Command(aliases = {"!endgame", "!givewin"}, description = "Admin only - end the specified game, crediting the win to a particular team, or no team")
-	public void onCommand(IMessage message, String[] args)
+	public CommandEndGame(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("endgame", "givewin"), "Admin only - end the specified game, crediting the win to a particular team, or no team", "endgame gameID red/blue/draw/cancel");
+	}
 
-		if(!gather.isAdmin(message.getAuthor()))
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
+		if(splitMessage.length<3)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that" + " "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		
+			return user.mention() + ", not enough arguments, command usage is !endgame gameID red/blue/draw/cancel!";
 		}
-		if(args.length<2)
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", not enough arguments, command usage is !endgame matchid red/blue/draw/cancel!");
-			return;
-		}
-		int matchId = -1;
+		int gameId = -1;
 		try
 		{
-			matchId = Integer.parseInt(args[0]);
+			gameId = Integer.parseInt(splitMessage[1]);
 		}
 		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 		{
 			e.printStackTrace();
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", an error occured parsing the game id, command usage is !endgame matchid red/blue/draw/cancel!");
-			return;
+			return user.mention() + ", an error occured parsing the game id, command usage is !endgame gameID red/blue/draw/cancel!";
 		}
-		GatherGame game = gather.getRunningGame(matchId);
+		GatherGame game = gather.getRunningGame(gameId);
 		if(game == null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "No game found with the id "+matchId+"!");
-			return;
+			return "No game found with the id "+gameId+"!";
 		}
 		else
 		{
-			String team = args[1].toLowerCase();
+			String team = splitMessage[2].toLowerCase();
 			switch(team)
 			{
 				case "blue":
@@ -68,10 +80,9 @@ public class CommandEndGame implements CommandExecutor
 					gather.endGame(game, -2);
 					break;
 				default:
-					DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().mention() + ", team did not match any known values! (red/blue/draw/cancel)");
-					break;
+					return user.mention() + ", team did not match any known values! (red/blue/draw/cancel)";
 			}
 		}
-		return;
+		return null;
 	}
 }

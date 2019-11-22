@@ -1,3 +1,4 @@
+package core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;

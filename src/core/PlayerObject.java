@@ -1,3 +1,4 @@
+package core;
 import sx.blah.discord.handle.obj.IUser;
 
 /**PlayerObject for holding all the variables assoiciated with a player. 

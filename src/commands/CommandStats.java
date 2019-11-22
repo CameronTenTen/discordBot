@@ -1,7 +1,11 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherDB;
+import core.StatsObject;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
@@ -13,28 +17,25 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherDB#getStats(long)
  * @see GatherDB#getStats(String)
  */
-public class CommandStats implements CommandExecutor
+public class CommandStats extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @param args
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandStats
-	 */
-	@Command(aliases = {"!stats","!playerstats"}, description = "Check the stats of a player stored in the database")
-	public void onCommand(IMessage message, String[] args)
+	public CommandStats(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		
+		super(commands, Arrays.asList("stats", "playerstats"), "Check the stats of a player stored in the database", "stats <KAGName/@user>");
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
 		StatsObject stats;
-		List<IUser> mentions = message.getMentions();
-		if(args.length==0)
+		List<IUser> mentions = messageObject.getMentions();
+		if(splitMessage.length==1)
 		{
 			//if they just did !stats without any argument, just get stats for them
-			stats = DiscordBot.database.getStats(message.getAuthor().getLongID());
+			stats = DiscordBot.database.getStats(user.getLongID());
 			if(stats==null)
 			{
-				DiscordBot.reply(message,"Could not find personal stats, if you want the stats of someone else then usage is !stats <KAGName/User>");
-				return;
+				return "Could not find stats for, if you want the stats of someone else then usage is "+this.getUsage();
 			}
 		}
 		else if(!mentions.isEmpty())
@@ -43,12 +44,12 @@ public class CommandStats implements CommandExecutor
 		}
 		else
 		{
-			stats = DiscordBot.database.getStats(args[0]);
+			stats = DiscordBot.database.getStats(splitMessage[1]);
 			if(stats==null)
 			{
 				//if the username wasnt a kag name, maybe it was a discord username
 				//TODO this only check for their username, not their nick
-				List<IUser> users = DiscordBot.client.getUsersByName(args[0],true);
+				List<IUser> users = DiscordBot.client.getUsersByName(splitMessage[1],true);
 				if(!users.isEmpty())
 				{
 					stats = DiscordBot.database.getStats(users.get(0).getLongID());
@@ -56,10 +57,9 @@ public class CommandStats implements CommandExecutor
 				else
 				{
 					//the argument isnt a recognised kag name or discord name, try nicks for this guild
-					IGuild guild = message.getGuild();
 					if(guild!=null)
 					{
-						users = guild.getUsersByName(args[0], true);
+						users = guild.getUsersByName(splitMessage[1], true);
 						if(!users.isEmpty())
 						{
 							stats = DiscordBot.database.getStats(users.get(0).getLongID());
@@ -71,11 +71,9 @@ public class CommandStats implements CommandExecutor
 		
 		if(stats==null)
 		{
-			DiscordBot.reply(message, "could not find stats for that player, did you type their name correctly?");
-			return;
+			return "could not find stats for that player, did you type their name correctly?";
 		}
 		
-		DiscordBot.sendMessage(message.getChannel(), "Stats for "+stats.kagname+": \n"+stats.toString());
-		return;
+		return "Stats for "+stats.kagname+": \n"+stats.toString();
 	}
 }

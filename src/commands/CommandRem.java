@@ -1,40 +1,50 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Command for players to remove themselves from the queue. Must be used in command channel. 
  * @author cameron
  *
  */
-public class CommandRem implements CommandExecutor
+public class CommandRem extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandRem
-	 */
-	@Command(aliases = {"!rem","!remove","!leave"}, description = "Remove yourself from the queue")
-	public void onCommand(IMessage message)
+	public CommandRem(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
-		
+		super(commands, Arrays.asList("rem", "remove", "leave"), "Remove yourself from the queue");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
 		synchronized(gather)
 		{
-			int remReturnVal = gather.remFromQueue(message.getAuthor());
+			int remReturnVal = gather.remFromQueue(user);
 			switch(remReturnVal)
 			{
 			case 1:
-				Discord4J.LOGGER.info("Removing player from queue: "+message.getAuthor().getDisplayName(message.getGuild()));
-				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-				return;
+				Discord4J.LOGGER.info("Removing player from queue: "+user.getDisplayName(guild));
+				return gather.fullUserString(user)+" **left** the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")";
 			case 0:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You are already not in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-				return;
+				return "You are already not in the queue "+user.getDisplayName(guild)+"!";
 			}
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An unexpected error occured attempting to remove "+message.getAuthor().getDisplayName(message.getGuild())+" from the queue");
-			return;
+			return "An unexpected error occured attempting to remove "+user.getDisplayName(guild)+" from the queue";
 		}
 	}
 }

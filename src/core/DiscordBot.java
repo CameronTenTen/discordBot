@@ -1,3 +1,4 @@
+package core;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,12 +11,44 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 
-import de.btobastian.sdcf4j.CommandHandler;
-import de.btobastian.sdcf4j.handler.Discord4JHandler;
+import commands.CommandAdd;
+import commands.CommandCachedPlayerInfo;
+import commands.CommandCancelGame;
+import commands.CommandClearGames;
+import commands.CommandClearPlayerCache;
+import commands.CommandClearQueue;
+import commands.CommandClearSubs;
+import commands.CommandConnect;
+import commands.CommandDisconnect;
+import commands.CommandEnd;
+import commands.CommandEndGame;
+import commands.CommandForceRem;
+import commands.CommandForceSub;
+import commands.CommandHelp;
+import commands.CommandLink;
+import commands.CommandLinkHelp;
+import commands.CommandLinkServer;
+import commands.CommandList;
+import commands.CommandPing;
+import commands.CommandPlayerInfo;
+import commands.CommandPlayers;
+import commands.CommandRefreshServers;
+import commands.CommandRem;
+import commands.CommandRsub;
+import commands.CommandScramble;
+import commands.CommandSetQueue;
+import commands.CommandStart;
+import commands.CommandStats;
+import commands.CommandStatus;
+import commands.CommandSub;
+import commands.CommandSubs;
+import commands.Discord4JCommands;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
+import sx.blah.discord.api.events.IListener;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -56,6 +89,7 @@ public class DiscordBot {
 	 */
 	public static PlayerObjectManager players;
 
+	//TODO: change this to a map of channel to gather object for quicker lookup in the most common case
 	/**Set of gather objects. Each gather object represents one gather queue, and one command channel. 
 	 * @see GatherObject
 	 */
@@ -152,43 +186,44 @@ public class DiscordBot {
 		// might want to do this in ready listener
 		//TODO delete the saved object so we don't load it next time
 
-		// command listeners
-		CommandHandler cmdHandler = new Discord4JHandler(client);
+		// command listening
+		Discord4JCommands commands = new Discord4JCommands();
+		commands.registerCommand(new CommandHelp(commands));
+		client.getDispatcher().registerListener((IListener<MessageReceivedEvent>) commands::onMessageReceivedEvent);
 
 		// add all the commands
-		cmdHandler.registerCommand(new CommandPing());
-		cmdHandler.registerCommand(new CommandAdd());
-		cmdHandler.registerCommand(new CommandRem());
-		cmdHandler.registerCommand(new CommandList());
-		cmdHandler.registerCommand(new CommandClearQueue());
-		cmdHandler.registerCommand(new CommandForceRem());
-		cmdHandler.registerCommand(new CommandEnd());
-		cmdHandler.registerCommand(new CommandClearGames());
-		cmdHandler.registerCommand(new CommandSetQueue());
-		cmdHandler.registerCommand(new CommandEndGame());
-		cmdHandler.registerCommand(new CommandPlayers());
-		//cmdHandler.registerCommand(new CommandReconnect());
-		cmdHandler.registerCommand(new CommandRsub());
-		cmdHandler.registerCommand(new CommandSub());
-		cmdHandler.registerCommand(new CommandStart());
-		cmdHandler.registerCommand(new CommandClearSubs());
-		cmdHandler.registerCommand(new CommandSubs());
-		cmdHandler.registerCommand(new CommandForceSub());
-		cmdHandler.registerCommand(new CommandLink());
-		cmdHandler.registerCommand(new CommandLinkServer());
-		cmdHandler.registerCommand(new CommandLinkHelp());
-		cmdHandler.registerCommand(new CommandStats());
-		cmdHandler.registerCommand(new CommandPlayerInfo());
-		cmdHandler.registerCommand(new CommandRefreshServers());
-		cmdHandler.registerCommand(new CommandScramble());
-		cmdHandler.registerCommand(new CommandStatus());
-		//cmdHandler.registerCommand(new CommandPingMe());
-		//cmdHandler.registerCommand(new CommandRandomTeams());
-		cmdHandler.registerCommand(new CommandDisconnect());
-		cmdHandler.registerCommand(new CommandCancelGame());
-		cmdHandler.registerCommand(new CommandConnect());
-		cmdHandler.registerCommand(new CommandCachedPlayerInfo());
-		cmdHandler.registerCommand(new CommandClearPlayerCache());
+		commands.registerCommand(new CommandPing(commands));
+		commands.registerCommand(new CommandLink(commands));
+		commands.registerCommand(new CommandLinkServer(commands));
+		commands.registerCommand(new CommandLinkHelp(commands));
+		commands.registerCommand(new CommandAdd(commands));
+		commands.registerCommand(new CommandRem(commands));
+		commands.registerCommand(new CommandList(commands));
+		commands.registerCommand(new CommandPlayers(commands));
+		commands.registerCommand(new CommandRsub(commands));
+		commands.registerCommand(new CommandSub(commands));
+		commands.registerCommand(new CommandSubs(commands));
+		commands.registerCommand(new CommandScramble(commands));
+		commands.registerCommand(new CommandCancelGame(commands));
+		commands.registerCommand(new CommandStatus(commands));
+		commands.registerCommand(new CommandStats(commands));
+		commands.registerCommand(new CommandPlayerInfo(commands));
+		commands.registerCommand(new CommandCachedPlayerInfo(commands));
+		commands.registerCommand(new CommandClearQueue(commands));
+		commands.registerCommand(new CommandForceRem(commands));
+		commands.registerCommand(new CommandClearGames(commands));
+		commands.registerCommand(new CommandSetQueue(commands));
+		commands.registerCommand(new CommandEndGame(commands));
+		commands.registerCommand(new CommandStart(commands));
+		commands.registerCommand(new CommandEnd(commands));
+		commands.registerCommand(new CommandClearSubs(commands));
+		commands.registerCommand(new CommandForceSub(commands));
+		commands.registerCommand(new CommandRefreshServers(commands));
+		//commands.registerCommand(new CommandPingMe(commands));
+		//commands.registerCommand(new CommandRandomTeams(commands));
+		commands.registerCommand(new CommandDisconnect(commands));
+		commands.registerCommand(new CommandConnect(commands));
+		commands.registerCommand(new CommandClearPlayerCache(commands));
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers

@@ -1,3 +1,5 @@
+package core;
+
 
 /**Object for holding the data needed for a sub request in the SubManager. Includes the player to be subbed, and the game they are playing in. 
  * @author cameron

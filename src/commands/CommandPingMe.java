@@ -1,6 +1,13 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
+import core.PlayerObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * Chat command for players to add to/remove from the soft queue/ping list. Must be used in command channel. 
@@ -12,37 +19,42 @@ import sx.blah.discord.handle.obj.IMessage;
  * @author cameron
  *
  */
-public class CommandPingMe implements CommandExecutor
+public class CommandPingMe extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandPingMe
-	 */
-	@Command(aliases = {"!pingme","!softqueue","!softadd","!soft","!interested","!interest","!int","!uninterested","!uninterest", "!unint", "!role", "!gather"}, description = "Add or remove yourself from the soft queue")
-	public void onCommand(IMessage message)
+	public CommandPingMe(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("pingme", "softqueue", "softadd", "soft", "interested", "interest", "int", "uninterested", "uninterest", "unint", "role", "gather"), "Add or remove yourself from the soft queue");
+	}
 
-		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(message.getAuthor());
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(user);
 		if(player==null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You must be linked to play gather " + message.getAuthor().getDisplayName(message.getGuild()) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
-			return;
+			return "You must be linked to play gather " + user.getDisplayName(guild) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
 		}
 		
-		int val = gather.toggleInterested(message.getAuthor());
+		int val = gather.toggleInterested(user);
 		
 		switch(val)
 		{
 		case 2:
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" is no longer **interested**");
-			return;
+			return user.getDisplayName(guild)+" is no longer **interested**";
 		case 0:
-			DiscordBot.sendMessage(gather.getCommandChannel(), message.getAuthor().getDisplayName(message.getGuild())+" is **interested** they want to be notified when there is enough players for a game!");
-			return;
-			
+			return user.getDisplayName(guild)+" is **interested** they want to be notified when there is enough players for a game!";
 		}
+		//the switch handles all cases, so this should never be triggered
+		return null;
 	}
 }

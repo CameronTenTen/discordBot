@@ -1,8 +1,14 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherGame;
+import core.GatherObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Command for sending the current player lists to the appropriate servers. Must be used in command channel. 
  * <p>
@@ -10,34 +16,44 @@ import sx.blah.discord.handle.obj.IMessage;
  * @author cameron
  * @see GatherGame#updateTeamsOnServer()
  */
-public class CommandRefreshServers implements CommandExecutor
+public class CommandRefreshServers extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandRefreshServers
-	 */
-	@Command(aliases = {"!refreshservers", "!refreshplayers", "!refresh", "!refreshgames", "!refreshteams"}, description = "Refresh the player list in currently running games, useful in case of a server disconnect")
-	public void onCommand(IMessage message)
+	public CommandRefreshServers(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("refreshservers", "refreshplayers", "refresh", "refreshgames", "refreshteams"), "Admin only - Refresh the player list in currently running games, useful in case of a server disconnect");
+	}
 
-		if(!gather.isAdmin(message.getAuthor()))
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		}
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
 		List<GatherGame> games = gather.getRunningGames();
 		if(games.isEmpty())
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "There is currently **no running games** to refresh");
-			return;
+			return "There is currently **no running games** to refresh";
 		}
 		for(GatherGame game : games)
 		{
 			game.updateTeamsOnServer();
-			DiscordBot.sendMessage(gather.getCommandChannel(), "**Sent current teams** to "+game.getServerIp()+":"+game.getServerPort());
+			return "**Sent current teams** to "+game.getServerIp()+":"+game.getServerPort();
 		}
+		return null;
 	}
 }

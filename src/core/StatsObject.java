@@ -1,3 +1,5 @@
+package core;
+
 
 /**Object for holding a players stats when they are retreived from the database
  * @author cameron
@@ -20,18 +22,18 @@ public class StatsObject {
 		mmr = new MmrObject();
 		//mmr=0;
 	}
-	String kagname;
-	long discordid;
-	int gamesplayed;
-	int wins;
-	int losses;
-	int draws;
-	int desertions;
-	int substitutions;
-	int desertionlosses;
-	int substitutionwins;
-	float winRate;
-	MmrObject mmr;
+	public String kagname;
+	public long discordid;
+	public int gamesplayed;
+	public int wins;
+	public int losses;
+	public int draws;
+	public int desertions;
+	public int substitutions;
+	public int desertionlosses;
+	public int substitutionwins;
+	public float winRate;
+	public MmrObject mmr;
 	//int mmr;
 	
 	/**Calculates the win rate of the player based on ((wins+subwins)/(gamesplayed+desertionlosses+subwins))*100. This is no longer used, win rate is calculated by the database query instead. 

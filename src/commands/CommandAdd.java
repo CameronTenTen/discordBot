@@ -1,7 +1,13 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.StatusType;
 
 /**
@@ -12,60 +18,60 @@ import sx.blah.discord.handle.obj.StatusType;
  * Does not allow players to add while offline(invisible mode). This is done to prevent people adding while invisible, then going offline (which the bot cant detect). 
  * The bot needs to remove players when they go offline to prevent games starting after people have left. 
  * <p>
- * Adding to queue and starting game are contined in a synchronized statement to prevent players removing while a game is being started.
+ * Adding to queue and starting game are contained in a synchronized statement to prevent players removing while a game is being started.
  * 
  * @author cameron
  *
  */
-public class CommandAdd implements CommandExecutor
+public class CommandAdd extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandAdd
-	 */
-	@Command(aliases = {"!add","!join"}, description = "Add yourself to the queue")
-	public void onCommand(IMessage message)
+	public CommandAdd(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("add","join"), "Add yourself to the queue");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
 		
-		if (message.getAuthor().getPresence().getStatus() == StatusType.OFFLINE)
+		if (user.getPresence().getStatus() == StatusType.OFFLINE)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "You cannot add while you are offline "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
+			return "You cannot add while you are offline "+user.getDisplayName(guild)+"!";
 		}
 		
 		synchronized(gather)
 		{
-			int addReturnVal = gather.addToQueue(message.getAuthor());
+			int addReturnVal = gather.addToQueue(user);
 			
 			switch(addReturnVal)
 			{
 			case -1:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You must link before you can add to the queue "+message.getAuthor().getDisplayName(message.getGuild())+" type **!link KAGUsernameHere** to get started or **!linkhelp** for more information");
-				return;
+				return "You must link before you can add to the queue "+user.getDisplayName(guild)+" type **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
 			case 1:
-				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
-				return;
+				Discord4J.LOGGER.info("Adding player to queue: "+user.getDisplayName(guild));
+				return gather.fullUserString(user)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")";
 			case 2:
-				DiscordBot.sendMessage(gather.getCommandChannel(), gather.fullUserString(message.getAuthor())+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-				Discord4J.LOGGER.info("Adding player to queue: "+message.getAuthor().getDisplayName(message.getGuild()));
+				this.reply(messageObject, gather.fullUserString(user)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				Discord4J.LOGGER.info("Adding player to queue: "+user.getDisplayName(guild));
 				gather.startGame();
-				return;
+				return null;
 			case 3:
-				DiscordBot.sendMessage(gather.getCommandChannel(),"You cannot add to the queue when you are **already in a game** "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-				return;
+				return"You cannot add to the queue when you are **already in a game** "+user.getDisplayName(guild)+"!";
 			case 0:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You are already in the queue "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-				return;
+				return "You are already in the queue "+user.getDisplayName(guild)+"!";
 			case 4:
-				DiscordBot.sendMessage(gather.getCommandChannel(), "You were not added because the queue is already full, try again later "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-				return;
+				return "You were not added because the queue is already full, try again later "+user.getDisplayName(guild)+"!";
 			}
-			DiscordBot.sendMessage(gather.getCommandChannel(), "An unexpected error occured adding "+message.getAuthor().getDisplayName(message.getGuild())+" to the queue");
+			return "An unexpected error occured adding "+user.getDisplayName(guild)+" to the queue";
 		}
-		return;
 	}
 }

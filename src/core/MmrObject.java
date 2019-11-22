@@ -1,3 +1,4 @@
+package core;
 
 /**Object for holding MMR related stuff
  * @author epsilon

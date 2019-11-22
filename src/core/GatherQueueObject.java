@@ -1,6 +1,6 @@
+package core;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Holds a list of players that are currently in the gather queue

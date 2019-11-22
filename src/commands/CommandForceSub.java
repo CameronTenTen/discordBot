@@ -1,8 +1,12 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherObject;
 import sx.blah.discord.Discord4J;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -11,37 +15,43 @@ import sx.blah.discord.handle.obj.IUser;
  * @author epsilon
  *
  */
-public class CommandForceSub implements CommandExecutor
+public class CommandForceSub extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandForceSub
-	 */
-	@Command(aliases = {"!forcesub"}, description = "Admin only - sub out a user from the game")
-	public void onCommand(IMessage message)
+	public CommandForceSub(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
-		
-		if(!gather.isAdmin(message.getAuthor()))
+		super(commands, Arrays.asList("forcesub"), "Admin only - sub out a user from the game", "forcesub @user...");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
+		List<IUser> mentions = messageObject.getMentions();
+		for(IUser mentionedUser : mentions)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only admins can do that "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		
-		}
-		
-		List<IUser> mentions = message.getMentions();
-		for(IUser user : mentions)
-		{
-			if(1==gather.substitutions.addSubRequest(user, gather.getPlayersGame(user)))
+			if(1==gather.substitutions.addSubRequest(mentionedUser, gather.getPlayersGame(mentionedUser)))
 			{
-				Discord4J.LOGGER.info("sub requested for: "+user.getDisplayName(message.getGuild()));
-				DiscordBot.sendMessage(gather.getCommandChannel(), "**Sub request** added for " + user.mention() + " use **!sub "+gather.getPlayersGame(user).getGameID()+"** to sub into their place! ("+gather.getQueueRole().mention()+")");
-				return;
+				Discord4J.LOGGER.info("sub requested for: "+mentionedUser.getDisplayName(guild));
+				return "**Sub request** added for " + mentionedUser.mention() + " use **!sub "+gather.getPlayersGame(mentionedUser).getGameID()+"** to sub into their place! ("+gather.getQueueRole().mention()+")";
 			}
 		}
-		
-		return;
+		return null;
 	}
 }

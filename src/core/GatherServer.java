@@ -1,3 +1,4 @@
+package core;
 import java.io.IOException;
 import sx.blah.discord.Discord4J;
 

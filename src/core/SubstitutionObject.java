@@ -1,3 +1,6 @@
+package core;
+
+import commands.CommandSub;
 
 /**Object representing a substitution that was made. Contains a PlayerObject for the player replaced and the player subbing in, as well as the GatherGame object. 
  * @author cameron
@@ -11,7 +14,7 @@ public class SubstitutionObject {
 		this.playerSubbingIn = player;
 		this.game = game;
 	}
-	PlayerObject playerToBeReplaced;
-	PlayerObject playerSubbingIn;
-	GatherGame game;
+	public PlayerObject playerToBeReplaced;
+	public PlayerObject playerSubbingIn;
+	public GatherGame game;
 }

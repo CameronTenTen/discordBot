@@ -1,3 +1,4 @@
+package core;
 import sx.blah.discord.api.events.IListener;
 import sx.blah.discord.handle.impl.events.user.PresenceUpdateEvent;
 import sx.blah.discord.handle.obj.IPresence;

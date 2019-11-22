@@ -1,59 +1,66 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.MessageTokenizer;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Admin only command for setting queue size. Useful for testing. Must be used in command channel. 
  * @author cameron
  *
  */
-public class CommandSetQueue implements CommandExecutor
+public class CommandSetQueue extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandSetQueue
-	 */
-	@Command(aliases = {"!setqueue"}, description = "Admin only - change the queue size")
-	public void onCommand(IMessage message)
+	public CommandSetQueue(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
-		
-		if(!gather.isAdmin(message.getAuthor()))
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		
-		}
-		
+		super(commands, Arrays.asList("setqueue"), "Admin only - change the queue size", "setqueue queueSize");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
 		int newSize;
-		MessageTokenizer tokens = message.tokenize();
-		tokens.nextWord();
 		//use the second argument as the queue size
-		if(!tokens.hasNextWord())
+		if(splitMessage.length<=1)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
-			return;
+			return "Invalid command format, queue size as a number must be provided";
 		}
 		try
 		{
-			newSize = Integer.parseInt(tokens.nextWord().toString());
+			newSize = Integer.parseInt(splitMessage[1]);
 		}
 		catch (NumberFormatException e)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Invalid command format, queue size as a number must be provided");
-			return;
+			return "Invalid command format, queue size as a number must be provided";
 		}
 		if(newSize<=gather.numPlayersInQueue())
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Cannot set queue size less than or equal to current queue size: "+gather.numPlayersInQueue());
-			return;
+			return "Cannot set queue size less than or equal to current queue size: "+gather.numPlayersInQueue();
 		}
 		gather.setMaxQueueSize(newSize);
-		DiscordBot.sendMessage(gather.getCommandChannel(), "Queue size has been set to "+gather.getMaxQueueSize());
 		
 		gather.updateChannelCaption();
-		return;
+		return "Queue size has been set to "+gather.getMaxQueueSize();
 	}
 }

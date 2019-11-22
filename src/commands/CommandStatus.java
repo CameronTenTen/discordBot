@@ -1,34 +1,45 @@
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+package commands;
+import java.util.Arrays;
+
+import core.DiscordBot;
+import core.GatherObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**Command for checking the status of any currently running games. Must be used in command channel. 
  * @author cameron
  * @see GatherObject#statusString()
  */
-public class CommandStatus implements CommandExecutor
+public class CommandStatus extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandStatus
-	 */
-	@Command(aliases = {"!status"}, description = "Check status of current games")
-	public void onCommand(IMessage message)
+	public CommandStatus(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("status"), "Check status of current games");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
 		
 		String currentStatus = gather.statusString();
 		if(!currentStatus.isEmpty())
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Current games: \n" + currentStatus);
-			return;
+			return "Current games: \n" + currentStatus;
 		}
 		else
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "No games currently running");
-			return;
+			return "No games currently running";
 		}
 	}
 }

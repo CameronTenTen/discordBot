@@ -1,3 +1,4 @@
+package core;
 
 /**Object used for holding token information when it is retreived from the kag2d api. 
  * @author cameron
@@ -7,10 +8,10 @@
  */
 public class TokenCheckObject {
 	
-	TokenCheckObject()
+	public TokenCheckObject()
 	{
 		playerTokenStatus=false;
 	}
 	
-	boolean playerTokenStatus;
+	public boolean playerTokenStatus;
 }

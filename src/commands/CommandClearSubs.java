@@ -1,7 +1,13 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherGame;
+import core.GatherObject;
+import core.SubstitutionObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -11,42 +17,50 @@ import sx.blah.discord.handle.obj.IUser;
  * @author cameron
  * @see SubstitutionObject#ClearSubs()
  */
-public class CommandClearSubs implements CommandExecutor
+public class CommandClearSubs extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandClearSubs
-	 */
-	@Command(aliases = {"!clearsubs"}, description = "Admin only - clear all current sub requests")
-	public void onCommand(IMessage message, String[] args)
+	public CommandClearSubs(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
-		
-		if(!gather.isAdmin(message.getAuthor()))
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		
-		}
-		
+		super(commands, Arrays.asList("clearsubs"), "Admin only - clear all current sub requests, or clear subs for specific users!", "clearsubs <@user...>");
+	}
+
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
 		//check if there was any mentions in the message
-		List<IUser> mentions = message.getMentions();
+		List<IUser> mentions = messageObject.getMentions();
 		if(mentions!=null && mentions.size()>0)
 		{
 			boolean doneSomething = false;
-			for(IUser user : mentions)
+			for(IUser mentionedUser : mentions)
 			{
-				if(gather.substitutions.removeSubRequest(user))
+				if(gather.substitutions.removeSubRequest(mentionedUser))
 				{
-					DiscordBot.sendMessage(gather.getCommandChannel(), "Sub request **cleared** for "+user.getDisplayName(gather.getGuild())+"!");
+					this.reply(messageObject, "Sub request **cleared** for "+mentionedUser.getDisplayName(gather.getGuild())+"!");
 					doneSomething = true;
 					continue;
 				}
-				if(gather.substitutions.removeSubVotes(user))
+				if(gather.substitutions.removeSubVotes(mentionedUser))
 				{
-					DiscordBot.sendMessage(gather.getCommandChannel(), "Sub votes **cleared** for "+user.getDisplayName(gather.getGuild())+"!");
+					this.reply(messageObject, "Sub votes **cleared** for "+mentionedUser.getDisplayName(gather.getGuild())+"!");
 					doneSomething = true;
 					continue;
 				}
@@ -55,49 +69,47 @@ public class CommandClearSubs implements CommandExecutor
 			if(!doneSomething)
 			{
 				//want some kind of feedback if nothing else happened
-				DiscordBot.sendMessage(gather.getCommandChannel(), "**No sub request or votes** found for that user!");
+				this.reply(messageObject, "**No sub request or votes** found for that user!");
 			}
-			return;
+			return null;
 		}
 		
 		//check if there was any other arguments in the message
 		int gameId = -1;
-		try
+		if(splitMessage.length>1)
 		{
-			gameId = Integer.parseInt(args[0]);
+			try
+			{
+				gameId = Integer.parseInt(splitMessage[1]);
+			}
+			catch (NumberFormatException e)
+			{
+				return "**Error** parsing supplied game id "+user.getDisplayName(guild);
+			}
 		}
-		catch (NumberFormatException e)
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "**Error** parsing supplied game id "+message.getAuthor().getDisplayName(message.getGuild()));
-			return;
-		}
-		catch (ArrayIndexOutOfBoundsException e)
+		else
 		{
 			//got here if the message had no extra arguments
 			gather.substitutions.clearSubs();
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Sub list **cleared**");
-			return;
+			return "Sub list **cleared**";
 		}
+		
 		GatherGame game = gather.getRunningGame(gameId);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "**No game found** with that id "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
+			return "**No game found** with that id "+user.getDisplayName(guild)+"!";
 		}
-		boolean doneSomething = false;
 		if(gather.substitutions.removeSubRequests(game))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub **requests cleared** for game #"+gameId);
-			doneSomething = true;
+			return "All sub **requests cleared** for game #"+gameId;
 		}
-		if(gather.substitutions.removeSubVotes(game))
+		else if(gather.substitutions.removeSubVotes(game))
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "All sub **votes cleared** for game #"+gameId);
-			doneSomething = true;
+			return "All sub **votes cleared** for game #"+gameId;
 		}
-		if(!doneSomething)
+		else
 		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "**No sub requests or votes** exist for game #"+gameId);
+			return "**No sub requests or votes** exist for game #"+gameId;
 		}
 	}
 }

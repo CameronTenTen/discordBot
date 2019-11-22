@@ -1,7 +1,12 @@
+package commands;
+import java.util.Arrays;
 import java.util.List;
 
-import de.btobastian.sdcf4j.Command;
-import de.btobastian.sdcf4j.CommandExecutor;
+import core.DiscordBot;
+import core.GatherObject;
+import core.PlayerObjectManager;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -9,45 +14,55 @@ import sx.blah.discord.handle.obj.IUser;
  * @author cameron
  * @see PlayerObjectManager#clearPlayerCache()
  */
-public class CommandClearPlayerCache implements CommandExecutor
+public class CommandClearPlayerCache extends Command<IMessage, IUser, IChannel, IGuild>
 {
-	/**The function that is called when the command is used
-	 * @param message
-	 * @param args
-	 * @see https://github.com/BtoBastian/sdcf4j
-	 * @see #CommandClearPlayerCache
-	 */
-	@Command(aliases = {"!clearPlayerCache", "!clear_player_cache"}, description = "Admin only - clear current player cache of all unused player objects")
-	public void onCommand(IMessage message, String[] args)
+	public CommandClearPlayerCache(Commands<IMessage, IUser, IChannel, IGuild> commands)
 	{
-		GatherObject gather = DiscordBot.getGatherObjectForChannel(message.getChannel());
-		if(gather==null) return;
+		super(commands, Arrays.asList("clearPlayerCache", "clear_player_cache"), "Admin only - clear current player cache of all unused player objects");
+	}
 
-		if(!gather.isAdmin(message.getAuthor()))
-		{
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Only **admins** can do that" + " "+message.getAuthor().getDisplayName(message.getGuild())+"!");
-			return;
-		
-		}
-		List<IUser> mentions = message.getMentions();
+	@Override
+	public boolean isChannelValid(IChannel channel) {
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return false;
+		return gather.isAdmin(user);
+	}
+
+	@Override
+	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	{
+		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
+		if(gather==null) return null;
+
+		List<IUser> mentions = messageObject.getMentions();
 		if(!mentions.isEmpty())
 		{
 			for(IUser mention : mentions)
 			{
 				if(DiscordBot.players.clearPlayerCache(mention.getLongID()))
 				{
-					DiscordBot.sendMessage(gather.getCommandChannel(), "Removed user from cache: " + gather.fullUserString(mention));
+					return "Removed user from cache: " + gather.fullUserString(mention);
 				}
 				else
 				{
-					DiscordBot.sendMessage(gather.getCommandChannel(), "Failed to remove user from cache: " + gather.fullUserString(mention));
+					return "Failed to remove user from cache: " + gather.fullUserString(mention);
 				}
 			}
+			//the code never reaches this point but the compiler thinks it might
+			return null;
 		}
 		else
 		{
 			DiscordBot.players.clearPlayerCache(null);
-			DiscordBot.sendMessage(gather.getCommandChannel(), "Cleared Cache: " + DiscordBot.players.listPlayerCache());
+			return "Cleared Cache: " + DiscordBot.players.listPlayerCache();
 		}
 	}
 }
