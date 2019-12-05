@@ -2,23 +2,25 @@ package core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonSyntaxException;
 
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.PermissionUtils;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.Snowflake;
 
 /**This object contains various variables and functions for one gather queue/channel. 
  * @author cameron
@@ -26,98 +28,89 @@ import sx.blah.discord.util.PermissionUtils;
  */
 public class GatherObject
 {
+	static final Logger LOGGER = LoggerFactory.getLogger(GatherObject.class);
+
 	private GatherQueueObject queue;
 
-	private IGuild guild;
-	private IChannel commandChannel = null;
-	private IRole adminRole = null;
-	private IRole queueRole = null;
-	private IRole softQueueRole = null;
-	private IVoiceChannel blueVoiceChannel = null;
-	private IVoiceChannel redVoiceChannel = null;
-	private IVoiceChannel generalVoiceChannel = null;
-	private IChannel scoreReportChannel = null;
-	private IMessage scoreboardMessage = null;
-	public long guildID = 0L;
-	public String commandChannelString = "";
-	public long commandChannelID = 0L;
-	public long blueVoiceID = 0L;
-	public long redVoiceID = 0L;
-	public long generalVoiceID = 0L;
-	public long scoreReportID = 0L;
-	public long adminRoleID = 0L;
-	public long queueRoleID = 0L;
-	public long softQueueRoleID = 0L;
-	public long scoreboardMessageID = 0L;
-	public long scoreboardChannelID = 0L;
+	private Guild guild;
+	private TextChannel commandChannel = null;
+	private Role adminRole = null;
+	private Role queueRole = null;
+	private Role softQueueRole = null;
+	private VoiceChannel blueVoiceChannel = null;
+	private VoiceChannel redVoiceChannel = null;
+	private VoiceChannel generalVoiceChannel = null;
+	private TextChannel scoreReportChannel = null;
+	private Message scoreboardMessage = null;
+	private String commandChannelBaseName = "";
 
 	public SubManager substitutions = null;
 
-	//this list comes from the config - it is only for importing the server list and should never be used
-	public Set<GatherServer> serverList;
-	//the list from the config is translated into a map for easy lookup and duplicate checking
-	//TODO: unify both lists so that the config specifies a case insensitive duplicate checked key map
 	public Map<String, GatherServer> servers;
 
 	private List<GatherGame> runningGames;
 
-	GatherObject()
+	GatherObject(GatherObjectConfig config)
 	{
 		queue = new GatherQueueObject();
-		serverList = new HashSet<GatherServer>();
 		servers = new HashMap<String, GatherServer>();
 		runningGames = new ArrayList<GatherGame>();
 		substitutions = new SubManager(this);
+		this.setDiscordObjects(config);
+		this.initialiseServers(config);
 	}
 
 	/**
 	 * Function to be called when the bot is ready for setup. Initialises all the Discord4J related objects such as channels and roles. Also initialises the scoreboard. 
 	 */
-	public void setDiscordObjects()
+	private void setDiscordObjects(GatherObjectConfig config)
 	{
-		setGuild(DiscordBot.client.getGuildByID(guildID));
+		setGuild(DiscordBot.client.getGuildById(Snowflake.of(config.guildID)).block());
 		if(guild == null)
 		{
-			Discord4J.LOGGER.error("Could not find guild with id: "+guildID);
+			LOGGER.error("Could not find guild with id: "+config.guildID);
 			return;
 		}
 
-		setCommandChannel(DiscordBot.client.getChannelByID(commandChannelID));
-		setScoreReportChannel(DiscordBot.client.getChannelByID(scoreReportID));
-		setBlueVoiceChannel(DiscordBot.client.getVoiceChannelByID(blueVoiceID));
-		setRedVoiceChannel(DiscordBot.client.getVoiceChannelByID(redVoiceID));
-		setGeneralVoiceChannel(DiscordBot.client.getVoiceChannelByID(generalVoiceID));
-		setAdminRole(DiscordBot.client.getRoleByID(adminRoleID));
-		setQueueRole(DiscordBot.client.getRoleByID(queueRoleID));
-		setSoftQueueRole(DiscordBot.client.getRoleByID(softQueueRoleID));
+		//TODO: shouldn't use so many blocks here, could be made a lot faster
+		setCommandChannel(DiscordBot.client.getChannelById(Snowflake.of(config.commandChannelID)).ofType(TextChannel.class).block());
+		setScoreReportChannel(DiscordBot.client.getChannelById(Snowflake.of(config.scoreReportID)).ofType(TextChannel.class).block());
+		setBlueVoiceChannel(DiscordBot.client.getChannelById(Snowflake.of(config.blueVoiceID)).ofType(VoiceChannel.class).block());
+		setRedVoiceChannel(DiscordBot.client.getChannelById(Snowflake.of(config.redVoiceID)).ofType(VoiceChannel.class).block());
+		setGeneralVoiceChannel(DiscordBot.client.getChannelById(Snowflake.of(config.generalVoiceID)).ofType(VoiceChannel.class).block());
+		setAdminRole(DiscordBot.client.getRoleById(Snowflake.of(config.guildID), Snowflake.of(config.adminRoleID)).block());
+		setQueueRole(DiscordBot.client.getRoleById(Snowflake.of(config.guildID), Snowflake.of(config.queueRoleID)).block());
+		setSoftQueueRole(DiscordBot.client.getRoleById(Snowflake.of(config.guildID), Snowflake.of(config.softQueueRoleID)).block());
 
-		if(scoreboardChannelID!=0)
+		if(config.scoreboardChannelID!=0)
 		{
-			IChannel chan = DiscordBot.client.getChannelByID(scoreboardChannelID);
+			TextChannel chan = DiscordBot.client.getChannelById(Snowflake.of(config.scoreboardChannelID)).ofType(TextChannel.class).block();
 			if(chan == null)
 			{
-				Discord4J.LOGGER.warn("Error getting scoreboard channel, null returned");
+				LOGGER.warn("Error getting scoreboard channel, null returned");
 				return;
 			}
 
-			if(scoreboardMessageID==0)
+			if(config.scoreboardMessageID==0)
 			{
-				scoreboardMessageID = chan.sendMessage("scoreboard").getLongID();
-				System.out.println("new scoreboard message has been created, please enter the message id in the config or a scoreboard will be created each time the bot starts: "+scoreboardMessageID);
+				config.scoreboardMessageID = DiscordBot.sendMessage(chan, "scoreboard").getId().asLong();
+				System.out.println("new scoreboard message has been created, please enter the message id in the config or a scoreboard will be created each time the bot starts: "+config.scoreboardMessageID);
 			}
 
-			setScoreboardMessage(chan.fetchMessage(scoreboardMessageID));
+			setScoreboardMessage(chan.getMessageById(Snowflake.of(config.scoreboardMessageID)).block());
 		}
 
 		if(this.getScoreboardMessage()!=null)this.updateScoreboard();
 
 		//no command channel found
 		if(commandChannel==null) System.out.println("Error: no command channel found for guild: "+guild.getName());
+		
+		this.commandChannelBaseName = config.commandChannelString;
 	}
 
-	public void initialiseServers()
+	public void initialiseServers(GatherObjectConfig config)
 	{
-		for(GatherServer server : serverList)
+		for(GatherServer server : config.serverList)
 		{
 			if (servers.containsKey(server.getServerID().toUpperCase()))
 			{
@@ -130,150 +123,150 @@ public class GatherObject
 	/**
 	 * @return the Discord guild this gather object is associated with. 
 	 */
-	public IGuild getGuild() {
+	public Guild getGuild() {
 		return guild;
 	}
 
 	/**
 	 * @param guild the Discord guild to associate this gather object with. 
 	 */
-	public void setGuild(IGuild guild)
+	public void setGuild(Guild guild)
 	{
-		if(guild == null) Discord4J.LOGGER.warn("guild is being set as null");
+		if(guild == null) LOGGER.warn("guild is being set as null");
 		this.guild = guild;
 	}
 
 	/**
 	 * @return the Discord channel this gather object is associated with.
 	 */
-	public IChannel getCommandChannel() {
+	public TextChannel getCommandChannel() {
 		return commandChannel;
 	}
 
 	/**
 	 * @param commandChannel the Discord channel to associate this gather object with.
 	 */
-	public void setCommandChannel(IChannel commandChannel) {
-		if(commandChannel == null) Discord4J.LOGGER.warn("command channel is being set as null");
+	public void setCommandChannel(TextChannel commandChannel) {
+		if(commandChannel == null) LOGGER.warn("command channel is being set as null");
 		this.commandChannel = commandChannel;
 	}
 
 	/**
 	 * @return the Discord channel where the bot puts score reports at the end of each game. 
 	 */
-	public IChannel getScoreReportChannel() {
+	public TextChannel getScoreReportChannel() {
 		return scoreReportChannel;
 	}
 
 	/**
 	 * @param scoreReportChannel the Discord channel where the bot should put score reports at the end of each game. 
 	 */
-	public void setScoreReportChannel(IChannel scoreReportChannel) {
-		if(scoreReportChannel == null) Discord4J.LOGGER.warn("score report channel is being set as null");
+	public void setScoreReportChannel(TextChannel scoreReportChannel) {
+		if(scoreReportChannel == null) LOGGER.warn("score report channel is being set as null");
 		this.scoreReportChannel = scoreReportChannel;
 	}
 
 	/**
 	 * @return the Discord role of gather admins for using admin commands
 	 */
-	public IRole getAdminRole() {
+	public Role getAdminRole() {
 		return adminRole;
 	}
 
 	/**
 	 * @param adminRole the Discord role that should be used as the admin role for using admin commands
 	 */
-	public void setAdminRole(IRole adminRole) {
-		if(adminRole == null) Discord4J.LOGGER.warn("admin role is being set as null");
+	public void setAdminRole(Role adminRole) {
+		if(adminRole == null) LOGGER.warn("admin role is being set as null");
 		this.adminRole = adminRole;
 	}
 
 	/**
 	 * @return the queue role for displaying the gather queue in the members list
 	 */
-	public IRole getQueueRole() {
+	public Role getQueueRole() {
 		return queueRole;
 	}
 
 	/**
 	 * @param queueRole the role that should be used for displaying the current queue in the members list
 	 */
-	public void setQueueRole(IRole queueRole) {
-		if(queueRole == null) Discord4J.LOGGER.warn("queue role is being set as null");
+	public void setQueueRole(Role queueRole) {
+		if(queueRole == null) LOGGER.warn("queue role is being set as null");
 		this.queueRole = queueRole;
 	}
 
 	/**
 	 * @return the soft queue role for allowing people express interest in a game without committing
 	 */
-	public IRole getSoftQueueRole() {
+	public Role getSoftQueueRole() {
 		return softQueueRole;
 	}
 
 	/**
 	 * @param softQueueRole the role that should be used for displaying the current soft queue in the members list
 	 */
-	public void setSoftQueueRole(IRole softQueueRole) {
-		if(softQueueRole == null) Discord4J.LOGGER.warn("queue role is being set as null");
+	public void setSoftQueueRole(Role softQueueRole) {
+		if(softQueueRole == null) LOGGER.warn("queue role is being set as null");
 		this.softQueueRole = softQueueRole;
 	}
 
 	/**
 	 * @return the voice channel for blue team
 	 */
-	public IVoiceChannel getBlueVoiceChannel() {
+	public VoiceChannel getBlueVoiceChannel() {
 		return blueVoiceChannel;
 	}
 
 	/**
 	 * @param blueVoiceChannel the voice channel that should be used for blue team voice chat
 	 */
-	public void setBlueVoiceChannel(IVoiceChannel blueVoiceChannel) {
-		if(blueVoiceChannel == null) Discord4J.LOGGER.warn("blue voice channel is being set as null");
+	public void setBlueVoiceChannel(VoiceChannel blueVoiceChannel) {
+		if(blueVoiceChannel == null) LOGGER.warn("blue voice channel is being set as null");
 		this.blueVoiceChannel = blueVoiceChannel;
 	}
 
 	/**
 	 * @return the voice channel for red team
 	 */
-	public IVoiceChannel getRedVoiceChannel() {
+	public VoiceChannel getRedVoiceChannel() {
 		return redVoiceChannel;
 	}
 
 	/**
 	 * @param blueVoiceChannel the voice channel that should be used for red team voice chat
 	 */
-	public void setRedVoiceChannel(IVoiceChannel redVoiceChannel) {
-		if(redVoiceChannel == null) Discord4J.LOGGER.warn("red voice channel is being set as null");
+	public void setRedVoiceChannel(VoiceChannel redVoiceChannel) {
+		if(redVoiceChannel == null) LOGGER.warn("red voice channel is being set as null");
 		this.redVoiceChannel = redVoiceChannel;
 	}
 
 	/**
 	 * @return the general voice channel used for before/after game chat
 	 */
-	public IVoiceChannel getGeneralVoiceChannel() {
+	public VoiceChannel getGeneralVoiceChannel() {
 		return generalVoiceChannel;
 	}
 
 	/**
 	 * @param generalVoiceChannel the general voice channel used for before/after game chat
 	 */
-	public void setGeneralVoiceChannel(IVoiceChannel generalVoiceChannel) {
-		if(generalVoiceChannel == null) Discord4J.LOGGER.warn("general voice channel is being set as null");
+	public void setGeneralVoiceChannel(VoiceChannel generalVoiceChannel) {
+		if(generalVoiceChannel == null) LOGGER.warn("general voice channel is being set as null");
 		this.generalVoiceChannel = generalVoiceChannel;
 	}
 
 	/**
 	 * @return the IMessage used to display the scoreboard
 	 */
-	public IMessage getScoreboardMessage() {
+	public Message getScoreboardMessage() {
 		return scoreboardMessage;
 	}
 
 	/**
 	 * @param scoreboardMessage the IMessage that should be used to display the scoreboard
 	 */
-	public void setScoreboardMessage(IMessage scoreboardMessage) {
+	public void setScoreboardMessage(Message scoreboardMessage) {
 		this.scoreboardMessage = scoreboardMessage;
 	}
 
@@ -281,11 +274,11 @@ public class GatherObject
 	 * @param user the user to check
 	 * @return true if one of their roles matches the admin role, false otherwise
 	 */
-	public boolean isAdmin(IUser user)
+	public boolean isAdmin(Member user)
 	{
-		if(user.getLongID()==207442663178240011L) return false;
-		List<IRole> roles = user.getRolesForGuild(this.guild);
-		for(IRole role : roles)
+		if(user.getId().asLong()==207442663178240011L) return false;
+		List<Role> roles = user.getRoles().collectList().block();
+		for(Role role : roles)
 		{
 			if(role.equals(this.getAdminRole()))
 			{
@@ -300,27 +293,29 @@ public class GatherObject
 	 * @return false if the bot does not have the necessary permission, true otherwise
 	 * @see PermissionUtils#hasPermissions(IGuild, IUser, Permissions...)
 	 */
-	public boolean canSetRole(IRole role)
+	public boolean canSetRole(Role role)
 	{
-		if(role == null)
+		/*if(role == null)
 		{
 			return false;
 		}
 		if(!PermissionUtils.hasPermissions(getGuild(), DiscordBot.client.getOurUser(), Permissions.MANAGE_ROLES))
 		{
-			Discord4J.LOGGER.warn("bot does not have MANAGE_ROLES permission, some functionality may be lost");
+			LOGGER.warn("bot does not have MANAGE_ROLES permission, some functionality may be lost");
 			return false;
 		}
-		return true;
+		return true;*/
+		//TODO: actually check the role
+		return DiscordBot.client.getSelf().block().asMember(this.getGuild().getId()).block().getBasePermissions().block().contains(Permission.MANAGE_ROLES);
 	}
 
 	/**Gets a string representing the specified Discord user. Formatted as DisplayName(Username#Discriminator).
-	 * @param user the PlayerObject to convert to string
+	 * @param member the PlayerObject to convert to string
 	 * @return a string representing the users name, formatted as DisplayName(Username#Discriminator)
 	 */
-	public String fullUserString(IUser user)
+	public String fullUserString(Member member)
 	{
-		return user.getDisplayName(getGuild()) + "(" + user.getName() + "#" + user.getDiscriminator() + ")";
+		return member.getDisplayName() + "(" + member.getUsername() + "#" + member.getDiscriminator() + ")";
 	}
 
 	/**Gets a string representing the specified Discord user. Formatted as DisplayName(Username#Discriminator).
@@ -338,9 +333,10 @@ public class GatherObject
 	 * @param currGuild the guild to use for getting the players discord nick
 	 * @return a string representing the users name, formatted as KAGName(DiscordNick)
 	 */
-	public String playerString(PlayerObject player, IGuild currGuild)
+	public String playerString(PlayerObject player)
 	{
-		return player.getKagName()+" ("+player.getDiscordUserInfo().getDisplayName(currGuild)+")";
+		if(player==null) return "";
+		return player.getKagName()+" ("+player.getDiscordUserInfo().getDisplayName()+")";
 	}
 
 	/**Adds a player to the gather queue. 
@@ -371,13 +367,13 @@ public class GatherObject
 	}
 
 	/**Wrapper function for adding a player to the queue by Discord user. 
-	 * @param user the discord user to add
+	 * @param member the discord user to add
 	 * @return 0 if the player already in queue or something else went wrong, 1 if the player added to the queue, 2 if player added to queue and the queue is now full, 4 if the player added after the queue is already full, or -1 if an error occured getting the player object
 	 * @see #addToQueue(PlayerObject)
 	 */
-	public int addToQueue(IUser user)
+	public int addToQueue(Member member)
 	{
-		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(user);
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(member);
 		//player is null if they are not linked
 		if(player==null) return -1;
 		return this.addToQueue(player);
@@ -401,11 +397,11 @@ public class GatherObject
 		}
 	}
 	
-	public PlayerObject checkInQueue(IUser user)
+	public PlayerObject checkInQueue(User user)
 	{
 		for(PlayerObject p : queue.asList())
 		{
-			if(p.getDiscordid()==user.getLongID()) return p;
+			if(user.getId().equals(p.getDiscordid())) return p;
 		}
 		return null;
 	}
@@ -415,7 +411,7 @@ public class GatherObject
 	 * @return 1 if the player was removed from the queue, 0 if the player was not in the queue
 	 * @see #remFromQueue(PlayerObject)
 	 */
-	public int remFromQueue(IUser user)
+	public int remFromQueue(User user)
 	{
 		//check the queue by discord user first, so that we don't create unnecessary player objects
 		PlayerObject player = checkInQueue(user);
@@ -443,9 +439,9 @@ public class GatherObject
 	 * @return the GatherGame that they are playing, or null if the player couldnt be found
 	 * @see #getPlayersGame(PlayerObject)
 	 */
-	public GatherGame getPlayersGame(IUser user)
+	public GatherGame getPlayersGame(User user)
 	{
-		return getPlayersGame(DiscordBot.players.getOrCreatePlayerObject(user));
+		return getPlayersGame(DiscordBot.players.getIfExists(user));
 	}
 
 	/**Wrapper of getPlayersGame() that returns true if they are found, or false otherwise
@@ -459,14 +455,18 @@ public class GatherObject
 		if(game==null) return false;
 		else return true;
 	}
+	
+	public String getPlayingText() {
+		return this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue";
+	}
 
 	/**
 	 * Helper function for updating the channel name to reflect the queue size and set the playing text based on queue size.
 	 */
 	public void updateChannelCaption()
 	{
-		DiscordBot.setPlayingText(this.numPlayersInQueue()+"/"+this.getMaxQueueSize()+" in queue");
-		DiscordBot.setChannelCaption(this.getGuild(), this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelString);
+		DiscordBot.setPlayingText(this.getPlayingText());
+		DiscordBot.setChannelCaption(this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelBaseName);
 	}
 
 	/**Function for adding a vote to cancel the game the player is currently in. 
@@ -477,7 +477,7 @@ public class GatherObject
 		GatherGame game = this.getPlayersGame(player);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(this.getCommandChannel(), "You are not **in a game** to cancel "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "You are not **in a game** to cancel "+player.getDiscordUserInfo().getDisplayName()+"!");
 			return;
 		}
 		int returnVal = game.addCancelVote(player);
@@ -485,14 +485,14 @@ public class GatherObject
 		{
 		case 0:
 			DiscordBot.sendMessage(getCommandChannel(), "Game #"+game.getGameID()+" has been canceled!", true);
-			Discord4J.LOGGER.info("Game cancelled: "+game.getGameID());
+			LOGGER.info("Game cancelled: "+game.getGameID());
 			this.endGame(game, -2);
 			return;
 		case -1:
-			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to cancel the game "+player.getDiscordUserInfo().getDisplayName(getGuild())+"("+game.getNumCancelVotes()+"/"+game.getCancelVotesReq()+")");
+			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to cancel the game "+player.getDiscordUserInfo().getDisplayName()+"("+game.getNumCancelVotes()+"/"+game.getCancelVotesReq()+")");
 			return;
 		}
-		DiscordBot.sendMessage(getCommandChannel(), "**Vote to cancel** game has been counted for "+player.getDiscordUserInfo().getDisplayName(getGuild())+" ("+returnVal+"/"+game.getCancelVotesReq()+")");
+		DiscordBot.sendMessage(getCommandChannel(), "**Vote to cancel** game has been counted for "+player.getDiscordUserInfo().getDisplayName()+" ("+returnVal+"/"+game.getCancelVotesReq()+")");
 	}
 
 	/**Function for adding a vote to scramble the teams for the game the player is currently in. 
@@ -503,12 +503,12 @@ public class GatherObject
 		GatherGame game = this.getPlayersGame(player);
 		if(game==null)
 		{
-			DiscordBot.sendMessage(this.getCommandChannel(), "You must be **in the game** to scramble "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "You must be **in the game** to scramble "+player.getDiscordUserInfo().getDisplayName()+"!");
 			return;
 		}
 		if(!game.getCurrState().equals(GatherGame.gameState.PREGAME))
 		{
-			DiscordBot.sendMessage(this.getCommandChannel(), "You cannot vote to scramble once the **game has started** "+player.getDiscordUserInfo().getDisplayName(this.getGuild())+"!");
+			DiscordBot.sendMessage(this.getCommandChannel(), "You cannot vote to scramble once the **game has started** "+player.getDiscordUserInfo().getDisplayName()+"!");
 			return;
 		}
 		int returnVal = game.addScrambleVote(player);
@@ -519,16 +519,16 @@ public class GatherObject
 			DiscordBot.sendMessage(getCommandChannel(), "Teams have been shuffled for game #"+game.getGameID()+"!", true);
 			DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 			DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
-			Discord4J.LOGGER.info("Teams shuffled: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
-			this.sortTeamRoomsAfterShuffle();
+			LOGGER.info("Teams shuffled: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
+			this.sortTeamRoomsAfterShuffle(game);
 			this.removePlayerTeamRoles(game);
 			this.addPlayersToTeamRoles(game);
 			return;
 		case -1:
-			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getDisplayName(getGuild())+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
+			DiscordBot.sendMessage(getCommandChannel(), "You have already voted to scramble the teams "+player.getDiscordUserInfo().getDisplayName()+"("+game.getNumScrambleVotes()+"/"+game.getScrambleVotesReq()+")");
 			return;
 		}
-		DiscordBot.sendMessage(getCommandChannel(), "**Vote to scramble** teams has been counted for "+player.getDiscordUserInfo().getDisplayName(getGuild())+" ("+returnVal+"/"+game.getScrambleVotesReq()+")");
+		DiscordBot.sendMessage(getCommandChannel(), "**Vote to scramble** teams has been counted for "+player.getDiscordUserInfo().getDisplayName()+" ("+returnVal+"/"+game.getScrambleVotesReq()+")");
 	}
 
 	/**Function for doing everything needed to start a gather game. 
@@ -566,14 +566,14 @@ public class GatherObject
 		if(server.getServerLink()!=null && server.getServerLink()!="") DiscordBot.sendMessage(getCommandChannel(), serverIdString + server.getServerLink());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Blue**__: "+game.blueMentionList().toString());
 		DiscordBot.sendMessage(getCommandChannel(), "__**Red**__:  "+game.redMentionList().toString());
-		Discord4J.LOGGER.info("Game started: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
+		LOGGER.info("Game started: "+game.getBlueKagNames().toString()+game.getRedKagNames().toString());
 		game.sendTeamsToServer();
 		//create the team roles
 		this.generateAndSetTeamRoles(game);
 		//put the players into the team roles
 		this.addPlayersToTeamRoles(game);
 		//do voice channel stuff
-		movePlayersIntoTeamRooms(5);
+		this.movePlayersIntoTeamRooms(game, 5);
 		//send private messages last so they dont cause other things to be rate limited
 		List<PlayerObject> blue = game.getBluePlayerList();
 		List<PlayerObject> red = game.getRedPlayerList();
@@ -694,7 +694,7 @@ public class GatherObject
 		{
 			//THIS IS A WORKAROUND FOR WHEN WE HAVE NO SERVER LIST AND THERE IS ONLY 1 GAME AT A TIME
 			//TODO: fix this? I don't remember why this is done.
-			Discord4J.LOGGER.warn("Server is null when giving win, clearing running games (if there is more than 1 running game this is a problem)");
+			LOGGER.warn("Server is null when giving win, clearing running games (if there is more than 1 running game this is a problem)");
 			clearGames();
 		}
 		else
@@ -702,7 +702,7 @@ public class GatherObject
 			setGameEnded(game);
 		}
 		//do voice channel stuff
-		movePlayersOutOfTeamRooms(5);
+		movePlayersOutOfTeamRooms(game, 5);
 		//check if there is enough people in queue to start another game (after waiting for the channels to settle)
 		try {
 			Thread.sleep(1000);
@@ -747,13 +747,13 @@ public class GatherObject
 	{
 		if(this.getScoreboardMessage()==null)
 		{
-			Discord4J.LOGGER.warn("Scoreboard not set!");
+			LOGGER.warn("Scoreboard not set!");
 			return;
 		}
 		List<StatsObject> list = DiscordBot.database.getTopPlayers(30);
 		if(list == null)
 		{
-			Discord4J.LOGGER.warn("Failed to get scoreboard data from the database!");
+			LOGGER.warn("Failed to get scoreboard data from the database!");
 			return;
 		}
 		String scoreboardString="```md\n" + "# Scoreboard #" + "\n``````diff\n++|      KAG name      |Games|  Win % | Score\n";
@@ -790,8 +790,8 @@ public class GatherObject
 			scoreboardString += stats.getMmrInteger()+"\n";
 		}
 		scoreboardString+="\n           Total games played: " +DiscordBot.database.getGamesPlayed("+numgames+")+ "```";
-		if(scoreboardString.length()>2000) Discord4J.LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());
-		this.getScoreboardMessage().edit(scoreboardString);
+		if(scoreboardString.length()>2000) LOGGER.warn("SCOREBOARD IS TOO LARGE: "+scoreboardString.length());
+		DiscordBot.editMessage(this.getScoreboardMessage(), scoreboardString);
 	}
 
 	/**Gets a server from the server list that is not in use. Returns the server id. 
@@ -1005,13 +1005,13 @@ public class GatherObject
 		int returnVal = substitutions.addSubRequest(playerToBeSubbed, game);
 		if(returnVal==-1)
 		{
-			Discord4J.LOGGER.error("adding server sub request encountered an error: "+returnVal+" for player: "+playerToBeSubbed+" game: "+game);
+			LOGGER.error("adding server sub request encountered an error: "+returnVal+" for player: "+playerToBeSubbed+" game: "+game);
 			this.getServer(ip, port).say("An error occured adding sub request for "+kagName+", this player isn't playing?");
 		}
 		else if(returnVal==1)
 		{
 			this.getServer(ip, port).say("Sub request added for player "+kagName+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerToBeSubbed.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
+			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerToBeSubbed.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().getMention()+")");
 		}
 		else if(returnVal==0)
 		{
@@ -1062,9 +1062,9 @@ public class GatherObject
 			this.getServer(ip, port).say("You have already voted to sub " + playerVotedFor.getKagName() + ", " + voting + "!");
 			return returnVal;
 		case 0:
-			Discord4J.LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
+			LOGGER.info("sub requested for: "+this.fullUserString(playerVotedFor));
 			this.getServer(ip, port).say("Sub request added for "+playerVotedFor.getKagName()+", use !sub "+game.getGameID()+" in Discord to sub into their place!");
-			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerVotedFor.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().mention()+")");
+			DiscordBot.sendMessage(this.getCommandChannel(), "**Sub request** added for " + playerVotedFor.getMentionString() + " use **!sub "+game.getGameID()+"** to sub into their place! ("+this.getQueueRole().getMention()+")");
 			return returnVal;
 		}
 		//gets here if returnVal is greater than 0 which means the sub vote was added and the number is the vote count
@@ -1078,11 +1078,16 @@ public class GatherObject
 	 */
 	public void clearQueueRole()
 	{
-		List<IUser> list = getGuild().getUsersByRole(getQueueRole());
-		for(IUser user : list)
+		this.guild.getMembers().subscribe(member -> 
 		{
-			DiscordBot.removeRole(user, getQueueRole());
-		}
+			for(Snowflake id : member.getRoleIds())
+			{
+				if (id.equals(this.getQueueRole().getId()))
+				{
+					DiscordBot.removeRole(member, getQueueRole());
+				}
+			}
+		});
 	}
 
 	/**Function for removing all players from the queue e.g. when a game starts. 
@@ -1100,15 +1105,15 @@ public class GatherObject
 	/**Helper function for setting a player as interested. This means that they get the soft queue role. 
 	 * @param user
 	 */
-	public void setInterested(IUser user) {
-		DiscordBot.addRole(user, this.getSoftQueueRole());
+	public void setInterested(Member member) {
+		DiscordBot.addRole(member, this.getSoftQueueRole());
 	}
 	
 	/**Helper function for setting a player as not interested. This means that they get the soft queue role role removed. 
 	 * @param user
 	 */
-	public void setNotInterested(IUser user) {
-		DiscordBot.removeRole(user, this.getSoftQueueRole());
+	public void setNotInterested(Member member) {
+		DiscordBot.removeRole(member, this.getSoftQueueRole());
 	}
 	
 	/**Toggles the users current interested state. Checks if they currently have the interested role, and removes them from it if they do, returning 2.
@@ -1116,20 +1121,20 @@ public class GatherObject
 	 * @param user
 	 * @return 2 if the user was changed to not interested, 0 otherwise
 	 */
-	public int toggleInterested(IUser user) {
+	public int toggleInterested(Member member) {
 		//check if the player has the role
-		List<IRole> roles = user.getRolesForGuild(this.getGuild());
-		for(IRole role : roles)
+		List<Role> roles = member.getRoles().collectList().block();
+		for(Role role : roles)
 		{
 			if(role.equals(this.getSoftQueueRole()))
 			{
 				//if they have the role, remove them from it
-				setNotInterested(user);
+				setNotInterested(member);
 				return 2;
 			}
 		}
 		//otherwise give them the role
-		setInterested(user);
+		setInterested(member);
 		return 0;
 	}
 
@@ -1145,27 +1150,28 @@ public class GatherObject
 
 	/**Helper function for moving all players out of the general voice channel into their team channels. 
 	 */
-	public void movePlayersIntoTeamRooms()
+	public void movePlayersIntoTeamRooms(GatherGame game)
 	{
-		IVoiceChannel general = this.getGeneralVoiceChannel();
-		IVoiceChannel blue = this.getBlueVoiceChannel();
-		IVoiceChannel red = this.getRedVoiceChannel();
+		VoiceChannel general = this.getGeneralVoiceChannel();
+		VoiceChannel blue = this.getBlueVoiceChannel();
+		VoiceChannel red = this.getRedVoiceChannel();
 
-		List<IUser> users = general.getConnectedUsers();
-		for(IUser user : users)
+		for( PlayerObject p : game.getBluePlayerList())
 		{
-			GatherGame game = this.getPlayersGame(user);
-			if(game!=null)
+			Member member = p.getDiscordUserInfo();
+			VoiceState voiceState = member.getVoiceState().block();
+			if(voiceState != null && voiceState.getChannelId().isPresent() && (general.getId().equals(voiceState.getChannelId().get()) || red.getId().equals(voiceState.getChannelId().get())))
 			{
-				int team = game.getPlayerTeam(user);
-				if(team==0)
-				{
-					DiscordBot.moveToVoiceChannel(user, blue);
-				}
-				else if(team==1)
-				{
-					DiscordBot.moveToVoiceChannel(user, red);
-				}
+				DiscordBot.moveToVoiceChannel(member, blue);
+			}
+		}
+		for( PlayerObject p : game.getRedPlayerList())
+		{
+			Member member = p.getDiscordUserInfo();
+			VoiceState voiceState = member.getVoiceState().block();
+			if(voiceState != null && voiceState.getChannelId().isPresent() && (general.getId().equals(voiceState.getChannelId().get()) || blue.getId().equals(voiceState.getChannelId().get())))
+			{
+				DiscordBot.moveToVoiceChannel(member, red);
 			}
 		}
 	}
@@ -1174,10 +1180,10 @@ public class GatherObject
 	 * @param delay the number of seconds to delay for before moving
 	 * @see #movePlayersIntoTeamRooms()
 	 */
-	public void movePlayersIntoTeamRooms(int delay)
+	public void movePlayersIntoTeamRooms(GatherGame game, int delay)
 	{
 		String countString = "Moving channels in ";
-		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
+		Message countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
 
 		try {
 			Thread.sleep(1000);
@@ -1189,28 +1195,35 @@ public class GatherObject
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		movePlayersIntoTeamRooms();
-		countMsg.delete();
+		movePlayersIntoTeamRooms(game);
+		DiscordBot.deleteMessage(countMsg);
 	}
 
 	/**Helper function for moving all players out of their team channels into the general voice channel. 
 	 */
-	public void movePlayersOutOfTeamRooms()
+	public void movePlayersOutOfTeamRooms(GatherGame game)
 	{
-		IVoiceChannel general = this.getGeneralVoiceChannel();
-		IVoiceChannel blue = this.getBlueVoiceChannel();
-		IVoiceChannel red = this.getRedVoiceChannel();
+		VoiceChannel general = this.getGeneralVoiceChannel();
+		VoiceChannel blue = this.getBlueVoiceChannel();
+		VoiceChannel red = this.getRedVoiceChannel();
 
-		List<IUser> users;
-		users = blue.getConnectedUsers();
-		for( IUser user : users)
+		for( PlayerObject p : game.getBluePlayerList())
 		{
-			DiscordBot.moveToVoiceChannel(user, general);
+			Member member = p.getDiscordUserInfo();
+			VoiceState voiceState = member.getVoiceState().block();
+			if(voiceState != null && voiceState.getChannelId().isPresent() && (blue.getId().equals(voiceState.getChannelId().get()) || red.getId().equals(voiceState.getChannelId().get())))
+			{
+				DiscordBot.moveToVoiceChannel(member, general);
+			}
 		}
-		users = red.getConnectedUsers();
-		for( IUser user : users)
+		for( PlayerObject p : game.getRedPlayerList())
 		{
-			DiscordBot.moveToVoiceChannel(user, general);
+			Member member = p.getDiscordUserInfo();
+			VoiceState voiceState = member.getVoiceState().block();
+			if(voiceState != null && voiceState.getChannelId().isPresent() && (blue.getId().equals(voiceState.getChannelId().get()) || red.getId().equals(voiceState.getChannelId().get())))
+			{
+				DiscordBot.moveToVoiceChannel(member, general);
+			}
 		}
 
 	}
@@ -1219,10 +1232,10 @@ public class GatherObject
 	 * @param delay the number of seconds to delay for before moving
 	 * @see #movePlayersIntoTeamRooms()
 	 */
-	public void movePlayersOutOfTeamRooms(int delay)
+	public void movePlayersOutOfTeamRooms(GatherGame game, int delay)
 	{
 		String countString = "Moving channels in ";
-		IMessage countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
+		Message countMsg = DiscordBot.sendMessage(this.getCommandChannel(), countString+delay);
 
 		try {
 			Thread.sleep(1000);
@@ -1234,69 +1247,36 @@ public class GatherObject
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		movePlayersOutOfTeamRooms();
-		countMsg.delete();
+		movePlayersOutOfTeamRooms(game);
+		DiscordBot.deleteMessage(countMsg);
 	}
 
 	/**Helper function for sending players to the correct voice channel after the teams have been shuffled
 	 */
-	public void sortTeamRoomsAfterShuffle()
+	public void sortTeamRoomsAfterShuffle(GatherGame game)
 	{
-		IVoiceChannel blue = this.getBlueVoiceChannel();
-		IVoiceChannel red = this.getRedVoiceChannel();
-
-		movePlayersIntoTeamRooms();
-		List<IUser> users;
-		users = blue.getConnectedUsers();
-		for( IUser user : users)
-		{
-			GatherGame game = this.getPlayersGame(user);
-			if(game.getPlayerTeam(user)==1)
-			{
-				DiscordBot.moveToVoiceChannel(user, red);
-			}
-		}
-		users = red.getConnectedUsers();
-		for( IUser user : users)
-		{
-			GatherGame game = this.getPlayersGame(user);
-			if(game.getPlayerTeam(user)==0)
-			{
-				DiscordBot.moveToVoiceChannel(user, blue);
-			}
-		}
-
+		//just move all of the players to their correct room
+		this.movePlayersIntoTeamRooms(game);
 	}
 
 	private void generateAndSetTeamRoles(GatherGame game) {
 		//check there isnt already roles that should be deleted
-		if(game.getBlueRole() != null && !game.getBlueRole().isDeleted()) DiscordBot.deleteRole(game.getBlueRole());
-		if(game.getRedRole() != null && !game.getRedRole().isDeleted()) DiscordBot.deleteRole(game.getRedRole());
-		
+		this.deleteTeamRoles(game);
+
+		int queueRolePosition = this.getQueueRole().getPosition().block();
 		//create the new roles
-		IRole blue = DiscordBot.createRole(this.getGuild());
-		IRole red = DiscordBot.createRole(this.getGuild());
-		
-		//apply the appropriate settings
-		//.changeHoist() doesnt work, using .edit() instead
-		/*blue.changeHoist(true);
-		blue.changeName("#"+game.getGameID()+" Blue Team");
-		blue.changeMentionable(true);
-		red.changeHoist(true);
-		red.changeName("#"+game.getGameID()+" Red Team");
-		red.changeMentionable(true);*/
-		blue.edit(blue.getColor(), true, "Blue Team #"+game.getGameID(), blue.getPermissions(), true);
-		red.edit(red.getColor(), true, "Red Team #"+game.getGameID(), red.getPermissions(), true);
-		
-		//put the two team roles just after the queue role
-		List<IRole> roles = DiscordBot.getRoles(this.getGuild());
-		//they should be at the bottom of the role list, but remove them before getting the queue index just in case
-		roles.remove(red);
-		roles.remove(blue);
-		int queueIndex = roles.indexOf(this.getQueueRole());
-		roles.add(queueIndex+1, blue);
-		roles.add(queueIndex+1, red);
-		DiscordBot.reorderRoles(this.getGuild(), roles);
+		Role blue = this.getGuild().createRole(roleSpec ->{
+			roleSpec.setName("Blue Team #"+game.getGameID());
+			roleSpec.setHoist(true);
+			roleSpec.setMentionable(true);
+		}).doOnSuccess(role -> role.changePosition(queueRolePosition+1)).block();
+		Role red = this.getGuild().createRole(roleSpec ->{
+			roleSpec.setName("Red Team #"+game.getGameID());
+			roleSpec.setHoist(true);
+			roleSpec.setMentionable(true);
+		}).doOnSuccess(role -> role.changePosition(queueRolePosition+2)).block();
+		blue.changePosition(queueRolePosition+1);
+		red.changePosition(queueRolePosition+2);
 		
 		//set the roles on the game object
 		game.setBlueRole(blue);
@@ -1320,8 +1300,10 @@ public class GatherObject
 		List<PlayerObject> players = game.getPlayerList();
 		for(PlayerObject player : players)
 		{
-			DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getBlueRole());
-			DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getRedRole());
+			//DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getBlueRole());
+			//DiscordBot.removeRoleIfPresent(player.getDiscordUserInfo(), game.getRedRole());
+			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getBlueRole());
+			DiscordBot.removeRole(player.getDiscordUserInfo(), game.getRedRole());
 		}
 	}
 	
@@ -1463,7 +1445,7 @@ public class GatherObject
 		String returnString = "";
 		for(GatherGame game : runningGames)
 		{
-			returnString += game.toString(this.getGuild());
+			returnString += game.toString();
 			returnString += "\n";
 		}
 		if(returnString.length()<=2)
@@ -1482,7 +1464,7 @@ public class GatherObject
 		String returnString="";
 		for(PlayerObject player : queue)
 		{
-			returnString+=playerString(player, this.getGuild());
+			returnString+=playerString(player);
 			returnString+=", ";
 		}
 		if(returnString.length()<=2)

@@ -1,5 +1,7 @@
 package core;
-import sx.blah.discord.handle.obj.IUser;
+
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Snowflake;
 
 /**PlayerObject for holding all the variables assoiciated with a player. 
  * @author cameron
@@ -7,7 +9,7 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class PlayerObject
 {
-	private IUser discordUserInfo;
+	private Member discordUserInfo;
 	private String kagName;
 	private boolean captainsVote;
 	private boolean inQueue;
@@ -16,14 +18,14 @@ public class PlayerObject
 	 */
 	private long lastUsed;
 
-	private PlayerObject(IUser user, boolean capVote)
+	private PlayerObject(Member user, boolean capVote)
 	{
 		setDiscordUserInfo(user);
 		setCaptainsVote(capVote);
 		this.used();
 	}
 
-	private PlayerObject(IUser user)
+	private PlayerObject(Member user)
 	{
 		this(user, false);
 		this.used();
@@ -34,7 +36,7 @@ public class PlayerObject
 	 * @param kagName
 	 * @see PlayerObjectManager
 	 */
-	PlayerObject(IUser user, String kagName)
+	PlayerObject(Member user, String kagName)
 	{
 		this(user);
 		this.setKagName(kagName);
@@ -46,9 +48,9 @@ public class PlayerObject
 	 * @param kagName
 	 * @see PlayerObjectManager
 	 */
-	PlayerObject(long id, String kagName)
+	PlayerObject(Snowflake userId, Snowflake guildId, String kagName)
 	{
-		this(DiscordBot.fetchUser(id), kagName);
+		this(DiscordBot.fetchMember(guildId, userId), kagName);
 		this.used();
 	}
 
@@ -87,7 +89,7 @@ public class PlayerObject
 	 * Updates the players last used time.
 	 * @return the IUser object associated with this player
 	 */
-	public IUser getDiscordUserInfo() {
+	public Member getDiscordUserInfo() {
 		this.used();
 		return discordUserInfo;
 	}
@@ -96,7 +98,7 @@ public class PlayerObject
 	 * Updates the players last used time.
 	 * @param user the IUser object to be associated with this player
 	 */
-	public void setDiscordUserInfo(IUser user) {
+	public void setDiscordUserInfo(Member user) {
 		this.discordUserInfo = user;
 		this.used();
 	}
@@ -169,9 +171,9 @@ public class PlayerObject
 	/**Getter for the players discord user id.
 	 * @return the players discord user id
 	 */
-	public long getDiscordid()
+	public Snowflake getDiscordid()
 	{
-		return this.discordUserInfo.getLongID();
+		return this.discordUserInfo.getId();
 	}
 
 	/**Getter for the users mention string for use in discord messages. 
@@ -181,7 +183,7 @@ public class PlayerObject
 	public String getMentionString()
 	{
 		this.used();
-		return getDiscordUserInfo().mention();
+		return getDiscordUserInfo().getMention();
 	}
 
 	/**Get a player as a string formated as KAG Username(Discord Name#Discord Discriminator). 
@@ -192,6 +194,6 @@ public class PlayerObject
 	public String toString()
 	{
 		//dont want to call used here otherwise debug prints impact it
-		return this.kagName +" ("+ this.discordUserInfo.getName()+"#"+this.discordUserInfo.getDiscriminator()+")";
+		return this.kagName +" ("+ this.discordUserInfo.getUsername()+"#"+this.discordUserInfo.getDiscriminator()+")";
 	}
 }

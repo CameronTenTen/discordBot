@@ -1,14 +1,13 @@
 package commands;
 import java.util.Arrays;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
-public class CommandPing extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandPing extends Command<Message, Member, Channel>
 {
-	public CommandPing(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandPing(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("ping"), "Pong!");
 	}
@@ -19,7 +18,7 @@ public class CommandPing extends Command<IMessage, IUser, IChannel, IGuild>
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		return "Pong!";
 	}

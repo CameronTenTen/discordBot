@@ -1,15 +1,22 @@
 package core;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 import commands.CommandAdd;
 import commands.CommandCachedPlayerInfo;
@@ -43,40 +50,39 @@ import commands.CommandStatus;
 import commands.CommandSub;
 import commands.CommandSubs;
 import commands.Discord4JCommands;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.ActivityType;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IPrivateChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.handle.obj.StatusType;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RequestBuffer;
-import sx.blah.discord.util.RequestBuilder;
+import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
+import discord4j.core.event.domain.PresenceUpdateEvent;
+import discord4j.core.event.domain.guild.MemberLeaveEvent;
+import discord4j.core.event.domain.lifecycle.ConnectEvent;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.PrivateChannel;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.presence.Activity;
+import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.Status;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Flux;
 
 /**The main bot class. Contains most of the interaction with the Discord bot client. Contains various helper functions and objects.
  * @author cameron
  *
  */
-public class DiscordBot {
-
+public class DiscordBot
+{
+	static final Logger LOGGER = LoggerFactory.getLogger(DiscordBot.class);
 	/**
 	 * The instance of the Discord4J client
 	 */
-	public static IDiscordClient client;
-	/**
-	 * This builder object is used for making rate limit safe discord requests
-	 */
-	public RequestBuilder builder;
+	public static DiscordClient client;
 	
 	public static DiscordBot bot;
 	
@@ -102,7 +108,7 @@ public class DiscordBot {
 	 * @return The GatherObject associated with the channel, or null if there is no object for this channel
 	 * @see GatherObject
 	 */
-	public static GatherObject getGatherObjectForChannel(IChannel channel) {
+	public static GatherObject getGatherObjectForChannel(Channel channel) {
 		if(channel==null) return null;
 		for (GatherObject object : gatherObjects) {
 			if (object.getCommandChannel().equals(channel))
@@ -112,15 +118,15 @@ public class DiscordBot {
 	}
 
 	/**Helper function for getting the correct gather objects for a guild, used when a user leaves a guild.
-	 * @param guild - the channel being used
-	 * @return A list of GatherObjects associated with the channel, list is empty if there are no objects for this channel
+	 * @param guildId - the snowflake id of the guild
+	 * @return A list of GatherObjects associated with the guild, list is empty if there are no objects for this guild
 	 * @see GatherObject
 	 */
-	public static List<GatherObject> getGatherObjectsForGuild(IGuild guild) {
-		if(guild==null) return null;
+	public static List<GatherObject> getGatherObjectsForGuild(Snowflake guildId) {
+		if(guildId==null) return null;
 		List<GatherObject> returnList = new ArrayList<GatherObject>();
 		for (GatherObject object : gatherObjects) {
-			if (object.getGuild().equals(guild))
+			if (object.getGuild().getId().equals(guildId))
 				returnList.add(object);
 		}
 		return returnList;
@@ -156,40 +162,36 @@ public class DiscordBot {
 		return DiscordBot.getGatherObjectForServer(game.getServerIp(), game.getServerPort());
 	}
 
-	/**Initial bot setup goes here. Some things that require the bot to be setup fully to work are done in a ReadyEventListener. 
+	/**Initial bot setup goes here.
 	 * <p>
-	 * Some things that are done here include instantiation of the client and request builder, client login, registering event listeners, registering command listeners. 
+	 * Some things that are done here include instantiation of the client and request builder,
+	 * registering event listeners, registering command listeners, reading the gather object config file,
+	 * connecting to the kag servers, client login.
 	 * @param token - the bot login token to be used for authentication
 	 */
 	public void startBot(String token) {
-		ClientBuilder builder = new ClientBuilder(); // Creates a new client builder instance
-
-		builder.withToken(token); // Sets the bot token for the client
-
-		try {
-			client = builder.login(); // Builds the IDiscordClient instance and logs it in
-			System.out.println("logged in");
-		} catch (DiscordException e) { // Error occurred logging in
-			System.err.println("Error occurred while logging in with token: " + token);
-			e.printStackTrace();
-			return;
-		}
-		this.builder= new RequestBuilder(client);
-		this.builder.shouldBufferRequests(true);
+		client = new DiscordClientBuilder(token).setInitialPresence(Presence.online()).build();
 
 		// event listeners
-		EventDispatcher dispatcher = client.getDispatcher();
-		dispatcher.registerListener(new ReadyEventListener());
-		dispatcher.registerListener(new PresenceEventListener());
+		client.getEventDispatcher().on(PresenceUpdateEvent.class).subscribe((PresenceUpdateEvent event) -> 
+		{
+			if(event.getCurrent().getStatus()==Status.OFFLINE)
+			{
+				DiscordBot.userWentOffline(event.getMember().block());
+			}
+		});
+		client.getEventDispatcher().on(MemberLeaveEvent.class).subscribe((MemberLeaveEvent event) ->
+		{
+			DiscordBot.userLeftGuild(event.getGuildId(), event.getMember().get());
+		});
 
 		//TODO load the queue object
-		// might want to do this in ready listener
 		//TODO delete the saved object so we don't load it next time
 
 		// command listening
 		Discord4JCommands commands = new Discord4JCommands();
 		commands.registerCommand(new CommandHelp(commands));
-		client.getDispatcher().registerListener((IListener<MessageReceivedEvent>) commands::onMessageReceivedEvent);
+		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(commands::onMessageReceivedEvent);
 
 		// add all the commands
 		commands.registerCommand(new CommandPing(commands));
@@ -224,6 +226,42 @@ public class DiscordBot {
 		commands.registerCommand(new CommandDisconnect(commands));
 		commands.registerCommand(new CommandConnect(commands));
 		commands.registerCommand(new CommandClearPlayerCache(commands));
+
+		/*List<IGuild> guilds = event.getClient().getGuilds();
+		if(guilds != null && guilds.size()>0)
+		{
+			for(IGuild guild : guilds)
+			{
+				DiscordBot.addGuild(guild);
+			}
+		}*/
+		try {
+			Gson gson = new Gson();
+			JsonReader reader;
+			reader = new JsonReader(new FileReader("servers.json"));
+			GatherObjectConfig config = gson.fromJson(reader, GatherObjectConfig.class);
+			GatherObject obj = new GatherObject(config);
+			DiscordBot.gatherObjects.add(obj);
+			obj.connectKAGServers(true);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		//just get the first gather object for now to set the playing text
+		//TODO: playing text wont really work if there was ever multiple servers
+		Iterator<GatherObject> itr = DiscordBot.gatherObjects.iterator();
+		GatherObject gather = itr.next();
+		if(gather == null) return;
+		gather.clearQueueRole();
+
+		//wait until the bot connects to update the channel caption (doesn't work before then)
+		client.getEventDispatcher().on(ConnectEvent.class).subscribe((ConnectEvent event) ->
+		{
+			gather.updateChannelCaption();
+		});
+
+		LOGGER.info("logging in");
+		client.login().block();
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers
@@ -250,284 +288,212 @@ public class DiscordBot {
 		
 		players = new PlayerObjectManager();
 		
+		linkRequests = new ArrayList<PlayerObject>();
+		
 		if(args.length<1)
 		{
 			System.err.println("ERROR: no command line arguments detected - you must specify the bot token as an argument");
 			return;
 		}
-		bot.startBot(args[0]);
 		
-		linkRequests = new ArrayList<PlayerObject>();
+		bot.startBot(args[0]);
 	}
 
-	//wrappers for doing things in order to avoid rate limit exceptions
+	//wrappers, so we are a little detached from the library
 
-	/**Wrapper function for sending messages without getting rate limit exceptions and with tts defaulted to false.
+	/**Wrapper function for sending messages with tts defaulted to false.
 	 * @param channel - the channel to put the message in
 	 * @param msg - the message to send
 	 * @return the message object after the message has been created, usually only want this if we are going to edit the message. 
-	 * @see #sendMessage(IChannel, String, boolean)
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
+	 * @see #sendMessage(MessageChannel, String, boolean)
 	 */
-	public static IMessage sendMessage(IChannel channel, String msg)
+	public static Message sendMessage(MessageChannel channel, String msg)
 	{
 		return sendMessage(channel, msg, false);
 	}
 	
-	/**Wrapper function for sending messages without getting rate limit exceptions. 
+	/**Wrapper function for sending messages. 
 	 * @param channel - the channel to put the message in
 	 * @param msg - the message to send
 	 * @param tts - should use text to speech
 	 * @return the message object after the message has been created, usually only want this if we are going to edit the message. 
-	 * @see Discord4J: {@link IChannel#sendMessage(String, boolean)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link MessageChannel#createMessage(java.util.function.Consumer)}
 	 */
-	public static IMessage sendMessage(IChannel channel, String msg, boolean tts)
+	public static Message sendMessage(MessageChannel channel, String msg, boolean tts)
 	{
-		return RequestBuffer.request(() -> {
-			try
-			{
-				return channel.sendMessage(msg, tts);
-			}
-			catch(NullPointerException e)
-			{
-				//this happened once???
-				Discord4J.LOGGER.warn("Null pointer exception caught from Discord4J code: " + e.getMessage());
-			}
-			return null;
-		}).get();
+		return channel.createMessage(messageSpec ->
+		{
+			messageSpec.setContent(msg);
+			messageSpec.setTts(tts);
+		}).block();
 	}
 	
-	/**Wrapper for editing messages without getting rate limit exceptions. 
+	/**Wrapper for editing messages. 
 	 * @param msg - the message to be edited
 	 * @param newString - the new version of the message
-	 * @see Discord4J: {@link IMessage#edit(String)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link Message#edit(java.util.function.Consumer)}
 	 */
-	public static void editMessage(IMessage msg, String newString)
+	public static void editMessage(Message msg, String newString)
 	{
-		try
+		if (msg == null) return;
+		msg.edit(editSpec ->
 		{
-			RequestBuffer.request(() -> {
-				msg.edit(newString);
-			});
-		}
-		catch (DiscordException e)
-		{
-			Discord4J.LOGGER.warn("DiscordException caught from Discord4J code when trying to edit a message: " + e.getMessage());
-		}
+			editSpec.setContent(newString);
+		}).block();
 	}
 	
-	/**Wrapper for replying to messages without getting rate limit exceptions. 
-	 * @param msg - the message to reply to
-	 * @param reply - the reply message
-	 * @see Discord4J: {@link IMessage#reply(String)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
-	 */
-	public static void reply(IMessage msg, String reply)
-	{
-		RequestBuffer.request(() -> {
-			msg.reply(reply);
-		});
-	}
-	
-	/**Wrapper for deleting messages without getting rate limit exceptions.
+	/**Wrapper for deleting messages.
 	 * @param msg - the message to delete
-	 * @see Discord4J: {@link IMessage#delete()}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link Message#delete()}
 	 */
-	public static void delete(IMessage msg)
+	public static void deleteMessage(Message msg)
 	{
-		RequestBuffer.request(() -> {
-			msg.delete();
-		});
+		if (msg == null) return;
+		msg.delete().block();
 	}
 	
-	/**Wrapper for adding roles to a user without getting rate limit exceptions. 
-	 * @param user - the user to be changed
+	/**Wrapper for adding roles to a guild member. 
+	 * @param member - the member to be changed
 	 * @param role - the role to give them
-	 * @see Discord4J: {@link IUser#addRole(IRole)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link Member#addRole(Snowflake)}
 	 */
-	public static void addRole(IUser user, IRole role)
+	public static void addRole(Member member, Role role)
 	{
-		if(user == null || role == null) return;
-		RequestBuffer.request(() -> {
-			user.addRole(role);
-		});
+		if(member == null || role == null) return;
+		member.addRole(role.getId()).block();
 	}
 	
-	/**Wrapper for removing roles from a user without getting rate limit exceptions. 
-	 * @param user - the user to be changed
+	/**Wrapper for removing roles from a guild member. 
+	 * @param member - the member to be changed
 	 * @param role - the role to take away
-	 * @see Discord4J: {@link IUser#removeRole(IRole)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link Member#removeRole(Snowflake)}
 	 */
-	public static void removeRole(IUser user, IRole role)
+	public static void removeRole(Member member, Role role)
 	{
-		if(user == null || role == null) return;
-		RequestBuffer.request(() -> {
-			user.removeRole(role);
-		});
+		if(member == null || role == null) return;
+		member.removeRole(role.getId()).block();
 	}
 	
-	/**Wrapper for removing a role from a user without getting rate limit exceptions. 
-	 * Checks the user acutally has the role before removing it. 
-	 * @param user - the user to be changed
-	 * @param role - the role to take away
-	 * @see Discord4J: {@link IUser#removeRole(IRole)}
-	 * @see Discord4J: {@link IUser#getRolesForGuild(IGuild)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
-	 */
-	public static void removeRoleIfPresent(IUser user, IRole role)
-	{
-		if(user == null || role == null) return;
-		List<IRole> roles = RequestBuffer.request(() -> {
-			return user.getRolesForGuild(role.getGuild());
-		}).get();
-		if(roles.contains(role))
-		{
-			removeRole(user, role);
-		}
-	}
-	
-	/**Wrapper function for creating a role on a guild. The role object should then be manipulated as needed. 
-	 * @param guild the guild for the role
-	 * @return IRole object representing the new role
-	 */
-	public static IRole createRole(IGuild guild)
-	{
-		return RequestBuffer.request(() -> {
-			return guild.createRole();
-		}).get();
-	}
-	
-	/**Wrapper for deleting a role from a guild without getting rate limit exceptions.
+	/**Wrapper for deleting a role from a guild.
 	 * @param role the role object to delete
 	 */
-	public static void deleteRole(IRole role)
+	public static void deleteRole(Role role)
 	{
 		if(role==null) return;
-		RequestBuffer.request(() -> {
-			role.delete();
-		});
+		role.delete().block();
 	}
 	
-	/**Wrapper for getting a list of the roles of a guild sorted by their effective positions without getting rate limit exceptions. 
+	/**Wrapper for getting a list of the roles of a guild sorted by their natural positions. 
 	 * @param guild the guild to get the roles from
-	 * @return List<IRole> the list of roles for the guild
+	 * @return Flux<Role> that emits the guilds roles
+	 * @see Discord4J: {@link Guild#getRoles()}
 	 */
-	public static List<IRole> getRoles(IGuild guild)
+	public static Flux<Role> getRoles(Guild guild)
 	{
-		return RequestBuffer.request(() -> {
-			return guild.getRoles();
-		}).get();
+		return guild.getRoles();
 	}
 	
-	public static void reorderRoles(IGuild guild, List<IRole> newOrder)
-	{
-		RequestBuffer.request(() -> {
-			guild.reorderRoles(newOrder.toArray(new IRole[] {}));
-		}).get();
-	}
-	
-	/**Wrapper for moving a user to a voice channel without getting rate limit exceptions. User must already be in a voice channel to allow moving them. 
-	 * @param user - the user to be moved
+	/**Wrapper for moving a guild member to a voice channel. User must already be in a voice channel to allow moving them. Requires the Permission.MOVE_MEMBERS permission.
+	 * @param member - the member to be moved
 	 * @param channel - the channel to move them to
-	 * @see Discord4J: {@link IUser#moveToVoiceChannel(IVoiceChannel)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link Member#edit(java.util.function.Consumer)}
 	 */
-	public static void moveToVoiceChannel(IUser user, IVoiceChannel channel)
+	public static void moveToVoiceChannel(Member member, VoiceChannel channel)
 	{
-		RequestBuffer.request(() -> {
-			try
-			{
-				user.moveToVoiceChannel(channel);
-			}
-			catch (DiscordException e)
-			{
-				//this can happen if the room doesnt exist or the user isnt already in a channel?
-				//or does it just happen if the bot doesnt have the permissions? I dont remember
-				Discord4J.LOGGER.warn(e.getMessage());
-			}
-		});
+		member.edit(editSpec ->
+		{
+			editSpec.setNewVoiceChannel(channel.getId());
+		}).block();
 	}
 
-	/**Wrapper for getting/creating a users private message channel without getting rate limit exceptions. Used for sending messages directly to a user. 
+	/**Wrapper for getting/creating a users private message channel. Used for sending messages directly to a user. 
 	 * @param user the user you want to message
 	 * @return the user's private channel
+	 * @see Discord4J: {@link User#getPrivateChannel()}
 	 */
-	public static IPrivateChannel getPMChannel(IUser user)
+	public static PrivateChannel getPMChannel(User user)
 	{
-		return RequestBuffer.request(() -> {
-			return user.getOrCreatePMChannel();
-		}).get();
+		return user.getPrivateChannel().block();
 	}
 
-	/**Wrapper for setting the bot "playing" text without getting rate limit exceptions. Playing text is global for all guilds the bot is in. 
+	/**Wrapper for setting the bot "playing" text. Playing text is global for all guilds the bot is in. 
 	 * @param newText - the new playing text to use
-	 * @see Discord4J: {@link IDiscordClient#changePlayingText(String)}
-	 * @see https://discord4j.readthedocs.io/en/latest/RateLimitExceptions-and-you/
-	 * @see Discord4J: {@link RequestBuffer#request(sx.blah.discord.util.RequestBuffer.IRequest)}
+	 * @see Discord4J: {@link DiscordClient#updatePresence(Presence)}
 	 */
-	public static void setPlayingText(String newText) {
-		RequestBuffer.request(() -> {
-			//TODO: make this not reset online and playing - I don't know if there is a way to get the current status/activity type
-			client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, newText);
-		});
+	public static void setPlayingText(String newText)
+	{
+		//TODO: make this a custom status
+		client.updatePresence(Presence.online(Activity.playing(newText))).block();
 	}
 
-	/**Wrapper for setting the title of a text channel without getting rate limit exceptions. Does some basic parsing of the input text to remove spaces, but prints an error for other invalid characters. 
+	/**Wrapper for setting the title of a text channel. Does some basic parsing of the input text to remove spaces, but will throw an error for other invalid characters. 
 	 * <p>
 	 * Discord only allows alphanumeric characters, dashes, and underscores in text channel names. 
-	 * @param guild the guild containing the channel
 	 * @param channel the channel to be changed
 	 * @param newText the new channel name
 	 */
-	public static void setChannelCaption(IGuild guild, IChannel channel, String newText) {
+	public static void setChannelCaption(TextChannel channel, String newText)
+	{
 		// remove spaces from the string (spaces not allowed)
-		// TODO: remove other illegal characters instead of just catching the exception
+		// TODO: remove other illegal characters
 		newText.replaceAll("\\s", "");
-		try {
-			RequestBuffer.request(() -> {
-				channel.changeName(newText);
-			});
-		} catch (IllegalArgumentException e) {
-			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());
-		} catch (MissingPermissionsException e) {
-			Discord4J.LOGGER.error("Error renaming channel: " + e.getMessage());
-		}
+		channel.edit(editSpec ->
+		{
+			editSpec.setName(newText);
+		}).block();
 	}
 
-	/**Wrapper for fetching a Discord user without getting rate limit exceptions. Used for fetching multiple users at once.
+	/**Wrapper for fetching a Discord user.
 	 * @param id of user to be fetched
 	 * @return Discord user
 	 */
-	public static IUser fetchUser(long id) {
-		return RequestBuffer.request(() -> {
-			return client.fetchUser(id);
-		}).get();
+	public static User fetchUser(Snowflake id)
+	{
+		return client.getUserById(id).block();
 	}
 
-	/**Does the things needed when a player disconnects. As of writing this it only removes them from any queue they might be in. Called by the PresenceEventListener when a user changes presence state. 
-	 * @param user the user that disconnected
-	 * @see #PresenceEventListener
+	/**Wrapper for fetching a Discord member.
+	 * @param guildId of the guild the member should be associated with
+	 * @param userId of the user to be fetched
+	 * @return Discord guild member
 	 */
-	public static void userWentOffline(IUser user)
+	public static Member fetchMember(Snowflake guildId, Snowflake userId)
+	{
+		return client.getMemberById(guildId, userId).block();
+	}
+
+	/**Helper for fetching a Discord member by username. Returns the first matching member, I don't know if this order is consistent. 
+	 * @param guild to search
+	 * @param name of user to be found
+	 * @return Discord guild member
+	 */
+	public static Member findMemberByUsername(Guild guild, String name)
+	{
+		if(name==null) return null;
+		return guild.getMembers().filter(member -> name.equalsIgnoreCase(member.getUsername())).blockFirst();
+	}
+
+	/**Helper for fetching a Discord member by display name. Returns the first matching member, I don't know if this order is consistent. 
+	 * @param guild to search
+	 * @param name of user to be found
+	 * @return Discord guild member
+	 */
+	public static Member findMemberByDisplayName(Guild guild, String name)
+	{
+		if(name==null) return null;
+		return guild.getMembers().filter(member -> name.equalsIgnoreCase(member.getDisplayName())).blockFirst();
+	}
+
+	/**Does the things needed when a player disconnects. As of writing this it only removes them from any queue they might be in. 
+	 * @param member the member that disconnected
+	 */
+	public static void userWentOffline(Member member)
 	{
 		for (GatherObject object : gatherObjects)
 		{
-			if (object.remFromQueue(user) == 1)
+			if (object.remFromQueue(member) == 1)
 			{
-				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(user)
+				DiscordBot.sendMessage(object.getCommandChannel(), object.fullUserString(member)
 				                + " has been **removed** from the queue (disconnected) ("
 				                + object.numPlayersInQueue()+ "/" 
 				                + object.getMaxQueueSize()+ ")");
@@ -535,16 +501,17 @@ public class DiscordBot {
 		}
 	}
 
-	/**Does the things needed when a player leaves the server. As of writing this it only removes them from any queue they might be in. Called by the UserLeaveEventListener when a user leaves any guild. 
-	 * @param user the user that disconnected
+	/**Does the things needed when a player leaves the server. As of writing this it only removes them from any queue they might be in. 
+	 * @param guildId the guild the member left
+	 * @param member the member that disconnected
 	 * @see #PresenceEventListener
 	 */
-	public static void userLeftGuild(IGuild guild, IUser user)
+	public static void userLeftGuild(Snowflake guildId, Member member)
 	{
-		List<GatherObject> gatherObjects = DiscordBot.getGatherObjectsForGuild(guild);
+		List<GatherObject> gatherObjects = DiscordBot.getGatherObjectsForGuild(guildId);
 		for(GatherObject obj : gatherObjects) {
-			if (obj.remFromQueue(user) == 1) {
-				DiscordBot.sendMessage(obj.getCommandChannel(), obj.fullUserString(user)
+			if (obj.remFromQueue(member) == 1) {
+				DiscordBot.sendMessage(obj.getCommandChannel(), obj.fullUserString(member)
 				                + " has been **removed** from the queue (left server) ("
 				                + obj.numPlayersInQueue()+ "/" 
 				                + obj.getMaxQueueSize()+ ")");
@@ -597,11 +564,11 @@ public class DiscordBot {
 	 * @see DiscordBot#doLinkRequest(String, IUser)
 	 * @see DiscordBot#doLinkRequest(String, long)
 	 */
-	public static PlayerObject getDiscordLinkRequest(IUser user)
+	public static PlayerObject getDiscordLinkRequest(Snowflake userId)
 	{
 		for(PlayerObject p : linkRequests)
 		{
-			if(p.getDiscordUserInfo().equals(user))
+			if(p.getDiscordUserInfo().getId().equals(userId))
 			{
 				return p;
 			}
@@ -615,10 +582,10 @@ public class DiscordBot {
 	 * @return 0 if updated an existing link request, 1 if a new link request was added
 	 * @see CommandLinkServer
 	 */
-	public static int addLinkRequest(IUser user, String kagname)
+	public static int addLinkRequest(Member member, String kagname)
 	{
 		//check for an existing request
-		PlayerObject p = getDiscordLinkRequest(user);
+		PlayerObject p = getDiscordLinkRequest(member.getId());
 		if(p != null)
 		{
 			p.setKagName(kagname);
@@ -626,22 +593,22 @@ public class DiscordBot {
 		}
 		//link request doesnt already exist for this user, make a new one
 		//careful with these player objects, they are not managed, dont use them anywhere else
-		linkRequests.add(new PlayerObject(user, kagname));
+		linkRequests.add(new PlayerObject(member, kagname));
 		return 1;
 	}
 
 	/** Complete a server link request checks if the first half of the request already exists and the details are correct, then links the accounts. 
 	 * @param kagname to be linked
 	 * @param user to be linked
-	 * @return Returns -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, -4 if a cross link was detected, and 1 if the link was successful
+	 * @return -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, -4 if a cross link was detected, and 1 if the link was successful
 	 * @see GatherDB#linkAccounts(String, long)
 	 * @see DiscordBot#addLinkRequest(IUser, String)
 	 * @see DiscordBot#doLinkRequest(String, long)
 	 */
-	public static int doLinkRequest(String kagname, IUser user)
+	public static int doLinkRequest(String kagname, Snowflake userId)
 	{
 		//check if the other half of this request exists
-		PlayerObject p = getDiscordLinkRequest(user);
+		PlayerObject p = getDiscordLinkRequest(userId);
 		if(p != null)
 		{
 			//other half of the request exists
@@ -651,8 +618,8 @@ public class DiscordBot {
 				return -2;
 			}
 			//both kag name and user info match
-			int result = database.linkAccounts(kagname, user.getLongID());
-			Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
+			int result = database.linkAccounts(kagname, userId.asLong(), p.getDiscordUserInfo().getGuildId().asLong());
+			LOGGER.info("account linking changed "+result+" lines in the sql database");
 			linkRequests.remove(p);
 			if(result==-2) return -4;
 			return 1;
@@ -664,17 +631,20 @@ public class DiscordBot {
 	/**Wrapper function for {@link #doLinkRequest(String, IUser)}. Converts the id to an IUser object. Returns -3 if the user wasn't found. 
 	 * @param kagname to be linked
 	 * @param id to be linked
-	 * @return Returns -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, 1 if the link was successful, and -3 if user could not be found
+	 * @return -1 if the first half of the link request doesnt already exist, -2 if the first half of the link request is for a different account, 1 if the link was successful, and -3 if user could not be found
 	 * @see DiscordBot#doLinkRequest(String, IUser)
 	 */
 	public static int doLinkRequest(String kagname, long id)
 	{
-		IUser user = client.getUserByID(id);
-		if(user == null) return -3;
-		else return doLinkRequest(kagname, user);
+		return doLinkRequest(kagname, Snowflake.of(id));
 	}
 	
-	public static GatherGame getPlayersGame(IUser user) {
+	/**Helper function for getting the game a player is in by user object
+	 * @param user to look for
+	 * @return the GatherGame object for the game they are in, or null if no game was found
+	 */
+	public static GatherGame getPlayersGame(User user)
+	{
 		for(GatherObject gather : DiscordBot.gatherObjects)
 		{
 			GatherGame game = gather.getPlayersGame(user);
@@ -683,12 +653,16 @@ public class DiscordBot {
 		return null;
 	}
 
-	public static void playerChanged(IUser user) {
+	/**Function to be triggered when a player updates their link info. Triggers an update of the teams on any game they are in incase they were fixing their username. 
+	 * @param user
+	 */
+	public static void playerChanged(User user)
+	{
 		GatherGame game = DiscordBot.getPlayersGame(user);
 		if(game != null)
 		{
 			game.updateTeamsOnServer();
-			DiscordBot.sendMessage(DiscordBot.getGatherObjectForGame(game).getCommandChannel(), "the **link details** of "+user.mention()+" have been **updated** for game #"+game.getGameID());
+			DiscordBot.sendMessage(DiscordBot.getGatherObjectForGame(game).getCommandChannel(), "the **link details** of "+user.getMention()+" have been **updated** for game #"+game.getGameID());
 		}
 	}
 	

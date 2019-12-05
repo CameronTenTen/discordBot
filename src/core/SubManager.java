@@ -3,13 +3,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.User;
 
 /**Manages all of the substitutions for one GatherObject/queue
  * @author cameron
  *
  */
-public class SubManager {
+public class SubManager
+{
 
 	GatherObject gather;
 
@@ -107,7 +108,7 @@ public class SubManager {
 	 * @return -1 if game is null, 0 if there is already a sub, 1 if the sub request was added
 	 * @see #addSubRequest(SubRequestObject)
 	 */
-	public int addSubRequest(IUser user, GatherGame game)
+	public int addSubRequest(User user, GatherGame game)
 	{
 		return addSubRequest(DiscordBot.players.getIfExists(user), game);
 	}
@@ -148,7 +149,7 @@ public class SubManager {
 	 * @param user the user that no longer needs to be subbed
 	 * @return true if they were removed, false otherwise
 	 */
-	public boolean removeSubRequest(IUser user)
+	public boolean removeSubRequest(User user)
 	{
 		return removeSubRequest(DiscordBot.players.getIfExists(user));
 	}
@@ -261,7 +262,7 @@ public class SubManager {
 	 * 0 if sufficient votes have been made to request a sub, or a number greater than 0 representing the total number of sub votes that have been made for the player. 
 	 * @see #addSubVote(PlayerObject, PlayerObject)
 	 */
-	public int addSubVote(IUser votedFor, IUser playerVoting)
+	public int addSubVote(User votedFor, User playerVoting)
 	{
 		return addSubVote(DiscordBot.players.getIfExists(votedFor), DiscordBot.players.getIfExists(playerVoting));
 	}
@@ -288,7 +289,7 @@ public class SubManager {
 	 * @param playerVotedFor the player to remove sub votes for
 	 * @return true if votes were removed, false if the player wasn't found
 	 */
-	public boolean removeSubVotes(IUser playerVotedFor)
+	public boolean removeSubVotes(User playerVotedFor)
 	{
 		return removeSubVotes(DiscordBot.players.getIfExists(playerVotedFor));
 	}

@@ -8,9 +8,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
-import java.util.Timer;
 
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+
+import java.util.Timer;
 
 /**class to keep track of player objects so that they can be updated when player data is changed (for example when a user links their accounts). All player objects should be created here. If they are created elsewhere they will become invalid if a player changes their linked accounts.
  * also periodically checks the last used time of each of the player objects and frees them for garbage collection if they have not been used for some time.
@@ -21,12 +24,12 @@ public class PlayerObjectManager
 {
 	//want this to be a map for efficiency reasons, feel like there should be a better way of doing this than maintaining two maps
 	private Map<String, PlayerObject> kagNameToPlayerObjectMap;
-	private Map<Long, PlayerObject> discordidToPlayerObjectMap;
+	private Map<Snowflake, PlayerObject> discordidToPlayerObjectMap;
 	//player objects are moved to the weak hash map when they are old, this is so the garbage collector can clean them up
 	//don't want to just remove them without keeping the weak map in case there is still a reference to them used somewhere else
 	//in that case, the player object will remain in the weak map and will be moved back to the strong one next time it is used
 	private Map<String, WeakReference<PlayerObject>> weakKagNameToPlayerObjectMap;
-	private Map<Long, WeakReference<PlayerObject>> weakDiscordidToPlayerObjectMap;
+	private Map<Snowflake, WeakReference<PlayerObject>> weakDiscordidToPlayerObjectMap;
 
 	//functions for keeping the player cache clean
 	private Timer timer;
@@ -56,7 +59,7 @@ public class PlayerObjectManager
 	private void cleanCacheAndweakenOldReferences()
 	{
 		//check if any of the current weak references have been garbage collected yet
-		Iterator<Entry<Long, WeakReference<PlayerObject>>> weakDiscordidIterator = this.weakDiscordidToPlayerObjectMap.entrySet().iterator();
+		Iterator<Entry<Snowflake, WeakReference<PlayerObject>>> weakDiscordidIterator = this.weakDiscordidToPlayerObjectMap.entrySet().iterator();
 		while(weakDiscordidIterator.hasNext())
 		{
 			WeakReference<PlayerObject> weakRef = weakDiscordidIterator.next().getValue();
@@ -174,9 +177,9 @@ public class PlayerObjectManager
 	PlayerObjectManager()
 	{
 		kagNameToPlayerObjectMap = new HashMap<String, PlayerObject>();
-		discordidToPlayerObjectMap = new HashMap<Long, PlayerObject>();
+		discordidToPlayerObjectMap = new HashMap<Snowflake, PlayerObject>();
 		weakKagNameToPlayerObjectMap = new HashMap<String, WeakReference<PlayerObject>>();
-		weakDiscordidToPlayerObjectMap = new HashMap<Long, WeakReference<PlayerObject>>();
+		weakDiscordidToPlayerObjectMap = new HashMap<Snowflake, WeakReference<PlayerObject>>();
 
 		//initialise the task for cleaning up old player objects
 		timer = new Timer(true);
@@ -189,7 +192,7 @@ public class PlayerObjectManager
 	 * @param discordid the Discord id of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
-	public PlayerObject checkCache(long discordid)
+	public PlayerObject checkCache(Snowflake discordid)
 	{
 		PlayerObject p = discordidToPlayerObjectMap.get(discordid);
 		if(p!=null)
@@ -239,7 +242,7 @@ public class PlayerObjectManager
 	 * @param discordid the player to clear
 	 * @return false either the player is not cached, or the specified player was not removed from the cache
 	 */
-	public boolean clearPlayerCache(Long discordid)
+	public boolean clearPlayerCache(Snowflake discordid)
 	{
 		this.printMaps();
 		if(discordid != null)
@@ -286,7 +289,7 @@ public class PlayerObjectManager
 	 * @param discordid the Discord id of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
-	public PlayerObject getIfExists(long discordid)
+	public PlayerObject getIfExists(Snowflake discordid)
 	{
 		PlayerObject p = discordidToPlayerObjectMap.get(discordid);
 		//System.out.println("discordid in strong map?"+p);
@@ -342,17 +345,17 @@ public class PlayerObjectManager
 	 * @param user the discord user object of the player to find
 	 * @return the PlayerObject of the player, or null if the player doesn't have an object yet
 	 */
-	public PlayerObject getIfExists(IUser user)
+	public PlayerObject getIfExists(User user)
 	{
 		if(user == null) return null;
-		return getIfExists(user.getLongID());
+		return getIfExists(user.getId());
 	}
 
 	/**Create a new managed PlayerObject. Takes their KAG username and gets their Discord id from the database.
 	 * @param kagName the KAG username of the user to instantiate
 	 * @return null if no Discord id was found for this KAG username (the player is not linked), or the new PlayerObject if creation is successful
 	 */
-	private PlayerObject addObject(String kagName)
+	private PlayerObject addObject(String kagName, Snowflake guildId)
 	{
 		//get their info from sql
 		long id = DiscordBot.database.getDiscordID(kagName);
@@ -362,7 +365,7 @@ public class PlayerObjectManager
 		if(id==-1) return null;
 		//we dont need to check the player doesnt already exist with the new data, this should be prevented by update
 		//p = checkExists(id);
-		PlayerObject p = new PlayerObject(id, kagName);
+		PlayerObject p = new PlayerObject(Snowflake.of(id), guildId, kagName);
 		//add the new player object to the maps for next time its needed
 		addToStrongMap(p);
 		return p;
@@ -372,15 +375,15 @@ public class PlayerObjectManager
 	 * @param discordid the Discord id of the user to instantiate
 	 * @return null if no KAG username was found for this Discord id (the player is not linked), or the new PlayerObject if creation is successful
 	 */
-	private PlayerObject addObject(long discordid)
+	private PlayerObject addObject(Member member)
 	{
 		//get their info from sql
-		String kagname = DiscordBot.database.getKagName(discordid);
+		String kagname = DiscordBot.database.getKagName(member.getId().asLong());
 		//return null if they have no sql entry
 		if(kagname=="") return null;
 		//we dont need to check the player doesnt already exist with the new data, this should be prevented by update
 		//p = checkExists(kagname);
-		PlayerObject p = new PlayerObject(discordid, kagname);
+		PlayerObject p = new PlayerObject(member, kagname);
 		//add the new player object to the list for next time its needed
 		addToStrongMap(p);
 		return p;
@@ -391,33 +394,36 @@ public class PlayerObjectManager
 	 * @return their PlayerObject
 	 * @see #getOrCreatePlayerObject(long)
 	 */
-	public PlayerObject getOrCreatePlayerObject(IUser user)
+	public PlayerObject getOrCreatePlayerObject(Member member)
 	{
-		return getOrCreatePlayerObject(user.getLongID());
+		PlayerObject p = getIfExists(member.getId());
+		if(p!=null) return p;
+		//if the player doesnt have an object, create one
+		return addObject(member);
 	}
 
 	/**Getter for a players player object. Creates the player object if they don't already have one.
 	 * @param kagName the KAG username of the wanted player
 	 * @return their PlayerObject
 	 */
-	public PlayerObject getOrCreatePlayerObject(String kagName)
+	public PlayerObject getOrCreatePlayerObject(String kagName, Snowflake guildId)
 	{
 		PlayerObject p = getIfExists(kagName);
 		if(p!=null) return p;
 		//if the player doesnt have an object, create one
-		return addObject(kagName);
+		return addObject(kagName, guildId);
 	}
 
 	/**Getter for a players player object. Creates the player object if they don't already have one.
 	 * @param discordid the Discord id of the wanted player
 	 * @return their PlayerObject
 	 */
-	public PlayerObject getOrCreatePlayerObject(long discordid)
+	public PlayerObject getOrCreatePlayerObject(Snowflake discordid, Snowflake guildId)
 	{
 		PlayerObject p = getIfExists(discordid);
 		if(p!=null) return p;
 		//if the player doesnt have an object, create one
-		return addObject(discordid);
+		return addObject(DiscordBot.fetchMember(guildId, discordid));
 	}
 
 	/**Updates a player object in the cache with a new value for their discord id.
@@ -428,13 +434,13 @@ public class PlayerObjectManager
 	 * @param p the player object to update
 	 * @param discordid the new discord id
 	 */
-	private void update(PlayerObject p, long discordid) {
+	private void update(PlayerObject p, Member member) {
 		//remove the player from the map (we need to update the key they are stored under)
 		discordidToPlayerObjectMap.remove(p.getDiscordid());
 		weakDiscordidToPlayerObjectMap.remove(p.getDiscordid());
-		p.setDiscordUserInfo(DiscordBot.client.getUserByID(discordid));
+		p.setDiscordUserInfo(member);
 		//add them back into the map with the new key
-		discordidToPlayerObjectMap.put(discordid, p);
+		discordidToPlayerObjectMap.put(member.getId(), p);
 	}
 
 	/**Updates a player object in the cache with a new value for their kagName.
@@ -458,15 +464,15 @@ public class PlayerObjectManager
 	 * @param user the user object of the player that has changed
 	 * @see #refresh(long)
 	 */
-	public void refresh(IUser user)
+	public void refresh(User user)
 	{
-		refresh(user.getLongID());
+		refresh(user.getId());
 	}
 
 	/**Called when someones player info is changed on the database. Gets their new info from the database.
 	 * @param kagName the KAG username of the player that has changed
 	 */
-	public void refresh(String kagName)
+	public void refresh(String kagName, Snowflake guildId)
 	{
 		PlayerObject p = getIfExists(kagName);
 		//if the player exists update them based on current sql data
@@ -474,7 +480,7 @@ public class PlayerObjectManager
 		{
 			//get their info from sql
 			long id = DiscordBot.database.getDiscordID(kagName);
-			this.update(p, id);
+			this.update(p, DiscordBot.fetchMember(guildId, Snowflake.of(id)));
 		}
 		//could add their player object here, but will do lazy approach and only do that when the object is needed
 		//addObject(kagName);
@@ -483,14 +489,14 @@ public class PlayerObjectManager
 	/**Called when someones player info is changed on the database. Gets their new info from the database.
 	 * @param discordid the Discord id of the player that has changed
 	 */
-	public void refresh(long discordid)
+	public void refresh(Snowflake discordId)
 	{
-		PlayerObject p = getIfExists(discordid);
+		PlayerObject p = getIfExists(discordId);
 		//if the player exists update them based on current sql data
 		if(p!=null)
 		{
 			//get their info from sql
-			String kagName = DiscordBot.database.getKagName(discordid);
+			String kagName = DiscordBot.database.getKagName(discordId.asLong());
 			this.update(p, kagName);
 		}
 		//could add their player object here, but will do lazy approach and only do that when the object is needed
@@ -502,13 +508,13 @@ public class PlayerObjectManager
 	 * @param kagName the KAG username of the player that has changed
 	 * @return returns false if the force update failed
 	 */
-	public boolean forceUpdate(String kagName, long discordid)
+	public boolean forceUpdate(String kagName, Member member)
 	{
 		PlayerObject playerByKagname = getIfExists(kagName);
-		PlayerObject playerByDiscordid = getIfExists(discordid);
+		PlayerObject playerByDiscordid = getIfExists(member);
 		if(playerByKagname==null && playerByDiscordid==null)
 		{
-			PlayerObject p = new PlayerObject(discordid, kagName);
+			PlayerObject p = new PlayerObject(member, kagName);
 			//add the new player object to the list for next time its needed
 			addToStrongMap(p);
 			return true;
@@ -524,7 +530,7 @@ public class PlayerObjectManager
 			}
 			if(playerByKagname!=null)
 			{
-				this.update(playerByKagname, discordid);
+				this.update(playerByKagname, member);
 			}
 			if(playerByDiscordid!=null)
 			{
@@ -532,5 +538,10 @@ public class PlayerObjectManager
 			}
 			return true;
 		}
+	}
+	
+	public boolean forceUpdate(String kagName, long userId, long guildId)
+	{
+		return this.forceUpdate(kagName, DiscordBot.fetchMember(Snowflake.of(guildId), Snowflake.of(userId)));
 	}
 }

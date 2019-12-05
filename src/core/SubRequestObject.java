@@ -5,7 +5,8 @@ package core;
  * @author cameron
  * @see SubManager
  */
-public class SubRequestObject {
+public class SubRequestObject
+{
 	
 	SubRequestObject(PlayerObject beingReplaced, GatherGame game)
 	{

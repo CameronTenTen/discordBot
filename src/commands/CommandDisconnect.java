@@ -3,10 +3,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import core.GatherObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /**Admin command for making the discord bot to disconnect from one or all KAG servers. If the bot thinks it is already disconnected, it will say so, but still try to disconnect anyway. 
  * Must be used in command channel. 
@@ -14,30 +13,30 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherObject#disconnectKAGServers()
  * @see GatherObject#disconnectFromServer(serverId)
  */
-public class CommandDisconnect extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandDisconnect extends Command<Message, Member, Channel>
 {
-	public CommandDisconnect(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandDisconnect(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("disconnect", "disconn", "discon"), "Admin only - disconnect from a kag server, or all kag servers", "disconnect serverID/ALL");
 	}
 
 	@Override
-	public boolean isChannelValid(IChannel channel) {
+	public boolean isChannelValid(Channel channel) {
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
 		else return true;
 	}
 
 	@Override
-	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	public boolean hasPermission(Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
-		return gather.isAdmin(user);
+		return gather.isAdmin(member);
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;

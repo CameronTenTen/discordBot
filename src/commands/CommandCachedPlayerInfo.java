@@ -5,10 +5,10 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Member;
 
 /**Command for showing player account info in the channel. Shows KAG username, Discord ID, Nick, Name and Discriminator as stored in the database. 
  * <p>
@@ -17,28 +17,28 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherDB#getKagName(long)
  * @see GatherDB#getDiscordID(String)
  */
-public class CommandCachedPlayerInfo extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandCachedPlayerInfo extends Command<Message, Member, Channel>
 {
-	public CommandCachedPlayerInfo(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandCachedPlayerInfo(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("cachedplayerinfo"), "Check the information of a player stored in the bot cache", "cachedplayerinfo KAGName/@user");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		DiscordBot.players.printMaps();
 
-		List<IUser> mentions = messageObject.getMentions();
+		List<User> mentions = messageObject.getUserMentions().collectList().block();
 		PlayerObject player;
 		if(splitMessage.length<=1)
 		{
 			//if they just did !playerinfo without any argument, just get stats for them
-			player = DiscordBot.players.checkCache(user.getLongID());
+			player = DiscordBot.players.checkCache(member.getId());
 		}
 		else if(!mentions.isEmpty())
 		{
-			player = DiscordBot.players.checkCache(mentions.get(0).getLongID());
+			player = DiscordBot.players.checkCache(mentions.get(0).getId());
 		}
 		else
 		{
@@ -53,7 +53,7 @@ public class CommandCachedPlayerInfo extends Command<IMessage, IUser, IChannel, 
 
 		if(player==null)
 		{
-			return user.mention()+", Could not find a record of that player, either you typed their name incorrectly, or they are not linked";
+			return member.getMention()+", Could not find a record of that player, either you typed their name incorrectly, or they are not linked";
 		}
 		else
 		{

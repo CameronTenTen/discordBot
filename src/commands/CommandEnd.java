@@ -2,11 +2,11 @@ package commands;
 import java.util.Arrays;
 
 import core.DiscordBot;
+import core.GatherGame;
 import core.GatherObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /**
  * Admin only command for moving all players out of the red and blue voice channels into the general channel. Must be used in command channel. 
@@ -14,36 +14,57 @@ import sx.blah.discord.handle.obj.IUser;
  * @author cameron
  * @see GatherObject#movePlayersOutOfTeamRooms()
  */
-public class CommandEnd extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandEnd extends Command<Message, Member, Channel>
 {
-	public CommandEnd(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandEnd(Commands<Message, Member, Channel> commands)
 	{
-		super(commands, Arrays.asList("end"), "Admin only - move users from team chat to general chat");
+		super(commands, Arrays.asList("end"), "Admin only - move users from team chat to general chat", "end gameID");
 	}
 
 	@Override
-	public boolean isChannelValid(IChannel channel) {
+	public boolean isChannelValid(Channel channel) {
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
 		else return true;
 	}
 
 	@Override
-	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	public boolean hasPermission(Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
-		return gather.isAdmin(user);
+		return gather.isAdmin(member);
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;
 
-		this.reply(messageObject, "Moving players out of team rooms");
-		gather.movePlayersOutOfTeamRooms();
+		if(splitMessage.length<2)
+		{
+			return member.getMention() + ", not enough arguments, command usage is !end gameID";
+		}
+		int gameId = -1;
+		try
+		{
+			gameId = Integer.parseInt(splitMessage[1]);
+		}
+		catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
+		{
+			return member.getMention() + ", an error occured parsing the game id, command usage is !end gameID";
+		}
+		GatherGame game = gather.getRunningGame(gameId);
+		if(game == null)
+		{
+			return "No game found with the id "+gameId+"!";
+		}
+		else
+		{
+			this.reply(messageObject, "Moving players out of team rooms");
+			gather.movePlayersOutOfTeamRooms(game);
+		}
 		return null;
 	}
 }

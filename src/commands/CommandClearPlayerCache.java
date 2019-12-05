@@ -5,55 +5,56 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObjectManager;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Member;
 
 /**Admin command for clearing the current player cache of all unused player objects. Must be used in command channel. 
  * @author cameron
  * @see PlayerObjectManager#clearPlayerCache()
  */
-public class CommandClearPlayerCache extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandClearPlayerCache extends Command<Message, Member, Channel>
 {
-	public CommandClearPlayerCache(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandClearPlayerCache(Commands<Message, Member, Channel> commands)
 	{
-		super(commands, Arrays.asList("clearPlayerCache", "clear_player_cache"), "Admin only - clear current player cache of all unused player objects");
+		super(commands, Arrays.asList("clearplayercache", "clear_player_cache"), "Admin only - clear current player cache of all unused player objects");
 	}
 
 	@Override
-	public boolean isChannelValid(IChannel channel) {
+	public boolean isChannelValid(Channel channel) {
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
 		else return true;
 	}
 
 	@Override
-	public boolean hasPermission(IUser user, IChannel channel, IGuild guild)
+	public boolean hasPermission(Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
-		return gather.isAdmin(user);
+		return gather.isAdmin(member);
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;
 
-		List<IUser> mentions = messageObject.getMentions();
+		List<User> mentions = messageObject.getUserMentions().collectList().block();
 		if(!mentions.isEmpty())
 		{
-			for(IUser mention : mentions)
+			for(User mention : mentions)
 			{
-				if(DiscordBot.players.clearPlayerCache(mention.getLongID()))
+				String playerString = gather.playerString(DiscordBot.players.getIfExists(mention.getId()));
+				if(DiscordBot.players.clearPlayerCache(mention.getId()))
 				{
-					return "Removed user from cache: " + gather.fullUserString(mention);
+					return "Removed user from cache: " + playerString;
 				}
 				else
 				{
-					return "Failed to remove user from cache: " + gather.fullUserString(mention);
+					return "Failed to remove user from cache: " + playerString;
 				}
 			}
 			//the code never reaches this point but the compiler thinks it might

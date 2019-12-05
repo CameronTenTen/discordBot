@@ -3,21 +3,23 @@ package commands;
 import java.util.Arrays;
 import java.util.List;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
-//TODO: document this
-public class CommandHelp extends Command<IMessage, IUser, IChannel, IGuild>
+/**Command for fetching a list of possible commands with descriptions and usage examples
+ * @author cameron
+ *
+ */
+public class CommandHelp extends Command<Message, Member, Channel>
 {
-	public CommandHelp(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandHelp(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("help", "h"), "Display this help message", "help");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		//reply with the help text split into two messages (just a quick hack for now to prevent the message being too long)
 		List<String> helpMessages = commands.getHelpMessageArray();

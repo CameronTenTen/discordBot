@@ -1,5 +1,6 @@
 package core;
 
+import discord4j.core.object.util.Snowflake;
 
 /**Listener object to be added to the KagServerChecker. Gets messages passed to it when they are received from the server. 
  * @author cameron
@@ -77,7 +78,7 @@ public class RconListener
 					{
 					case 1:
 						gather.getServer(ip, port).say("Accounts linked successfully, you can now join the queue in discord");
-						DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserByID(id).mention()+" has sucessfully linked");
+						DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserById(Snowflake.of(id)).block().getMention()+" has sucessfully linked");
 						if(!DiscordBot.database.checkValidLink(username, id))
 						{
 							DiscordBot.sendMessage(gather.getCommandChannel(),"WARNING: problem with linked information detected, there maybe more than one entry for you. **Please share this error with someone that has database access.** (This should not prevent you playing in the short term, but may cause issues long term)");
@@ -94,7 +95,7 @@ public class RconListener
 						gather.getServer(ip, port).say("Could not find a user for that discord id, did you type it correctly?");
 						break;
 					case -4:
-						DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserByID(id).mention()+"WARNING: fatal problem with linked information detected, you maybe trying to cross link. **Please share this error with someone that has database access.**");
+						DiscordBot.sendMessage(gather.getCommandChannel(), DiscordBot.client.getUserById(Snowflake.of(id)).block().getMention()+"WARNING: fatal problem with linked information detected, you maybe trying to cross link. **Please share this error with someone that has database access.**");
 						break;
 					}
 				}

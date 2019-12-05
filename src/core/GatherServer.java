@@ -1,12 +1,15 @@
 package core;
 import java.io.IOException;
-import sx.blah.discord.Discord4J;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**represents a gather KAG server, keeps track of the connection between the bot and the server, the properties of the server, and the status of the server
  * @author cameron
  */
 public class GatherServer
 {
+	static final Logger LOGGER = LoggerFactory.getLogger(GatherServer.class);
 	private String serverName;
 	private String serverID;
 	private String ip;
@@ -33,7 +36,8 @@ public class GatherServer
 	 */
 	public boolean connect()
 	{
-		try {
+		try
+		{
 			//check for and stop any existing connections
 			if(rconThread != null) rconThread.interrupt();
 			//now create the new connection
@@ -44,8 +48,9 @@ public class GatherServer
 			rconThread = new Thread(serverCheckObject);
 			rconThread.start();
 			return true;
-		} catch (IOException e) {
-			Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
+		} catch (IOException e)
+		{
+			LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
 			rconThread = null;
 			serverCheckObject = null;
 			return false;
@@ -90,7 +95,7 @@ public class GatherServer
 	{
 		if(serverCheckObject == null)
 		{
-			Discord4J.LOGGER.error("Could not send message to kag server, serverConnection is null");
+			LOGGER.error("Could not send message to kag server, serverConnection is null");
 			return;
 		}
 		serverCheckObject.sendMessage(msg);
@@ -125,77 +130,88 @@ public class GatherServer
 	/**Getter for the server name string, only used by the bot for allowing players to differentiate servers. The value of this has no effect on the bot behavior. 
 	 * @return the server name string
 	 */
-	public String getServerName() {
+	public String getServerName()
+	{
 		return serverName;
 	}
 
 	/**Setter for the server name string, only used by the bot for allowing players to differentiate servers. The value of this has no effect on the bot behavior. 
 	 * @param serverName the new server name to use
 	 */
-	public void setServerName(String serverName) {
+	public void setServerName(String serverName)
+	{
 		this.serverName = serverName;
 	}
 
 	/**Getter for the server id string, a reference id for passing to commands that need a server specified.
 	 * @return the server id string
 	 */
-	public String getServerID() {
+	public String getServerID()
+	{
 		return serverID;
 	}
 
 	/**Setter for the server id string, a reference id for passing to commands that need a server specified.
 	 * @param serverName the new server id to use
 	 */
-	public void setServerID(String serverID) {
+	public void setServerID(String serverID)
+	{
 		this.serverID = serverID;
 	}
 
 	/**Getter for the server ip address. 
 	 * @return the server ip address
 	 */
-	public String getIp() {
+	public String getIp()
+	{
 		return ip;
 	}
 
 	/**Setter for the server ip address. 
 	 * @param ip the new server ip address
 	 */
-	public void setIp(String ip) {
+	public void setIp(String ip)
+	{
 		this.ip = ip;
 	}
 
 	/**Getter for the server port. 
 	 * @return the server port
 	 */
-	public int getPort() {
+	public int getPort()
+	{
 		return port;
 	}
 
 	/**Setter for the server port. 
 	 * @param port the new server port
 	 */
-	public void setPort(int port) {
+	public void setPort(int port)
+	{
 		this.port = port;
 	}
 
 	/**Getter for the server password. 
 	 * @return the current server password
 	 */
-	public String getServerPassword() {
+	public String getServerPassword()
+	{
 		return serverPassword;
 	}
 
 	/**Setter for the server password. 
 	 * @param serverPassword the new server password
 	 */
-	public void setServerPassword(String serverPassword) {
+	public void setServerPassword(String serverPassword)
+	{
 		this.serverPassword = serverPassword;
 	}
 
 	/**Getter for the http:// or kag:// link players can use to connect with this server. 
 	 * @return the server link
 	 */
-	public String getServerLink() {
+	public String getServerLink()
+	{
 		if(this.serverLink != null) return this.serverLink;
 		else return "<kag://"+this.getIp()+":"+this.getPort()+"/"+this.getServerPassword()+">";
 	}
@@ -203,21 +219,24 @@ public class GatherServer
 	/**Setter for the http:// or kag:// link players can use to connect with this server. 
 	 * @param serverLink the new server link
 	 */
-	public void setServerLink(String serverLink) {
+	public void setServerLink(String serverLink)
+	{
 		this.serverLink = serverLink;
 	}
 
 	/**Getter for checking if the server is currently in use for a gather game. 
 	 * @return true if the server is in use
 	 */
-	public boolean isInUse() {
+	public boolean isInUse()
+	{
 		return isInUse;
 	}
 
 	/**Setter for whether the server is in use. 
 	 * @param isInUse the new value for isInUse
 	 */
-	public void setInUse(boolean isInUse) {
+	public void setInUse(boolean isInUse)
+	{
 		this.isInUse = isInUse;
 	}
 }

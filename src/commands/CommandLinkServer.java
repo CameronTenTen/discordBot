@@ -4,10 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerInfoObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /**Command for users to link their KAG usernames with their discord account without logging into their KAG account by directing them to the KAG server instead. Useful for people who don't know their KAG account details(steam users).
  * <p>
@@ -21,22 +20,22 @@ import sx.blah.discord.handle.obj.IUser;
  * @see DiscordBot#getPlayerInfo(String)
  * @see DiscordBot#getCorrectCase(String)
  * @see GatherDB#linkAccounts(String, long)
- * @see DiscordBot#addLinkRequest(sx.blah.discord.handle.obj.IUser, String)
+ * @see DiscordBot#addLinkRequest(sx.blah.discord.handle.obj.Member, String)
  * @see DiscordBot#doLinkRequest(String, long)
  */
-public class CommandLinkServer extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandLinkServer extends Command<Message, Member, Channel>
 {
-	public CommandLinkServer(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandLinkServer(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("linkserver", "serverlink"), "Link your KAG account to your discord account by logging into a kag server", "linkserver <KAGName>");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		if(splitMessage.length<=1)
 		{
-			return user.mention()+", in order to link your Discord and KAG accounts provide your KAG username like this **!linkserver KAGUsernameHere**, for more information use !linkhelp";
+			return member.getMention()+", in order to link your Discord and KAG accounts provide your KAG username like this **!linkserver KAGUsernameHere**, for more information use !linkhelp";
 		}
 		else if(splitMessage.length==2)
 		{
@@ -44,34 +43,34 @@ public class CommandLinkServer extends Command<IMessage, IUser, IChannel, IGuild
 			//check the username is small enough, if its too big they probably forgot the space between username and token
 			if(submittedUsername.length()>20)
 			{
-				return user.mention()+", that username is too long to be valid!";
+				return member.getMention()+", that username is too long to be valid!";
 			}
 			//quick sanity check on their username before giving them the link
 			PlayerInfoObject info = DiscordBot.getPlayerInfo(submittedUsername);
 			if(info==null || info.username.equals(""))
 			{
-				return user.mention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
+				return member.getMention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
 			}
 			else if(info.gold==false)
 			{
 				//TODO: should remove this check due to f2p?
-				return user.mention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should use your game account. If you do not know your game account you can connect to the gather server to see it on the scoreboard";
+				return member.getMention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should use your game account. If you do not know your game account you can connect to the gather server to see it on the scoreboard";
 			}
 			else
 			{
-				int returnVal = DiscordBot.addLinkRequest(user, info.username);
+				int returnVal = DiscordBot.addLinkRequest(member, info.username);
 				switch(returnVal)
 				{
 				case 1:
-					return user.mention()+", please connect to a gather KAG server and paste this message to ingame chat: !link "+user.getLongID();
+					return member.getMention()+", please connect to a gather KAG server and paste this message to ingame chat: !link "+member.getId();
 				case 0:
-					return user.mention()+", your link request has been updated for a new kag username, please connect to a gather KAG server and paste this message to ingame chat: !link "+user.getLongID();
+					return member.getMention()+", your link request has been updated for a new kag username, please connect to a gather KAG server and paste this message to ingame chat: !link "+member.getId();
 				}
 			}
 		}
 		else if(splitMessage.length>=3)
 		{
-			return user.mention()+", you have entered too many arguments for this command, perhaps you put an accidental space in your name, usage is **!linkserver KAGUsernameHere**";
+			return member.getMention()+", you have entered too many arguments for this command, perhaps you put an accidental space in your name, usage is **!linkserver KAGUsernameHere**";
 		}
 		return null;
 	}

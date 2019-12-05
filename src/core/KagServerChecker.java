@@ -10,7 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import sx.blah.discord.Discord4J;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**Listens to the tcp socket that is connected to the KAG server and sends received messages to its listeners. 
  * @author cameron
@@ -18,6 +19,7 @@ import sx.blah.discord.Discord4J;
  */
 public class KagServerChecker implements Runnable
 {
+	static final Logger LOGGER = LoggerFactory.getLogger(KagServerChecker.class);
 	private Socket socket;
 	private List<RconListener> listeners;
 	private PrintWriter out;
@@ -89,13 +91,13 @@ public class KagServerChecker implements Runnable
 		{
 			if(Thread.interrupted()) return;
 			try {
-				Discord4J.LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer/60.0f+" seconds");
+				LOGGER.info("Attempting to reconnect to KAG server in "+reconnectTimer/60.0f+" seconds");
 				Thread.sleep(reconnectTimer);
 				try {
 					this.connect();
 				} catch (IOException e) {
 					this.disconnect();
-					Discord4J.LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
+					LOGGER.error("An error occured connecting to the gather KAG server("+e.getMessage()+"): "+ip+":"+port);
 				}
 			} catch (InterruptedException e) {
 				//if the sleep is interrupted then we want to stay disconnected
@@ -117,7 +119,7 @@ public class KagServerChecker implements Runnable
 		socket = new Socket(ip, port);
 		out = new PrintWriter(socket.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		Discord4J.LOGGER.info("Connected to KAG server: "+ip+":"+port);
+		LOGGER.info("Connected to KAG server: "+ip+":"+port);
 		out.println(rconPassword);
 		this.setReconnecting(false);
 		this.setConnected(true);
@@ -144,7 +146,7 @@ public class KagServerChecker implements Runnable
 	public void disconnect()
 	{
 		try {
-			Discord4J.LOGGER.info("Disconnecting from KAG server: "+ip+":"+port);
+			LOGGER.info("Disconnecting from KAG server: "+ip+":"+port);
 			socket.close();
 			in.close();
 			out.close();
@@ -188,7 +190,7 @@ public class KagServerChecker implements Runnable
 					lastMsg = in.readLine();
 					if(lastMsg == null || lastMsg.endsWith("server shutting down."))
 					{
-						Discord4J.LOGGER.info("connection loss detected: "+lastMsg);
+						LOGGER.info("connection loss detected: "+lastMsg);
 						connectionLost();
 					}
 					else

@@ -9,7 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import sx.blah.discord.Discord4J;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**Object for managing the database connection. Provides various useful functions for database interaction. 
  * @author cameron
@@ -33,8 +34,9 @@ import sx.blah.discord.Discord4J;
  * clear stats data from players table using
  * UPDATE players SET gamesplayed=0, wins=0, losses=0, draws=0, desertions=0, substitutions=0, desertionlosses=0, substitutionwins=0;
  */
-public class GatherDB {
-
+public class GatherDB
+{
+	static final Logger LOGGER = LoggerFactory.getLogger(GatherDB.class);
 	private String username;
 	private String password;
 	private String url;
@@ -51,42 +53,48 @@ public class GatherDB {
 	/**
 	 * @return the username to use to connect to the database
 	 */
-	public String getUsername() {
+	public String getUsername()
+	{
 		return username;
 	}
 
 	/**
 	 * @param username the username to use to connect to the database
 	 */
-	public void setUsername(String username) {
+	public void setUsername(String username)
+	{
 		this.username = username;
 	}
 
 	/**
 	 * @return the password to use to connect to the database
 	 */
-	public String getPassword() {
+	public String getPassword()
+	{
 		return password;
 	}
 
 	/**
 	 * @param password the password to use to connect to the database
 	 */
-	public void setPassword(String password) {
+	public void setPassword(String password)
+	{
 		this.password = password;
 	}
 
 	/**
 	 * @return the url to use to connect to the database
 	 */
-	public String getUrl() {
+	public String getUrl()
+	{
 		return url;
 	}
 
 	/**
 	 * @param url the url to use to connect to the databse
 	 */
-	public void setUrl(String url) {
+	public void setUrl(String url)
+	{
 		this.url = url;
 	}
 	
@@ -94,7 +102,8 @@ public class GatherDB {
 	 * @param ip the ip address of the server
 	 * @param database the name of the database to use on the server
 	 */
-	public void setUrl(String ip, String database) {
+	public void setUrl(String ip, String database)
+	{
 		this.url = "jdbc:mysql://" + ip + "/" + database;
 	}
 
@@ -103,24 +112,27 @@ public class GatherDB {
 	 */
 	public void connect()
 	{
-		try {
+		try
+		{
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
 		
-                try {
-                	connection = DriverManager.getConnection(url+"?autoReconnect=true", username, password);
-                	
-                } catch (SQLException e) {
-			System.out.println("SQLException: " + e.getMessage());
-			System.out.println("SQLState: " + e.getSQLState());
-			System.out.println("VendorError: " + e.getErrorCode());
+		try
+		{
+			connection = DriverManager.getConnection(url+"?autoReconnect=true", username, password);
+		} catch (SQLException e)
+		{
+			LOGGER.error("SQLException: " + e.getMessage());
+			LOGGER.error("SQLState: " + e.getSQLState());
+			LOGGER.error("VendorError: " + e.getErrorCode());
 			e.printStackTrace();
 		}
 	}
 	
-	private interface SqlStatementObjectReturn<T> {
+	private interface SqlStatementObjectReturn<T>
+	{
 		T run(Statement statement, ResultSet result) throws SQLException;
 	}
 
@@ -139,7 +151,7 @@ public class GatherDB {
 		}
 		catch (SQLException e1)
 		{
-			Discord4J.LOGGER.info("Exception: "+e1.getMessage()+" thrown when running a database query, retrying...");
+			LOGGER.info("Exception: "+e1.getMessage()+" thrown when running a database query, retrying...");
 			//retry because the the auto reconnect doesn't work until after one query has failed
 			try
 			{
@@ -147,31 +159,33 @@ public class GatherDB {
 			}
 			catch (SQLException e2)
 			{
-				Discord4J.LOGGER.error("SQLException: " + e2.getMessage());
-				Discord4J.LOGGER.error("SQLState: " + e2.getSQLState());
-				Discord4J.LOGGER.error("VendorError: " + e2.getErrorCode());
+				LOGGER.error("SQLException: " + e2.getMessage());
+				LOGGER.error("SQLState: " + e2.getSQLState());
+				LOGGER.error("VendorError: " + e2.getErrorCode());
 				StringWriter writer = new StringWriter();
 				e2.printStackTrace(new PrintWriter(writer));
-				Discord4J.LOGGER.error(writer.toString());
+				LOGGER.error(writer.toString());
 			}
 		}
-        	finally
-                {
-                	if(result != null)
-                	{
-                		try {
-                			result.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                	if(statement != null)
-                	{
-                		try {
-                			statement.close();
-                		} catch (SQLException e) {
-                		}
-                	}
-                }
+		finally
+		{
+			if(result != null)
+			{
+				try
+				{
+					result.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(statement != null)
+			{
+				try
+				{
+					statement.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 		return defaultReturnVal;
 	}
 	
@@ -181,23 +195,24 @@ public class GatherDB {
 	 */
 	public String getKagName(long id)
 	{
-		return errorHandler("", (statement, result) ->{
+		return errorHandler("", (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
 
-	        	if (result.next())
-	        	{
-	        		if(!result.isLast())
-	        		{
-	        			//would also like to print this warning to discord, but not sure how best to handle that
-	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by discord id("+id+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
-	        		}
-	        		return result.getString("kagname");
-	        	}
-	        	else
-	        	{
-	        		return "";
-	        	}
+			if (result.next())
+			{
+				if(!result.isLast())
+				{
+					//would also like to print this warning to discord, but not sure how best to handle that
+					LOGGER.error("Attempted to retrieve player from database by discord id("+id+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
+				}
+				return result.getString("kagname");
+			}
+			else
+			{
+				return "";
+			}
 		});
 	}
 
@@ -207,23 +222,24 @@ public class GatherDB {
 	 */
 	public long getDiscordID(String kagName)
 	{
-		return errorHandler(-1L, (statement, result) ->{
+		return errorHandler(-1L, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \"" + kagName + "\"");
 
-	        	if (result.next())
-	        	{
-	        		if(!result.isLast())
-	        		{
-	        			//would also like to print this warning to discord, but not sure how best to handle that
-	        			Discord4J.LOGGER.error("Attempted to retrieve player from database by kagname("+kagName+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
-	        		}
-	        		return result.getLong("discordid");
-	        	}
-	        	else
-	        	{
-	        		return -1L;
-	        	}
+			if (result.next())
+			{
+				if(!result.isLast())
+				{
+					//would also like to print this warning to discord, but not sure how best to handle that
+					LOGGER.error("Attempted to retrieve player from database by kagname("+kagName+"), but found multiple entries - this SHOULD NEVER HAPPEN and suggests INCORRECT TABLE CONSTRAINTS. This player may have issues due to incorrect link results");
+				}
+				return result.getLong("discordid");
+			}
+			else
+			{
+				return -1L;
+			}
 		});
 	}
 	
@@ -234,31 +250,32 @@ public class GatherDB {
 	 */
 	public StatsObject getStats(String kagname)
 	{
-		return errorHandler(null, (statement, result) ->{
+		return errorHandler(null, (statement, result) ->
+		{
 			StatsObject returnObj = new StatsObject();
 			returnObj.kagname = kagname;
 			statement = connection.createStatement();
 			// result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE kagname = \""+kagname + "\"");
 			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \""+kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		returnObj.discordid = result.getLong("discordid");
-	        		returnObj.gamesplayed = result.getInt("gamesplayed");
-	        		returnObj.wins = result.getInt("wins");
-	        		returnObj.losses = result.getInt("losses");
-	        		returnObj.draws = result.getInt("draws");
-	        		returnObj.desertions = result.getInt("desertions");
-	        		returnObj.substitutions = result.getInt("substitutions");
-	        		returnObj.desertionlosses = result.getInt("desertionlosses");
-	        		returnObj.substitutionwins = result.getInt("substitutionwins");
-	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
-	        		return returnObj;
-	        	}
-	        	else
-	        	{
-	        		return null;
-	        	}
+			if (result.next())
+			{
+				returnObj.discordid = result.getLong("discordid");
+				returnObj.gamesplayed = result.getInt("gamesplayed");
+				returnObj.wins = result.getInt("wins");
+				returnObj.losses = result.getInt("losses");
+				returnObj.draws = result.getInt("draws");
+				returnObj.desertions = result.getInt("desertions");
+				returnObj.substitutions = result.getInt("substitutions");
+				returnObj.desertionlosses = result.getInt("desertionlosses");
+				returnObj.substitutionwins = result.getInt("substitutionwins");
+				// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
+				return returnObj;
+			}
+			else
+			{
+				return null;
+			}
 		});
 	}
 
@@ -269,31 +286,32 @@ public class GatherDB {
 	 */
 	public StatsObject getStats(long id)
 	{
-		return errorHandler(null, (statement, result) ->{
+		return errorHandler(null, (statement, result) ->
+		{
 			StatsObject returnObj = new StatsObject();
 			returnObj.discordid = id;
 			statement = connection.createStatement();
 			//result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE discordid = "+id);
 			result = statement.executeQuery("SELECT * FROM players WHERE discordid = "+id);
 
-	        	if (result.next())
-	        	{
-	        		returnObj.kagname = result.getString("kagName");
-	        		returnObj.gamesplayed = result.getInt("gamesplayed");
-	        		returnObj.wins = result.getInt("wins");
-	        		returnObj.losses = result.getInt("losses");
-	        		returnObj.draws = result.getInt("draws");
-	        		returnObj.desertions = result.getInt("desertions");
-	        		returnObj.substitutions = result.getInt("substitutions");
-	        		returnObj.desertionlosses = result.getInt("desertionlosses");
-	        		returnObj.substitutionwins = result.getInt("substitutionwins");
-	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
-	        		return returnObj;
-	        	}
-	        	else
-	        	{
-	        		return null;
-	        	}
+			if (result.next())
+			{
+				returnObj.kagname = result.getString("kagName");
+				returnObj.gamesplayed = result.getInt("gamesplayed");
+				returnObj.wins = result.getInt("wins");
+				returnObj.losses = result.getInt("losses");
+				returnObj.draws = result.getInt("draws");
+				returnObj.desertions = result.getInt("desertions");
+				returnObj.substitutions = result.getInt("substitutions");
+				returnObj.desertionlosses = result.getInt("desertionlosses");
+				returnObj.substitutionwins = result.getInt("substitutionwins");
+				// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
+				return returnObj;
+			}
+			else
+			{
+				return null;
+			}
 		});
 	}
 
@@ -303,18 +321,19 @@ public class GatherDB {
 	 */
 	public int getGamesPlayed(String kagname)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT gamesPlayed FROM players WHERE kagname = \"" + kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("gamesplayed");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("gamesplayed");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -324,18 +343,19 @@ public class GatherDB {
 	 */
 	public int getGamesPlayed(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT gamesplayed FROM players WHERE discordid = " + id);
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("gamesplayed");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("gamesplayed");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -345,18 +365,19 @@ public class GatherDB {
 	 */
 	public int getWins(String kagname)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT wins FROM players WHERE kagname = \"" + kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("wins");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("wins");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -366,18 +387,19 @@ public class GatherDB {
 	 */
 	public int getWins(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT wins FROM players WHERE discordid = " + id);
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("wins");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("wins");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -387,18 +409,19 @@ public class GatherDB {
 	 */
 	public int getLosses(String kagname)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT losses FROM players WHERE kagname = \"" + kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("losses");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("losses");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -408,18 +431,19 @@ public class GatherDB {
 	 */
 	public int getLosses(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT losses FROM players WHERE discordid = " + id);
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("losses");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("losses");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -429,18 +453,19 @@ public class GatherDB {
 	 */
 	public int getDraws(String kagname)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT draws FROM players WHERE kagname = \"" + kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("draws");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("draws");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -450,18 +475,19 @@ public class GatherDB {
 	 */
 	public int getDraws(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT draws FROM players WHERE discordid = " + id);
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("draws");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("draws");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -471,18 +497,19 @@ public class GatherDB {
 	 */
 	public int getdesertions(String kagname)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT desertions FROM players WHERE kagname = \"" + kagname + "\"");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("desertions");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("desertions");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -492,18 +519,19 @@ public class GatherDB {
 	 */
 	public int getdesertions(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT desertions FROM players WHERE discordid = " + id);
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("desertions");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("desertions");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -513,7 +541,8 @@ public class GatherDB {
 	 */
 	public int addWin(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
 		});
@@ -525,7 +554,8 @@ public class GatherDB {
 	 */
 	public int addWin(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -537,7 +567,8 @@ public class GatherDB {
 	 */
 	public int addLoss(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE discordid="+id);
 		});
@@ -549,7 +580,8 @@ public class GatherDB {
 	 */
 	public int addLoss(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -561,7 +593,8 @@ public class GatherDB {
 	 */
 	public int addDesertion(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE discordid="+id);
 		});
@@ -573,7 +606,8 @@ public class GatherDB {
 	 */
 	public int addDesertion(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -585,7 +619,8 @@ public class GatherDB {
 	 */
 	public int addDesertionLoss(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE discordid="+id);
 		});
@@ -597,7 +632,8 @@ public class GatherDB {
 	 */
 	public int addDesertionLoss(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -609,7 +645,8 @@ public class GatherDB {
 	 */
 	public int addSubstitution(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE discordid="+id);
 		});
@@ -621,7 +658,8 @@ public class GatherDB {
 	 */
 	public int addSubstitution(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -633,7 +671,8 @@ public class GatherDB {
 	 */
 	public int addSubstitutionWin(long id)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE discordid="+id);
 		});
@@ -645,7 +684,8 @@ public class GatherDB {
 	 */
 	public int addSubstitutionWin(String kagName)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE kagname=\""+kagName+"\"");
 		});
@@ -657,9 +697,10 @@ public class GatherDB {
 	 * @param id the Discord id to link
 	 * @return the number of rows changed by the request, -1 if the user couldnt be found, -2 if the user is trying to cross link accounts.
 	 */
-	public int linkAccounts(String kagName, long id)
+	public int linkAccounts(String kagName, long id, long guildId)
 	{
-		int returnVal = errorHandler(-1, (statement, result) ->{
+		int returnVal = errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			//this query can lead to duplicated links if the database constraints aren't correct
 			//could fix this by manually checking for existing entries first and updating the, but then I am just making my own version of "ON DUPLICATE KEY UPDATE"
@@ -667,7 +708,7 @@ public class GatherDB {
 		});
 		if(returnVal!=-1)
 		{
-			if(!DiscordBot.players.forceUpdate(kagName, id))
+			if(!DiscordBot.players.forceUpdate(kagName, id, guildId))
 			{
 				return -2;
 			}
@@ -684,7 +725,8 @@ public class GatherDB {
 	 */
 	public boolean checkValidLink(String kagName, long id)
 	{
-		return errorHandler(false, (statement, result) ->{
+		return errorHandler(false, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			if(this.getDiscordID(kagName)!=id)
 			{
@@ -702,7 +744,8 @@ public class GatherDB {
 	 */
 	public int incrementGamesPlayed()
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			return statement.executeUpdate("UPDATE players SET gamesplayed=gamesplayed+1 WHERE kagname=\"+numgames+\"");
 		});
@@ -713,19 +756,20 @@ public class GatherDB {
 	 */
 	public int reserveGameId()
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			statement.executeUpdate("INSERT INTO games () VALUES ()");
 			result = statement.executeQuery("SELECT LAST_INSERT_ID();");
 
-	        	if (result.next())
-	        	{
-	        		return result.getInt("LAST_INSERT_ID()");
-	        	}
-	        	else
-	        	{
-	        		return -1;
-	        	}
+			if (result.next())
+			{
+				return result.getInt("LAST_INSERT_ID()");
+			}
+			else
+			{
+				return -1;
+			}
 		});
 	}
 
@@ -735,7 +779,8 @@ public class GatherDB {
 	 */
 	public int addGame(GatherGame game)
 	{
-		return errorHandler(-1, (statement, result) ->{
+		return errorHandler(-1, (statement, result) ->
+		{
 			int rowsChanged=-1;
 			statement = connection.createStatement();
 			//game into games table
@@ -745,11 +790,13 @@ public class GatherDB {
 			//TODO appropriate stats for subs
 			List<String> blueTeam = game.getBlueKagNames();
 			List<String> redTeam = game.getRedKagNames();
-			for(String kagName : blueTeam) {
+			for(String kagName : blueTeam)
+			{
 				boolean blueWon = game.getWinningTeam()==0 ? true : false;
 				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 0, "+blueWon+")");
 			}
-			for(String kagName : redTeam) {
+			for(String kagName : redTeam)
+			{
 				boolean redWon = game.getWinningTeam()==1 ? true : false;
 				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 1, "+redWon+")");
 			}
@@ -764,7 +811,8 @@ public class GatherDB {
 	 */
 	public List<StatsObject> getTopPlayers(int numPlayers)
 	{
-		return errorHandler(null, (statement, result) ->{
+		return errorHandler(null, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT "+numPlayers+")"
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT "+numPlayers+")"
@@ -773,48 +821,49 @@ public class GatherDB {
 			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
 
 			List<StatsObject> returnList = new ArrayList<StatsObject>();
-	        	while (result.next())
-	        	{
-	        		StatsObject returnObj = new StatsObject();
-	        		returnObj.kagname = result.getString("kagname");
-	        		returnObj.discordid = result.getLong("discordid");
-	        		returnObj.gamesplayed = result.getInt("gamesplayed");
-	        		returnObj.wins = result.getInt("wins");
-	        		returnObj.losses = result.getInt("losses");
-	        		returnObj.draws = result.getInt("draws");
-	        		returnObj.desertions = result.getInt("desertions");
-	        		returnObj.substitutions = result.getInt("substitutions");
-	        		returnObj.winRate = result.getFloat("winrate");
-	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
-	        		returnList.add(returnObj);
-	        	}
-        		return returnList;
+			while (result.next())
+			{
+				StatsObject returnObj = new StatsObject();
+				returnObj.kagname = result.getString("kagname");
+				returnObj.discordid = result.getLong("discordid");
+				returnObj.gamesplayed = result.getInt("gamesplayed");
+				returnObj.wins = result.getInt("wins");
+				returnObj.losses = result.getInt("losses");
+				returnObj.draws = result.getInt("draws");
+				returnObj.desertions = result.getInt("desertions");
+				returnObj.substitutions = result.getInt("substitutions");
+				returnObj.winRate = result.getFloat("winrate");
+				// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
+				returnList.add(returnObj);
+			}
+			return returnList;
 		});
 	}
 	
 	public List<StatsObject> getRandomPlayers(int numPlayers)
 	{
-		return errorHandler(null, (statement, result) ->{
+		return errorHandler(null, (statement, result) ->
+		{
 			statement = connection.createStatement();
 			result = statement.executeQuery("SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 AS winrate, ((1*(wins-(desertions/2))/gamesplayed)+1.96*1.96/(2*gamesplayed)-1.96*SQRT(((1*(wins-(desertions/2))/gamesplayed)*(1-(1*(wins-(desertions/2))/gamesplayed))+1.96*1.96/(4*gamesplayed))/gamesplayed))/(1+1.96*1.96/gamesplayed) AS mmr FROM players WHERE kagname<>'+numgames+' ORDER BY RAND() LIMIT "+numPlayers);
 
 			List<StatsObject> returnList = new ArrayList<StatsObject>();
-	        	while (result.next())
-	        	{
-	        		StatsObject returnObj = new StatsObject();
-	        		returnObj.kagname = result.getString("kagname");
-	        		returnObj.discordid = result.getLong("discordid");
-	        		returnObj.gamesplayed = result.getInt("gamesplayed");
-	        		returnObj.wins = result.getInt("wins");
-	        		returnObj.losses = result.getInt("losses");
-	        		returnObj.draws = result.getInt("draws");
-	        		returnObj.desertions = result.getInt("desertions");
-	        		returnObj.substitutions = result.getInt("substitutions");
-	        		returnObj.winRate = result.getFloat("winrate");
-	        		// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
-	        		returnList.add(returnObj);
-	        	}
-        		return returnList;
+			while (result.next())
+			{
+				StatsObject returnObj = new StatsObject();
+				returnObj.kagname = result.getString("kagname");
+				returnObj.discordid = result.getLong("discordid");
+				returnObj.gamesplayed = result.getInt("gamesplayed");
+				returnObj.wins = result.getInt("wins");
+				returnObj.losses = result.getInt("losses");
+				returnObj.draws = result.getInt("draws");
+				returnObj.desertions = result.getInt("desertions");
+				returnObj.substitutions = result.getInt("substitutions");
+				returnObj.winRate = result.getFloat("winrate");
+				// returnObj.mmr = result.getInt("2000+(wins*10)-(losses*10)");
+				returnList.add(returnObj);
+			}
+			return returnList;
 		});
 	}
 }

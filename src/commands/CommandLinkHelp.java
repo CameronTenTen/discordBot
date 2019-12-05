@@ -1,24 +1,23 @@
 package commands;
 import java.util.Arrays;
 
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /** Prints a linking help message
  * @author cameron
  *
  */
-public class CommandLinkHelp extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandLinkHelp extends Command<Message, Member, Channel>
 {
-	public CommandLinkHelp(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandLinkHelp(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("linkhelp"), "Link your KAG account to your discord account");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		return "linking is the process of connecting your KAG and Discord accounts so that the bot knows who you are. \n"
 		                + "This allows for the server to manage your team and record more detailed stats. \n"

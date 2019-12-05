@@ -2,7 +2,8 @@ package core;
 import java.util.HashMap;
 import java.util.Map;
 
-import sx.blah.discord.Discord4J;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**Manages a list of votes for different vote types.
  * <p>
@@ -14,8 +15,9 @@ import sx.blah.discord.Discord4J;
  * @author cameron
  *
  */
-public class VoteManager {
-
+public class VoteManager
+{
+	static final Logger LOGGER = LoggerFactory.getLogger(VoteManager.class);
 	//map of all the registered vote types, and the number of votes required to pass each one
 	Map<String, Integer> voteTypes;
 	//map of vote name (command), to map of players who have voted, and their "vote info" string
@@ -70,7 +72,7 @@ public class VoteManager {
 	{
 		if(!voteTypes.containsKey(voteType))
 		{
-			Discord4J.LOGGER.error("Bot attempted to add a vote for a vote type that doesnt exist! someone did some bad programming!: "+voteType+" with stack trace: "+Thread.currentThread().getStackTrace());
+			LOGGER.error("Bot attempted to add a vote for a vote type that doesnt exist! someone did some bad programming!: "+voteType+" with stack trace: "+Thread.currentThread().getStackTrace());
 			return -2;
 		}
 		Map<PlayerObject, String> votes = currentVotes.get(voteType);

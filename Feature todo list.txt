@@ -1,8 +1,12 @@
 command !setserver #matchid serverid
+command !serverlist or similar to list servers and their ids
 managed voice chat channels - configure channel category, create two channels in the category (configure name), configure whether it is locked for player not in that team
 remove !end and !start commands
 connect discord and server scramble teams votes
 !setgame/!startgame/!setteams/!creategame admin command to create a game with specified teams
+!reserveserver for creating games that dont count as gather games
+- takes list of players so it can manage the teams, just doesnt score it
+- also requires you to specify a name for the game so it doesnt need to assign an id
 !freeze command has a timeout
 auto detection of kag server connection loss
 !rsub bans or permission system

@@ -2,17 +2,18 @@ package commands;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import core.DiscordBot;
 import core.GatherGame;
 import core.GatherObject;
 import core.PlayerObject;
 import core.SubManager;
 import core.SubstitutionObject;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /**Command for subbing into a game. Must be used in command channel. Player must be linked and not already playing a game.
  * <p>
@@ -20,42 +21,44 @@ import sx.blah.discord.handle.obj.IUser;
  * @author cameron
  * @see SubManager#subPlayerIntoGame(PlayerObject)
  */
-public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandSub extends Command<Message, Member, Channel>
 {
-	public CommandSub(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	static final Logger LOGGER = LoggerFactory.getLogger(CommandSub.class);
+
+	public CommandSub(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("sub"), "Sub into the first open sub position", "sub gameID");
 	}
 
 	@Override
-	public boolean isChannelValid(IChannel channel) {
+	public boolean isChannelValid(Channel channel) {
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
 		else return true;
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;
 		
-		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(user);
+		PlayerObject player = DiscordBot.players.getOrCreatePlayerObject(member);
 		if(player==null)
 		{
-			return "You must be linked to sub into a game " + user.getDisplayName(guild) + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
+			return "You must be linked to sub into a game " + member.getDisplayName() + "! Use **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
 		}
 		
 		//check there is actually games running
 		if(!gather.hasRunningGames())
 		{
-			return "There is currently **no games** running " + user.getDisplayName(guild) + "!";
+			return "There is currently **no games** running " + member.getDisplayName() + "!";
 		}
 		
 		//check there isnt already a sub request for the player trying to sub in
 		if(gather.substitutions.removeSubRequest(player))
 		{
-			return gather.fullUserString(user) + " has **subbed back** into their game!";
+			return gather.fullUserString(member) + " has **subbed back** into their game!";
 		}
 		
 		//check they arent already playing
@@ -69,7 +72,7 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 			}
 			else
 			{
-				return "You cannot sub into a game when you are **already playing** "+user.getDisplayName(guild) + "!";
+				return "You cannot sub into a game when you are **already playing** "+member.getDisplayName() + "!";
 			}
 		}
 		
@@ -82,7 +85,7 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 			if(games.size()>1)
 			{
 				//you must specify which game you want to sub into
-				return "You must specify the game you want to sub for "+user.getDisplayName(guild)+"! usage is **!sub gameID**";
+				return "You must specify the game you want to sub for "+member.getDisplayName()+"! usage is **!sub gameID**";
 			}
 			else if(games.size()==1)
 			{
@@ -91,7 +94,7 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 			else
 			{
 				//no games to sub into
-				return "There are **no games** to sub for "+user.getDisplayName(guild)+"!";
+				return "There are **no games** to sub for "+member.getDisplayName()+"!";
 			}
 		}
 		else
@@ -102,13 +105,13 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 			}
 			catch (NumberFormatException|ArrayIndexOutOfBoundsException e)
 			{
-				return "**Invalid** command format or number "+user.getDisplayName(guild)+"! usage is **!sub gameID**";
+				return "**Invalid** command format or number "+member.getDisplayName()+"! usage is **!sub gameID**";
 			}
 			
 			//check the game exists
 			if(gather.getRunningGame(gameId)==null)
 			{
-				return "There is **no current game** with that id " + user.getDisplayName(guild) + "!";
+				return "There is **no current game** with that id " + member.getDisplayName() + "!";
 			}
 		}
 		
@@ -116,7 +119,7 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 		
 		if(returnObj == null)
 		{
-			return "There are **no sub spaces** available for game #" + gameId + " " + user.getDisplayName(guild) + "!";
+			return "There are **no sub spaces** available for game #" + gameId + " " + member.getDisplayName() + "!";
 		}
 		else
 		{
@@ -134,9 +137,9 @@ public class CommandSub extends Command<IMessage, IUser, IChannel, IGuild>
 			{
 				teamString = "ERROR";
 			}
-			Discord4J.LOGGER.info(user.getDisplayName(guild)+" has subbed into game #"+returnObj.game.getGameID()+" for "+returnObj.playerToBeReplaced.toString());
+			LOGGER.info(member.getDisplayName()+" has subbed into game #"+returnObj.game.getGameID()+" for "+returnObj.playerToBeReplaced.toString());
 			DiscordBot.sendMessage(gather.getCommandChannel(), returnObj.playerSubbingIn.toString() + " has **replaced** " + returnObj.playerToBeReplaced.toString() + " in game #"+returnObj.game.getGameID()+" on **" + teamString + "** Team!");
-			gather.remFromQueue(user);
+			gather.remFromQueue(member);
 			return null;
 		}
 	}

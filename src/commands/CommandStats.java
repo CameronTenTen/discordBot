@@ -5,10 +5,11 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherDB;
 import core.StatsObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.Member;
 
 /**Command for checking the stats of a player that are stored in the database. If no args are given, it finds the stats for the player who typed the command. 
  * If the command contains a mention, stats are retreived for that player. 
@@ -17,22 +18,22 @@ import sx.blah.discord.handle.obj.IUser;
  * @see GatherDB#getStats(long)
  * @see GatherDB#getStats(String)
  */
-public class CommandStats extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandStats extends Command<Message, Member, Channel>
 {
-	public CommandStats(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	public CommandStats(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("stats", "playerstats"), "Check the stats of a player stored in the database", "stats <KAGName/@user>");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		StatsObject stats;
-		List<IUser> mentions = messageObject.getMentions();
+		List<User> mentions = messageObject.getUserMentions().collectList().block();
 		if(splitMessage.length==1)
 		{
 			//if they just did !stats without any argument, just get stats for them
-			stats = DiscordBot.database.getStats(user.getLongID());
+			stats = DiscordBot.database.getStats(member.getId().asLong());
 			if(stats==null)
 			{
 				return "Could not find stats for, if you want the stats of someone else then usage is "+this.getUsage();
@@ -40,7 +41,7 @@ public class CommandStats extends Command<IMessage, IUser, IChannel, IGuild>
 		}
 		else if(!mentions.isEmpty())
 		{
-			stats = DiscordBot.database.getStats(mentions.get(0).getLongID());
+			stats = DiscordBot.database.getStats(mentions.get(0).getId().asLong());
 		}
 		else
 		{
@@ -48,21 +49,21 @@ public class CommandStats extends Command<IMessage, IUser, IChannel, IGuild>
 			if(stats==null)
 			{
 				//if the username wasnt a kag name, maybe it was a discord username
-				//TODO this only check for their username, not their nick
-				List<IUser> users = DiscordBot.client.getUsersByName(splitMessage[1],true);
-				if(!users.isEmpty())
+				Guild guild = messageObject.getGuild().block();
+				if (guild != null)
 				{
-					stats = DiscordBot.database.getStats(users.get(0).getLongID());
-				}
-				else
-				{
-					//the argument isnt a recognised kag name or discord name, try nicks for this guild
-					if(guild!=null)
+					Member matchedMember = DiscordBot.findMemberByUsername(guild, splitMessage[1]);
+					if(matchedMember != null)
 					{
-						users = guild.getUsersByName(splitMessage[1], true);
-						if(!users.isEmpty())
+						stats = DiscordBot.database.getStats(matchedMember.getId().asLong());
+					}
+					else
+					{
+						//the argument isnt a recognised kag name or discord name, try nicks for this guild
+						matchedMember = DiscordBot.findMemberByDisplayName(guild, splitMessage[1]);
+						if(matchedMember != null)
 						{
-							stats = DiscordBot.database.getStats(users.get(0).getLongID());
+							stats = DiscordBot.database.getStats(matchedMember.getId().asLong());
 						}
 					}
 				}

@@ -5,17 +5,18 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 
 import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerInfoObject;
 import core.TokenCheckObject;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Member;
 
 /**Command for users to link their KAG usernames with their discord account. 
  * <p>
@@ -37,19 +38,20 @@ import sx.blah.discord.handle.obj.IUser;
  * @see DiscordBot#getCorrectCase(String)
  * @see GatherDB#linkAccounts(String, long)
  */
-public class CommandLink extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandLink extends Command<Message, Member, Channel>
 {
-	public CommandLink(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	static final Logger LOGGER = LoggerFactory.getLogger(CommandLink.class);
+	public CommandLink(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("link"), "Link your KAG account to your discord account", "link <KAGName> <playerTokenHere>");
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		if(splitMessage.length<=1)
 		{
-			return user.mention()+", in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp";
+			return member.getMention()+", in order to link your Discord and KAG accounts provide your KAG username like this **!link KAGUsernameHere**, for more information use !linkhelp";
 		}
 		else if(splitMessage.length==2)
 		{
@@ -57,22 +59,22 @@ public class CommandLink extends Command<IMessage, IUser, IChannel, IGuild>
 			//check the username is small enough, if its too big they probably forgot the space between username and token
 			if(submittedUsername.length()>20)
 			{
-				return user.mention()+", your username is too long! Did you forget a space somewhere in your message?";
+				return member.getMention()+", your username is too long! Did you forget a space somewhere in your message?";
 			}
 			//quick sanity check on their username before giving them the link
 			PlayerInfoObject info = DiscordBot.getPlayerInfo(submittedUsername);
 			if(info==null || info.username.equals(""))
 			{
-				return user.mention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
+				return member.getMention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
 			}
 			else if(info.gold==false)
 			{
 				//TODO: should remove this check due to f2p?
-				return user.mention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should **use your game account**, if you **have not set your password for that account** there is a **button in the main menu** of the game to do so. \nIf you **do not want to setup your account** you can use the command **!linkserver KAGUsernameHere** instead";
+				return member.getMention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should **use your game account**, if you **have not set your password for that account** there is a **button in the main menu** of the game to do so. \nIf you **do not want to setup your account** you can use the command **!linkserver KAGUsernameHere** instead";
 			}
 			else
 			{
-				return user.mention()+", please go to https://api.kag2d.com/v1/player/"+info.username+"/token/new to get a token, and then link using the command **!link "+info.username+" PlayerTokenHere**";
+				return member.getMention()+", please go to https://api.kag2d.com/v1/player/"+info.username+"/token/new to get a token, and then link using the command **!link "+info.username+" PlayerTokenHere**";
 			}
 		}
 		else if(splitMessage.length>=3)
@@ -108,18 +110,18 @@ public class CommandLink extends Command<IMessage, IUser, IChannel, IGuild>
 					if(submittedUsername.length()>15)
 					{
 						Long.parseLong(submittedUsername);
-						return user.mention()+", Could not find a kag username matching "+submittedUsername+", but that looks like a valid discord id.  Were you supposed to paste that message to ingame chat?";
+						return member.getMention()+", Could not find a kag username matching "+submittedUsername+", but that looks like a valid discord id.  Were you supposed to paste that message to ingame chat?";
 					}
 				}
 				catch (Exception e)
 				{
 				}
-				return user.mention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
+				return member.getMention()+", an error occured checking your username, the supplied username was not valid or the kag2d api could not be accessed (https://api.kag2d.com/v1/player/"+submittedUsername+"/info)";
 			}
 			else if(info.gold==false)
 			{
 				//TODO: should remove this check due to f2p?
-				return user.mention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.";
+				return member.getMention()+", the username you entered does not own the game! If you are a steam user you may have made separate forum and game accounts and should use your game account, if you have not set your password for that account there is a button in the main menu of the game to do so.";
 			}
 			String username = info.username;
 			
@@ -136,30 +138,30 @@ public class CommandLink extends Command<IMessage, IUser, IChannel, IGuild>
 			}
 			catch(IOException e)
 			{
-				Discord4J.LOGGER.warn("IO exception caught when attempting to link accounts: "+e.getMessage());
+				LOGGER.warn("IO exception caught when attempting to link accounts: "+e.getMessage());
 			}
 			
 			if(tokenCheck.playerTokenStatus)
 			{
 				//player token is good
-				int result = DiscordBot.database.linkAccounts(username, user.getLongID());
-				Discord4J.LOGGER.info("account linking changed "+result+" lines in the sql database");
+				int result = DiscordBot.database.linkAccounts(username, member.getId().asLong(), member.getGuildId().asLong());
+				LOGGER.info("account linking changed "+result+" lines in the sql database");
 				if(result>=0)
 				{
 					this.reply(messageObject, "account successfully linked");
-					if(!DiscordBot.database.checkValidLink(username, user.getLongID()))
+					if(!DiscordBot.database.checkValidLink(username, member.getId().asLong()))
 					{
 						this.reply(messageObject, "WARNING: problem with linked information detected, there maybe more than one entry for you. **Please share this error with someone that has database access.** (This should not prevent you playing in the short term, but may cause issues long term)");
 					}
 					//check if the player needs to be updated on any servers
-					DiscordBot.playerChanged(user);
+					DiscordBot.playerChanged(member);
 				}
-				else return user.mention()+", an error occured linking your accounts, this message should not be displayed, you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link";
+				else return member.getMention()+", an error occured linking your accounts, this message should not be displayed, you may be trying to link two accounts that are already linked seperatly. \nSomeone with database access may be needed to help link";
 			}
 			else
 			{
 				//tell them that the token is not good
-				return user.mention()+", an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed";
+				return member.getMention()+", an error occured linking your accounts, the supplied token was not valid or the kag2d api could not be accessed";
 			}
 		}
 		return null;

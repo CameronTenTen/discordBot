@@ -1,14 +1,15 @@
 package commands;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import core.DiscordBot;
 import core.GatherObject;
-import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.StatusType;
+import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.presence.Status;
+import discord4j.core.object.entity.Member;
 
 /**
  * Chat command for players to add to the queue. Must be used in command channel. 
@@ -23,55 +24,57 @@ import sx.blah.discord.handle.obj.StatusType;
  * @author cameron
  *
  */
-public class CommandAdd extends Command<IMessage, IUser, IChannel, IGuild>
+public class CommandAdd extends Command<Message, Member, Channel>
 {
-	public CommandAdd(Commands<IMessage, IUser, IChannel, IGuild> commands)
+	static final Logger LOGGER = LoggerFactory.getLogger(CommandAdd.class);
+
+	public CommandAdd(Commands<Message, Member, Channel> commands)
 	{
 		super(commands, Arrays.asList("add","join"), "Add yourself to the queue");
 	}
 
 	@Override
-	public boolean isChannelValid(IChannel channel) {
+	public boolean isChannelValid(Channel channel) {
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return false;
 		else return true;
 	}
 
 	@Override
-	public String onCommand(String[] splitMessage, String messageString, IMessage messageObject, IUser user, IChannel channel, IGuild guild)
+	public String onCommand(String[] splitMessage, String messageString, Message messageObject, Member member, Channel channel)
 	{
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;
-		
-		if (user.getPresence().getStatus() == StatusType.OFFLINE)
+
+		if (member.getPresence().block().getStatus().equals(Status.INVISIBLE))
 		{
-			return "You cannot add while you are offline "+user.getDisplayName(guild)+"!";
+			return "You cannot add while you are offline "+member.getDisplayName()+"!";
 		}
-		
+
 		synchronized(gather)
 		{
-			int addReturnVal = gather.addToQueue(user);
-			
+			int addReturnVal = gather.addToQueue(member);
+
 			switch(addReturnVal)
 			{
 			case -1:
-				return "You must link before you can add to the queue "+user.getDisplayName(guild)+" type **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
+				return "You must link before you can add to the queue "+member.getDisplayName()+" type **!link KAGUsernameHere** to get started or **!linkhelp** for more information";
 			case 1:
-				Discord4J.LOGGER.info("Adding player to queue: "+user.getDisplayName(guild));
-				return gather.fullUserString(user)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")";
+				LOGGER.info("Adding player to queue: "+member.getDisplayName());
+				return gather.fullUserString(member)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")";
 			case 2:
-				this.reply(messageObject, gather.fullUserString(user)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
-				Discord4J.LOGGER.info("Adding player to queue: "+user.getDisplayName(guild));
+				this.reply(messageObject, gather.fullUserString(member)+" **added** to the queue! ("+gather.numPlayersInQueue()+"/"+gather.getMaxQueueSize()+")");
+				LOGGER.info("Adding player to queue: "+member.getDisplayName());
 				gather.startGame();
 				return null;
 			case 3:
-				return"You cannot add to the queue when you are **already in a game** "+user.getDisplayName(guild)+"!";
+				return"You cannot add to the queue when you are **already in a game** "+member.getDisplayName()+"!";
 			case 0:
-				return "You are already in the queue "+user.getDisplayName(guild)+"!";
+				return "You are already in the queue "+member.getDisplayName()+"!";
 			case 4:
-				return "You were not added because the queue is already full, try again later "+user.getDisplayName(guild)+"!";
+				return "You were not added because the queue is already full, try again later "+member.getDisplayName()+"!";
 			}
-			return "An unexpected error occured adding "+user.getDisplayName(guild)+" to the queue";
+			return "An unexpected error occured adding "+member.getDisplayName()+" to the queue";
 		}
 	}
 }
