@@ -8,6 +8,7 @@ import core.DiscordBot;
 import core.GatherObject;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.presence.Status;
 import discord4j.core.object.entity.Member;
 
@@ -46,7 +47,8 @@ public class CommandAdd extends Command<Message, Member, Channel>
 		GatherObject gather = DiscordBot.getGatherObjectForChannel(channel);
 		if(gather==null) return null;
 
-		if (member.getPresence().block().getStatus().equals(Status.INVISIBLE))
+		Presence presence = member.getPresence().block();
+		if (presence != null && presence.getStatus().equals(Status.INVISIBLE))
 		{
 			return "You cannot add while you are offline "+member.getDisplayName()+"!";
 		}
