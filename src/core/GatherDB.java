@@ -15,17 +15,36 @@ import org.slf4j.LoggerFactory;
 /**Object for managing the database connection. Provides various useful functions for database interaction. 
  * @author cameron
  * <p>
+ * bot user created using the command:
+ *  CREATE USER bot_user WITH PASSWORD 'bot_password';
+ * <p>
+ *  CREATE DATABASE gatherdb WITH OWNER = bot_user;
+ * <p>
  * players table created using the command:
+ * <br>MySQL:<br>
  *  CREATE TABLE players (kagname VARCHAR(20), discordid BIGINT, gamesplayed INT DEFAULT 0, wins INT DEFAULT 0, losses INT DEFAULT 0, draws INT DEFAULT 0, desertions INT DEFAULT 0, substitutions INT DEFAULT 0, desertionlosses INT DEFAULT 0, substitutionwins INT DEFAULT 0, UNIQUE KEY kagname (kagname), UNIQUE KEY discordid (discordid));
+ * <br>Postgresql:<br>
+ *  CREATE TABLE players (kagname VARCHAR(20) CONSTRAINT kagname UNIQUE, discordid BIGINT CONSTRAINT discordid UNIQUE, gamesplayed INT DEFAULT 0, wins INT DEFAULT 0, losses INT DEFAULT 0, draws INT DEFAULT 0, desertions INT DEFAULT 0, substitutions INT DEFAULT 0, desertionlosses INT DEFAULT 0, substitutionwins INT DEFAULT 0);
  * <p>
  * games table created using the command:
+ * <br>MySQL:<br>
  * CREATE TABLE games (gameId INT UNSIGNED NOT NULL AUTO_INCREMENT, gameLengthSeconds INT, PRIMARY KEY (gameId));
+ * <br>Postgresql:<br>
+ * CREATE SEQUENCE games_gameId_seq;<br>
+ * CREATE TABLE games (<br>
+ *     gameId INT NOT NULL PRIMARY KEY DEFAULT nextval('games_gameId_seq'),<br>
+ *     gameLengthSeconds INT<br>
+ * );<br>
+ * ALTER SEQUENCE games_gameId_seq OWNED BY games.gameId;<br>
  * <p>
  * playerGames table created using the command:
- * CREATE TABLE playerGames (gameId INT UNSIGNED NOT NULL, kagName VARCHAR(20), team TINYINT, won BOOL, UNIQUE KEY (gameId, kagName));
+ * <br>MySQL:<br>
+ * CREATE TABLE playerGames (gameId INT UNSIGNED NOT NULL, kagName VARCHAR(20), team SMALLINT, won BOOL, UNIQUE KEY (gameId, kagName));
+ * <br>Postgresql:<br>
+ * CREATE TABLE playerGames (gameId INT NOT NULL, kagName VARCHAR(20), team SMALLINT, won BOOL, UNIQUE (gameId, kagName));
  * <p>
  * export players table to csv using
- * SELECT *, 2000+(wins*10)-(losses*10) FROM players INTO OUTFILE '/var/lib/mysql-files/players.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+ * SELECT * FROM players INTO OUTFILE '/var/lib/mysql-files/players.csv' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
  * <p>
  * make copy of players table using
  * CREATE TABLE newtable LIKE players; 
@@ -104,7 +123,8 @@ public class GatherDB
 	 */
 	public void setUrl(String ip, String database)
 	{
-		this.url = "jdbc:mysql://" + ip + "/" + database;
+		//this.url = "jdbc:mysql://" + ip + "/" + database;
+		this.url = "jdbc:postgresql://" + ip + "/" + database;
 	}
 
 	/**
@@ -114,7 +134,8 @@ public class GatherDB
 	{
 		try
 		{
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			//Class.forName("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("org.postgresql.Driver").newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
@@ -225,7 +246,7 @@ public class GatherDB
 		return errorHandler(-1L, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \"" + kagName + "\"");
+			result = statement.executeQuery("SELECT * FROM players WHERE kagname = '" + kagName + "'");
 
 			if (result.next())
 			{
@@ -255,8 +276,7 @@ public class GatherDB
 			StatsObject returnObj = new StatsObject();
 			returnObj.kagname = kagname;
 			statement = connection.createStatement();
-			// result = statement.executeQuery("SELECT *, 2000+(wins*10)-(losses*10) FROM players WHERE kagname = \""+kagname + "\"");
-			result = statement.executeQuery("SELECT * FROM players WHERE kagname = \""+kagname + "\"");
+			result = statement.executeQuery("SELECT * FROM players WHERE kagname = '"+kagname + "'");
 
 			if (result.next())
 			{
@@ -324,7 +344,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT gamesPlayed FROM players WHERE kagname = \"" + kagname + "\"");
+			result = statement.executeQuery("SELECT gamesPlayed FROM players WHERE kagname = '" + kagname + "'");
 
 			if (result.next())
 			{
@@ -368,7 +388,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT wins FROM players WHERE kagname = \"" + kagname + "\"");
+			result = statement.executeQuery("SELECT wins FROM players WHERE kagname = '" + kagname + "'");
 
 			if (result.next())
 			{
@@ -412,7 +432,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT losses FROM players WHERE kagname = \"" + kagname + "\"");
+			result = statement.executeQuery("SELECT losses FROM players WHERE kagname = '" + kagname + "'");
 
 			if (result.next())
 			{
@@ -456,7 +476,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT draws FROM players WHERE kagname = \"" + kagname + "\"");
+			result = statement.executeQuery("SELECT draws FROM players WHERE kagname = '" + kagname + "'");
 
 			if (result.next())
 			{
@@ -500,7 +520,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			result = statement.executeQuery("SELECT desertions FROM players WHERE kagname = \"" + kagname + "\"");
+			result = statement.executeQuery("SELECT desertions FROM players WHERE kagname = '" + kagname + "'");
 
 			if (result.next())
 			{
@@ -557,7 +577,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET wins=wins+1, gamesplayed=gamesplayed+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 
@@ -583,7 +603,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET losses=losses+1, gamesplayed=gamesplayed+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 
@@ -609,7 +629,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 
@@ -635,7 +655,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET desertions=desertions+1, desertionlosses=desertionlosses+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 
@@ -661,7 +681,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 
@@ -687,7 +707,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE kagname=\""+kagName+"\"");
+			return statement.executeUpdate("UPDATE players SET substitutions=substitutions+1, substitutionwins=substitutionwins+1 WHERE kagname='"+kagName+"'");
 		});
 	}
 	
@@ -703,8 +723,21 @@ public class GatherDB
 		{
 			statement = connection.createStatement();
 			//this query can lead to duplicated links if the database constraints aren't correct
-			//could fix this by manually checking for existing entries first and updating the, but then I am just making my own version of "ON DUPLICATE KEY UPDATE"
-			return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES(\""+kagName+"\","+id+") ON DUPLICATE KEY UPDATE kagname=\""+kagName+"\", discordid = "+id);
+			//try an insert on each key first
+			int val = 0;
+			//if the discord id exists, then update the kagname associated with it
+			//this will error if the update breaks any unique key rules
+			val += statement.executeUpdate("UPDATE players SET kagname='"+kagName+"' WHERE discordid="+id);
+			//check if the kagname exists too
+			//this will error if the update breaks any unique key rules
+			val += statement.executeUpdate("UPDATE players SET discordid= "+id+"WHERE kagname='"+kagName+"'");
+			//do an insert if neither update did anything (player doesnt exist yet)
+			if(val==0)
+			{
+				return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES('"+kagName+"',"+id+")");
+			}
+			return val;
+			//return statement.executeUpdate("INSERT INTO players (kagname, discordid) VALUES('"+kagName+"',"+id+") ON DUPLICATE KEY UPDATE kagname='"+kagName+"', discordid = "+id);
 		});
 		if(returnVal!=-1)
 		{
@@ -747,7 +780,7 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			return statement.executeUpdate("UPDATE players SET gamesplayed=gamesplayed+1 WHERE kagname=\"+numgames+\"");
+			return statement.executeUpdate("UPDATE players SET gamesplayed=gamesplayed+1 WHERE kagname='+numgames+'");
 		});
 	}
 	
@@ -759,12 +792,16 @@ public class GatherDB
 		return errorHandler(-1, (statement, result) ->
 		{
 			statement = connection.createStatement();
-			statement.executeUpdate("INSERT INTO games () VALUES ()");
-			result = statement.executeQuery("SELECT LAST_INSERT_ID();");
+			statement.execute("INSERT INTO games DEFAULT VALUES RETURNING gameId;");
+			result = statement.getResultSet();
+			//MySQL version of this query
+			//statement.executeUpdate("INSERT INTO games VALUES ()");
+			//result = statement.executeQuery("SELECT LAST_INSERT_ID();");
 
 			if (result.next())
 			{
-				return result.getInt("LAST_INSERT_ID()");
+				return result.getInt("gameId");
+				//return result.getInt("LAST_INSERT_ID()");
 			}
 			else
 			{
@@ -784,7 +821,10 @@ public class GatherDB
 			int rowsChanged=-1;
 			statement = connection.createStatement();
 			//game into games table
-			rowsChanged = statement.executeUpdate("INSERT INTO games (gameId, gameLengthSeconds) VALUES ("+game.getGameID()+","+game.getGameLengthSeconds()+") ON DUPLICATE KEY UPDATE gameLengthSeconds="+game.getGameLengthSeconds());
+			rowsChanged = statement.executeUpdate("INSERT INTO games (gameId, gameLengthSeconds) VALUES ("+game.getGameID()+","+game.getGameLengthSeconds()+") ON CONFLICT(gameId) DO UPDATE SET gameLengthSeconds="+game.getGameLengthSeconds());
+			//MySQL version
+			//rowsChanged = statement.executeUpdate("INSERT INTO games (gameId, gameLengthSeconds) VALUES ("+game.getGameID()+","+game.getGameLengthSeconds()+") ON DUPLICATE KEY UPDATE gameLengthSeconds="+game.getGameLengthSeconds());
+			
 			//players into playergames table
 			//TODO make an object for storing more stats related to what the player did in the game, we would then get a list of these objects instead of strings here
 			//TODO appropriate stats for subs
@@ -793,12 +833,12 @@ public class GatherDB
 			for(String kagName : blueTeam)
 			{
 				boolean blueWon = game.getWinningTeam()==0 ? true : false;
-				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 0, "+blueWon+")");
+				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", '"+kagName+"', 0, "+blueWon+")");
 			}
 			for(String kagName : redTeam)
 			{
 				boolean redWon = game.getWinningTeam()==1 ? true : false;
-				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", \""+kagName+"\", 1, "+redWon+")");
+				rowsChanged += statement.executeUpdate("INSERT INTO playerGames (gameId, kagName, team, won) VALUES ("+game.getGameID()+", '"+kagName+"', 1, "+redWon+")");
 			}
 			
 			return rowsChanged;
@@ -816,7 +856,7 @@ public class GatherDB
 			statement = connection.createStatement();
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC LIMIT "+numPlayers+")"
 			//result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100, 2000+(wins*10)-(losses*10) FROM players WHERE gamesplayed>=10 AND kagname<>\"+numgames+\" ORDER BY 2000+(wins*10)-(losses*10) DESC, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 DESC, gamesplayed DESC LIMIT "+numPlayers+")"
-			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 AS winrate, ((1*(wins-(desertions/2))/gamesplayed)+1.96*1.96/(2*gamesplayed)-1.96*SQRT(((1*(wins-(desertions/2))/gamesplayed)*(1-(1*(wins-(desertions/2))/gamesplayed))+1.96*1.96/(4*gamesplayed))/gamesplayed))/(1+1.96*1.96/gamesplayed) AS mmr FROM players WHERE gamesplayed>(SELECT gamesplayed FROM players WHERE kagname='+numgames+')*0.1 AND kagname<>\"+numgames+\" ORDER BY mmr DESC, winrate DESC, gamesplayed DESC, kagname ASC LIMIT "+numPlayers+")"
+			result = statement.executeQuery("(SELECT *, ((wins+substitutionwins)/(gamesplayed+desertionlosses+substitutionwins))*100 AS winrate, ((1*(wins-(desertions/2))/gamesplayed)+1.96*1.96/(2*gamesplayed)-1.96*SQRT(((1*(wins-(desertions/2))/gamesplayed)*(1-(1*(wins-(desertions/2))/gamesplayed))+1.96*1.96/(4*gamesplayed))/gamesplayed))/(1+1.96*1.96/gamesplayed) AS mmr FROM players WHERE gamesplayed>(SELECT gamesplayed FROM players WHERE kagname='+numgames+')*0.1 AND kagname<>'+numgames+' ORDER BY mmr DESC, winrate DESC, gamesplayed DESC, kagname ASC LIMIT "+numPlayers+")"
 			                             /*+ " UNION ALL "
 			                              + "(SELECT *, (wins/(wins+losses+desertions))*100 FROM players WHERE gamesplayed<10 AND kagname<>\"+numgames+\" ORDER BY gamesplayed DESC)"*/);
 

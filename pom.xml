@@ -17,10 +17,15 @@
     </plugins>
   </build>
   <dependencies>
-    <dependency>
+    <!--<dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.20</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>	42.2.13</version>
     </dependency>
     <dependency>
       <groupId>com.discord4j</groupId>
