@@ -466,7 +466,7 @@ public class GatherObject
 	public void updateChannelCaption()
 	{
 		DiscordBot.setPlayingText(this.getPlayingText());
-		DiscordBot.setChannelCaption(this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelBaseName);
+		//DiscordBot.setChannelCaption(this.getCommandChannel(), this.numPlayersInQueue()+"-in-q"+ "_" + this.commandChannelBaseName);
 	}
 
 	/**Function for adding a vote to cancel the game the player is currently in. 
