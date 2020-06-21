@@ -1,4 +1,5 @@
 package core;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -78,6 +79,18 @@ import reactor.core.publisher.Flux;
  */
 public class DiscordBot
 {
+	//environment variables
+	static final String botTokenEnvVarName = "BOT_TOKEN";
+	static final String dbUsernameEnvVarName = "DB_USERNAME";
+	static final String dbPasswordEnvVarName = "DB_PASSWORD";
+	static final String dbIpAddressEnvVarName = "DB_IP";
+	static final String dbDatabaseEnvVarName = "DB_DATABASE";
+	static final String serversJsonEnvVarName = "SERVERS_JSON";
+	
+	//config file paths
+	static final String databasePropertiesFilePath = "database.properties";
+	static final String serversJsonFilePath = "servers.json";
+	
 	static final Logger LOGGER = LoggerFactory.getLogger(DiscordBot.class);
 	/**
 	 * The instance of the Discord4J client
@@ -238,8 +251,25 @@ public class DiscordBot
 		try {
 			Gson gson = new Gson();
 			JsonReader reader;
-			reader = new JsonReader(new FileReader("servers.json"));
-			GatherObjectConfig config = gson.fromJson(reader, GatherObjectConfig.class);
+			GatherObjectConfig config = null;
+			File f = new File(DiscordBot.serversJsonFilePath);
+			if(f.exists() && !f.isDirectory())
+			{
+				reader = new JsonReader(new FileReader(f));
+				config = gson.fromJson(reader, GatherObjectConfig.class);
+			}
+			else
+			{
+				//try the environment variable
+				config = gson.fromJson(System.getenv(DiscordBot.serversJsonEnvVarName), GatherObjectConfig.class);
+			}
+			if(config==null || config.guildID==0L)
+			{
+				//print an error and exit if no server config found (or guild is 0 since that probably means the config was empty)
+				LOGGER.error("ERROR: No servers configuration detected(or guild not set), either provide a server json file, "
+				                   + "or set the environment variable ("+DiscordBot.serversJsonEnvVarName+")");
+				return;
+			}
 			GatherObject obj = new GatherObject(config);
 			DiscordBot.gatherObjects.add(obj);
 			obj.connectKAGServers(true);
@@ -273,30 +303,65 @@ public class DiscordBot
 		gatherObjects = new HashSet<GatherObject>();
 		
 		//load database properties
-		Properties props = new Properties();
-		FileInputStream input = new FileInputStream("database.properties");
-		props.load(input);
-		String user = props.getProperty("username");
-		String pass = props.getProperty("password");
-		String id = props.getProperty("ipaddress");
-		String db = props.getProperty("database");
-		input.close();
+		String user = null;
+		String pass = null;
+		String ip = null;
+		String db = null;
+		File f = new File(DiscordBot.databasePropertiesFilePath);
+		if(f.exists() && !f.isDirectory()) { 
+			Properties props = new Properties();
+			FileInputStream input = new FileInputStream(f);
+			props.load(input);
+			user = props.getProperty("username");
+			pass = props.getProperty("password");
+			ip = props.getProperty("ipaddress");
+			db = props.getProperty("database");
+			input.close();
+		}
+		else
+		{
+			//database properties file doesn't exist, try getting the config from environment variables instead
+			user = System.getenv(DiscordBot.dbUsernameEnvVarName);
+			pass = System.getenv(DiscordBot.dbPasswordEnvVarName);
+			ip = System.getenv(DiscordBot.dbIpAddressEnvVarName);
+			db = System.getenv(DiscordBot.dbDatabaseEnvVarName);
+		}
+		if(user==null || pass == null || ip == null || db == null)
+		{
+			LOGGER.error("ERROR: No database configuration detected, either provide a database properties file, "
+			                   + "or set the environment variables ("+
+			                   DiscordBot.dbUsernameEnvVarName+", "+
+			                   DiscordBot.dbPasswordEnvVarName+", "+
+			                   DiscordBot.dbIpAddressEnvVarName+", "+
+			                   DiscordBot.dbDatabaseEnvVarName+")");
+			return;
+		}
 		
 		//connect to database
-		database = new GatherDB(user, pass, id, db);
+		database = new GatherDB(user, pass, ip, db);
 		database.connect();
 		
 		players = new PlayerObjectManager();
 		
 		linkRequests = new ArrayList<PlayerObject>();
 		
-		if(args.length<1)
+		String token = null;
+		if(args.length>=1)
 		{
-			System.err.println("ERROR: no command line arguments detected - you must specify the bot token as an argument");
-			return;
+			token = args[0];
+		}
+		else
+		{
+			//try the environment variable instead
+			token = System.getenv(DiscordBot.botTokenEnvVarName);
+			if (token==null)
+			{
+				LOGGER.error("ERROR: need a bot token, specify it as a command line argument or use the "+DiscordBot.botTokenEnvVarName+" environment variable");
+				return;
+			}
 		}
 		
-		bot.startBot(args[0]);
+		bot.startBot(token);
 	}
 
 	//wrappers, so we are a little detached from the library
