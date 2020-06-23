@@ -52,6 +52,7 @@ import commands.CommandStats;
 import commands.CommandStatus;
 import commands.CommandSub;
 import commands.CommandSubs;
+import commands.CommandSuspend;
 import commands.Discord4JCommands;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
@@ -243,6 +244,7 @@ public class DiscordBot
 		commands.registerCommand(new CommandDisconnect(commands));
 		commands.registerCommand(new CommandConnect(commands));
 		commands.registerCommand(new CommandClearPlayerCache(commands));
+		commands.registerCommand(new CommandSuspend(commands));
 
 		/*List<IGuild> guilds = event.getClient().getGuilds();
 		if(guilds != null && guilds.size()>0)

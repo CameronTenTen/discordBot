@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**Abstract class describing a command managing interface, to be instantiated for different frameworks/objects.
  * @author cameron
  *
@@ -13,11 +16,16 @@ import java.util.List;
  */
 public abstract class Commands<M, U, C>
 {
+	static final Logger LOGGER = LoggerFactory.getLogger(Commands.class);
 	//useful for finding the command associated with a command string
 	private HashMap<String, Command<M, U, C>> commands;
 	//useful when a list of commands is needed in the order they were created (i.e. when getting help)
 	private List<Command<M, U, C>> commandList;
 	List<String> prefixes;
+	
+	private boolean suspended;
+	private String resumeCommand;
+	private String resumeMessage;
 
 	Commands()
 	{
@@ -69,8 +77,23 @@ public abstract class Commands<M, U, C>
 				//the message had a prefix we were looking for, now check if its a valid command
 				message = message.substring(prefix.length());
 				String[] splitMessage = message.split("[\\s&&[^\\n]]++");
+				String commandString = splitMessage[0].toLowerCase();
+				//check if the bot is listening to commands
+				if (this.suspended)
+				{
+					if (commandString!=null && commandString.equalsIgnoreCase(resumeCommand))
+					{
+						//bot not listening to commands, but the "resume" command was used
+						this.resume(messageObject);
+					}
+					else
+					{
+						//bot not listening to commands and should not be resumed
+						return;
+					}
+				}
 				//just use the first command that matches
-				Command<M, U, C> command = this.getCommand(splitMessage[0].toLowerCase());
+				Command<M, U, C> command = this.getCommand(commandString);
 				if (command != null && command.isChannelValid(channel))
 				{
 					if (command.hasPermission(user, channel))
@@ -118,6 +141,29 @@ public abstract class Commands<M, U, C>
 			return null;
 		}
 		return this.prefixes.get(0);
+	}
+	
+	/**Suspend interaction with the bot, after this is called the bot will only react to the resume command
+	 * @param resumeCommand the command that can be used to resume the bot
+	 * @param resumeMessage the message to be displayed when the bot is resumed
+	 */
+	public void suspend(String resumeCommand, String resumeMessage)
+	{
+		this.resumeCommand = resumeCommand;
+		this.resumeMessage = resumeMessage;
+		this.suspended = true;
+		LOGGER.info("Bot Suspended");
+	}
+	
+	/**Function for resuming the bot after it has been suspended, this is configured by setting the resume command and message when suspending the bot
+	 * @param messageObject the message containing the command that is resuming the bot
+	 */
+	public void resume(M messageObject)
+	{
+		this.resumeCommand = null;
+		this.suspended = false;
+		this.reply(messageObject, this.resumeMessage);
+		LOGGER.info("Bot Resumed");
 	}
 
 	/**Helper function for returning an array of strings, where each element in the array is the help message for one command
