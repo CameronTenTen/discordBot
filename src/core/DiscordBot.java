@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,12 +86,14 @@ public class DiscordBot
 	static final String dbUsernameEnvVarName = "DB_USERNAME";
 	static final String dbPasswordEnvVarName = "DB_PASSWORD";
 	static final String dbIpAddressEnvVarName = "DB_IP";
+	static final String dbPortEnvVarName = "DB_PORT";
+	static final String dbURLEnvVarName = "DATABASE_URL";
 	static final String dbDatabaseEnvVarName = "DB_DATABASE";
 	static final String serversJsonEnvVarName = "SERVERS_JSON";
 	
 	//config file paths
-	static final String databasePropertiesFilePath = "database.properties";
-	static final String serversJsonFilePath = "servers.json";
+	static final String databasePropertiesFilePath = "database.propertiesa";
+	static final String serversJsonFilePath = "servers.jsona";
 	
 	static final Logger LOGGER = LoggerFactory.getLogger(DiscordBot.class);
 	/**
@@ -306,7 +310,9 @@ public class DiscordBot
 		String user = null;
 		String pass = null;
 		String ip = null;
+		String port = null;
 		String db = null;
+		String url = null;
 		File f = new File(DiscordBot.databasePropertiesFilePath);
 		if(f.exists() && !f.isDirectory()) { 
 			Properties props = new Properties();
@@ -315,31 +321,69 @@ public class DiscordBot
 			user = props.getProperty("username");
 			pass = props.getProperty("password");
 			ip = props.getProperty("ipaddress");
+			port = props.getProperty("port");
 			db = props.getProperty("database");
 			input.close();
 		}
 		else
 		{
 			//database properties file doesn't exist, try getting the config from environment variables instead
+			url = System.getenv(DiscordBot.dbURLEnvVarName);
 			user = System.getenv(DiscordBot.dbUsernameEnvVarName);
 			pass = System.getenv(DiscordBot.dbPasswordEnvVarName);
 			ip = System.getenv(DiscordBot.dbIpAddressEnvVarName);
+			port = System.getenv(DiscordBot.dbPortEnvVarName);
 			db = System.getenv(DiscordBot.dbDatabaseEnvVarName);
 		}
-		if(user==null || pass == null || ip == null || db == null)
+		//initialise the database manager and connect to the database
+		if(url!=null)
+		{
+			URI dbUri = null;
+			try {
+				dbUri = new URI(url);
+			} catch (URISyntaxException e) {
+				LOGGER.error("ERROR: DB URL format not recognised");
+			}
+			//extract the parameters from the url, if they can be extracted
+			//use the value of the environment variable if the variable is not in the url
+			if (dbUri.getUserInfo().split(":")[0]!=null && dbUri.getUserInfo().split(":")[0]!="")
+			{
+				user =  dbUri.getUserInfo().split(":")[0];
+			}
+			if (dbUri.getUserInfo().split(":")[1]!=null && dbUri.getUserInfo().split(":")[1]!="")
+			{
+				pass = dbUri.getUserInfo().split(":")[1];
+			}
+			if (dbUri.getHost()!=null && dbUri.getHost()!="")
+			{
+				ip = dbUri.getHost();
+			}
+			if (Integer.toString(dbUri.getPort())!=null && Integer.toString(dbUri.getPort())!="")
+			{
+				port = Integer.toString(dbUri.getPort());
+			}
+			if (dbUri.getPath().replaceFirst("/", "")!=null && dbUri.getPath().replaceFirst("/", "")!="")
+			{
+				db = dbUri.getPath().replaceFirst("/", "");
+			}
+		}
+		
+		if (user!=null && pass != null && ip != null && port != null && db != null)
+		{
+			database = new GatherDB(user, pass, ip, port, db);
+		}
+		else
 		{
 			LOGGER.error("ERROR: No database configuration detected, either provide a database properties file, "
-			                   + "or set the environment variables ("+
+			                   + "or set the appropriate environment variables ("+
+			                   DiscordBot.dbURLEnvVarName+", "+
 			                   DiscordBot.dbUsernameEnvVarName+", "+
 			                   DiscordBot.dbPasswordEnvVarName+", "+
 			                   DiscordBot.dbIpAddressEnvVarName+", "+
+			                   DiscordBot.dbPortEnvVarName+", "+
 			                   DiscordBot.dbDatabaseEnvVarName+")");
 			return;
 		}
-		
-		//connect to database
-		database = new GatherDB(user, pass, ip, db);
-		database.connect();
 		
 		players = new PlayerObjectManager();
 		

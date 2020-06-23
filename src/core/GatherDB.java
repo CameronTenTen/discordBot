@@ -61,11 +61,17 @@ public class GatherDB
 	private String url;
 	private Connection connection = null;
 	
-	GatherDB(String user, String pass, String ip, String db)
+	GatherDB(String user, String pass, String ip, String port, String db)
 	{
 		setUsername(user);
 		setPassword(pass);
-		setUrl(ip, db);
+		setUrl(user, pass, ip, port, db);
+		connect();
+	}
+	
+	GatherDB(String url)
+	{
+		setUrl(url);
 		connect();
 	}
 	
@@ -114,17 +120,17 @@ public class GatherDB
 	 */
 	public void setUrl(String url)
 	{
-		this.url = url;
+		this.url = "jdbc:" + url;
 	}
 	
 	/**Helper function for setting the connection url by joining the ip and database name together into a properly formatted string
 	 * @param ip the ip address of the server
 	 * @param database the name of the database to use on the server
 	 */
-	public void setUrl(String ip, String database)
+	public void setUrl(String username, String password, String ip, String port, String database)
 	{
 		//this.url = "jdbc:mysql://" + ip + "/" + database;
-		this.url = "jdbc:postgresql://" + ip + "/" + database;
+		this.url = "jdbc:postgresql://" + ip + ":" + port + "/" + database;
 	}
 
 	/**
@@ -142,7 +148,7 @@ public class GatherDB
 		
 		try
 		{
-			connection = DriverManager.getConnection(url+"?autoReconnect=true", username, password);
+			connection = DriverManager.getConnection(url+"?autoReconnect=true", this.getUsername(), this.getPassword());
 		} catch (SQLException e)
 		{
 			LOGGER.error("SQLException: " + e.getMessage());
