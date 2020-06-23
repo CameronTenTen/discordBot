@@ -1,1 +1,1 @@
-run: ./run.sh <(echo $TOKEN)
+run: java -jar target/discordBot-1.0.jar
