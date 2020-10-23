@@ -4,9 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherObject;
 import core.SubManager;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for checking the current sub requests. Must be used in command channel. 
  * @author cameron

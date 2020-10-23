@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin only command for removing a player from the queue. Must be used in command channel. 
  * Gets a list of all the mentions in the command and removes those players from the queue if they are in it. 

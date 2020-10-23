@@ -54,27 +54,30 @@ import commands.CommandSub;
 import commands.CommandSubs;
 import commands.CommandSuspend;
 import commands.Discord4JCommands;
+import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;
 import discord4j.core.event.domain.lifecycle.ConnectEvent;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.object.entity.PrivateChannel;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.presence.Status;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**The main bot class. Contains most of the interaction with the Discord bot client. Contains various helper functions and objects.
  * @author cameron
@@ -100,7 +103,7 @@ public class DiscordBot
 	/**
 	 * The instance of the Discord4J client
 	 */
-	public static DiscordClient client;
+	public static GatewayDiscordClient client;
 	
 	public static DiscordBot bot;
 	
@@ -179,81 +182,8 @@ public class DiscordBot
 	{
 		return DiscordBot.getGatherObjectForServer(game.getServerIp(), game.getServerPort());
 	}
-
-	/**Initial bot setup goes here.
-	 * <p>
-	 * Some things that are done here include instantiation of the client and request builder,
-	 * registering event listeners, registering command listeners, reading the gather object config file,
-	 * connecting to the kag servers, client login.
-	 * @param token - the bot login token to be used for authentication
-	 */
-	public void startBot(String token) {
-		client = new DiscordClientBuilder(token).setInitialPresence(Presence.online()).build();
-
-		// event listeners
-		client.getEventDispatcher().on(PresenceUpdateEvent.class).subscribe((PresenceUpdateEvent event) -> 
-		{
-			if(event.getCurrent().getStatus()==Status.OFFLINE)
-			{
-				DiscordBot.userWentOffline(event.getMember().block());
-			}
-		});
-		client.getEventDispatcher().on(MemberLeaveEvent.class).subscribe((MemberLeaveEvent event) ->
-		{
-			DiscordBot.userLeftGuild(event.getGuildId(), event.getMember().get());
-		});
-
-		//TODO load the queue object
-		//TODO delete the saved object so we don't load it next time
-
-		// command listening
-		Discord4JCommands commands = new Discord4JCommands();
-		commands.registerCommand(new CommandHelp(commands));
-		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(commands::onMessageReceivedEvent);
-
-		// add all the commands
-		commands.registerCommand(new CommandPing(commands));
-		commands.registerCommand(new CommandLink(commands));
-		commands.registerCommand(new CommandLinkServer(commands));
-		commands.registerCommand(new CommandLinkHelp(commands));
-		commands.registerCommand(new CommandAdd(commands));
-		commands.registerCommand(new CommandRem(commands));
-		commands.registerCommand(new CommandList(commands));
-		commands.registerCommand(new CommandPlayers(commands));
-		commands.registerCommand(new CommandRsub(commands));
-		commands.registerCommand(new CommandSub(commands));
-		commands.registerCommand(new CommandSubs(commands));
-		commands.registerCommand(new CommandScramble(commands));
-		commands.registerCommand(new CommandCancelGame(commands));
-		commands.registerCommand(new CommandStatus(commands));
-		commands.registerCommand(new CommandStats(commands));
-		commands.registerCommand(new CommandPlayerInfo(commands));
-		commands.registerCommand(new CommandCachedPlayerInfo(commands));
-		commands.registerCommand(new CommandClearQueue(commands));
-		commands.registerCommand(new CommandForceRem(commands));
-		commands.registerCommand(new CommandClearGames(commands));
-		commands.registerCommand(new CommandSetQueue(commands));
-		commands.registerCommand(new CommandEndGame(commands));
-		commands.registerCommand(new CommandStart(commands));
-		commands.registerCommand(new CommandEnd(commands));
-		commands.registerCommand(new CommandClearSubs(commands));
-		commands.registerCommand(new CommandForceSub(commands));
-		commands.registerCommand(new CommandRefreshServers(commands));
-		//commands.registerCommand(new CommandPingMe(commands));
-		//commands.registerCommand(new CommandRandomTeams(commands));
-		commands.registerCommand(new CommandDisconnect(commands));
-		commands.registerCommand(new CommandConnect(commands));
-		commands.registerCommand(new CommandClearPlayerCache(commands));
-		commands.registerCommand(new CommandSuspend(commands));
-
-		/*List<IGuild> guilds = event.getClient().getGuilds();
-		if(guilds != null && guilds.size()>0)
-		{
-			for(IGuild guild : guilds)
-			{
-				DiscordBot.addGuild(guild);
-			}
-		}*/
+	
+	public void initGatherObjects() {
 		try {
 			Gson gson = new Gson();
 			JsonReader reader;
@@ -282,22 +212,103 @@ public class DiscordBot
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-
+	
 		//just get the first gather object for now to set the playing text
 		//TODO: playing text wont really work if there was ever multiple servers
 		Iterator<GatherObject> itr = DiscordBot.gatherObjects.iterator();
 		GatherObject gather = itr.next();
 		if(gather == null) return;
 		gather.clearQueueRole();
-
+	
 		//wait until the bot connects to update the channel caption (doesn't work before then)
 		client.getEventDispatcher().on(ConnectEvent.class).subscribe((ConnectEvent event) ->
 		{
 			gather.updateChannelCaption();
 		});
+	}
 
-		LOGGER.info("logging in");
-		client.login().block();
+	/**Initial bot setup goes here.
+	 * <p>
+	 * Some things that are done here include instantiation of the client and request builder,
+	 * registering event listeners, registering command listeners, reading the gather object config file,
+	 * connecting to the kag servers, client login.
+	 * @param token - the bot login token to be used for authentication
+	 */
+	public void startBot(String token) {
+		DiscordClientBuilder.create(token).build().withGateway((GatewayDiscordClient newClient) -> {
+			DiscordBot.client = newClient;
+			//client = new DiscordClientBuilder(token).setInitialPresence(Presence.online()).build();
+	
+			// event listeners
+			client.getEventDispatcher().on(PresenceUpdateEvent.class).subscribe((PresenceUpdateEvent event) -> 
+			{
+				if(event.getCurrent().getStatus()==Status.OFFLINE)
+				{
+					DiscordBot.userWentOffline(event.getMember().block());
+				}
+			});
+			client.getEventDispatcher().on(MemberLeaveEvent.class).subscribe((MemberLeaveEvent event) ->
+			{
+				DiscordBot.userLeftGuild(event.getGuildId(), event.getMember().get());
+			});
+	
+			//TODO load the queue object
+			//TODO delete the saved object so we don't load it next time
+	
+			// command listening
+			Discord4JCommands commands = new Discord4JCommands();
+			commands.registerCommand(new CommandHelp(commands));
+			client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(commands::onMessageReceivedEvent);
+	
+			// add all the commands
+			commands.registerCommand(new CommandPing(commands));
+			commands.registerCommand(new CommandLink(commands));
+			commands.registerCommand(new CommandLinkServer(commands));
+			commands.registerCommand(new CommandLinkHelp(commands));
+			commands.registerCommand(new CommandAdd(commands));
+			commands.registerCommand(new CommandRem(commands));
+			commands.registerCommand(new CommandList(commands));
+			commands.registerCommand(new CommandPlayers(commands));
+			commands.registerCommand(new CommandRsub(commands));
+			commands.registerCommand(new CommandSub(commands));
+			commands.registerCommand(new CommandSubs(commands));
+			commands.registerCommand(new CommandScramble(commands));
+			commands.registerCommand(new CommandCancelGame(commands));
+			commands.registerCommand(new CommandStatus(commands));
+			commands.registerCommand(new CommandStats(commands));
+			commands.registerCommand(new CommandPlayerInfo(commands));
+			commands.registerCommand(new CommandCachedPlayerInfo(commands));
+			commands.registerCommand(new CommandClearQueue(commands));
+			commands.registerCommand(new CommandForceRem(commands));
+			commands.registerCommand(new CommandClearGames(commands));
+			commands.registerCommand(new CommandSetQueue(commands));
+			commands.registerCommand(new CommandEndGame(commands));
+			commands.registerCommand(new CommandStart(commands));
+			commands.registerCommand(new CommandEnd(commands));
+			commands.registerCommand(new CommandClearSubs(commands));
+			commands.registerCommand(new CommandForceSub(commands));
+			commands.registerCommand(new CommandRefreshServers(commands));
+			//commands.registerCommand(new CommandPingMe(commands));
+			//commands.registerCommand(new CommandRandomTeams(commands));
+			commands.registerCommand(new CommandDisconnect(commands));
+			commands.registerCommand(new CommandConnect(commands));
+			commands.registerCommand(new CommandClearPlayerCache(commands));
+			commands.registerCommand(new CommandSuspend(commands));
+
+			
+			//wait until the bot connects to update the channel caption (doesn't work before then)
+			client.getEventDispatcher().on(ReadyEvent.class).subscribe((readyEvent)->{
+				//hack to put the initialisation in a different thread
+				//better fix would be to make initialisation not block
+				Mono.empty().subscribe((a) -> {
+					this.initGatherObjects();
+				});
+			});
+	
+			LOGGER.info("logging in");
+			//client.login().block();
+			return client.onDisconnect();
+		}).block();
 	}
 
 	/**Main, instantiates some things, loads the database properties, sets up the database and player object managers

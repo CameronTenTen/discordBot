@@ -1,7 +1,7 @@
 package core;
 
+import  discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Snowflake;
 
 /**PlayerObject for holding all the variables assoiciated with a player. 
  * @author cameron

@@ -5,11 +5,11 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherDB;
 import core.StatsObject;
-import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for checking the stats of a player that are stored in the database. If no args are given, it finds the stats for the player who typed the command. 
  * If the command contains a mention, stats are retreived for that player. 

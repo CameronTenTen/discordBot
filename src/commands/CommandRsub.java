@@ -9,10 +9,10 @@ import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObject;
 import core.SubManager;
-import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for requesting a substitute for a player. If the command is used with no arguments, a sub is requested for yourself. 
  * To add a sub request vote for someone else, the command must be used with a user mention of another player in the game.

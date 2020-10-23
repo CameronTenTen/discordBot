@@ -3,9 +3,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin command for making the discord bot to disconnect from one or all KAG servers. If the bot thinks it is already disconnected, it will say so, but still try to disconnect anyway. 
  * Must be used in command channel. 

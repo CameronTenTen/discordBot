@@ -4,9 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerInfoObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for users to link their KAG usernames with their discord account without logging into their KAG account by directing them to the KAG server instead. Useful for people who don't know their KAG account details(steam users).
  * <p>

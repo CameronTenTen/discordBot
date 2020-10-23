@@ -4,9 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherGame;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin only command for ending the current game. Must be used in command channel. 
  * <p>

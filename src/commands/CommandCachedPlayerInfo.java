@@ -5,10 +5,10 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerObject;
-import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for showing player account info in the channel. Shows KAG username, Discord ID, Nick, Name and Discriminator as stored in the database. 
  * <p>

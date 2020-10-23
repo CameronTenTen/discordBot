@@ -14,9 +14,9 @@ import core.DiscordBot;
 import core.GatherDB;
 import core.PlayerInfoObject;
 import core.TokenCheckObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for users to link their KAG usernames with their discord account. 
  * <p>

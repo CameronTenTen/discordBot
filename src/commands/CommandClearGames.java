@@ -3,9 +3,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**
  * Admin only command for clearing all currently running games for a gather object. Must be used in command channel. 

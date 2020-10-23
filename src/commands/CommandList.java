@@ -3,9 +3,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for saying the current player list and queue size for the gather object associated with this channel.  Must be used in command channel. 
  * @author cameron

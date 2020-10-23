@@ -4,9 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**
  * Command players can use to cancel a game if something went wrong. Must be used in command channel. 

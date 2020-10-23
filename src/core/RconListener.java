@@ -1,6 +1,6 @@
 package core;
 
-import discord4j.core.object.util.Snowflake;
+import  discord4j.common.util.Snowflake;
 
 /**Listener object to be added to the KagServerChecker. Gets messages passed to it when they are received from the server. 
  * @author cameron

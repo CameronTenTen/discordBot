@@ -3,9 +3,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin command for making the discord bot connect to one or all disconnected KAG servers(only tries if it knows that it is disconnected). Must be used in command channel. 
  * @author cameron

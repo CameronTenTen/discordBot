@@ -3,9 +3,9 @@ package commands;
 import java.util.Arrays;
 import java.util.List;
 
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for fetching a list of possible commands with descriptions and usage examples
  * @author cameron

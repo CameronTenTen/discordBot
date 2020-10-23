@@ -6,14 +6,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
 
+import  discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
-
-import java.util.Timer;
 
 /**class to keep track of player objects so that they can be updated when player data is changed (for example when a user links their accounts). All player objects should be created here. If they are created elsewhere they will become invalid if a player changes their linked accounts.
  * also periodically checks the last used time of each of the player objects and frees them for garbage collection if they have not been used for some time.

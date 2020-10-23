@@ -1,9 +1,9 @@
 package commands;
 import java.util.Arrays;
 
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /** Prints a linking help message
  * @author cameron

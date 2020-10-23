@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.presence.Status;
-import discord4j.core.object.entity.Member;
 
 /**
  * Chat command for players to add to the queue. Must be used in command channel. 

@@ -4,9 +4,9 @@ import java.util.Arrays;
 import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**
  * Chat command for players to add to/remove from the soft queue/ping list. Must be used in command channel. 

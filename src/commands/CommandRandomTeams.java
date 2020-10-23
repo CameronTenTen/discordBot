@@ -9,9 +9,9 @@ import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObject;
 import core.StatsObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin only command for adding random players from database to the queue. Useful for testing. Must be used in command channel. 
  * Retrieves a random list of players from the gather database and adds them to the queue. The number of players retrieved is equal to the queue size. 

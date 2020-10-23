@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import core.DiscordBot;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Instantiation of the Command manager class for discord4J
  * @author cameron
@@ -37,7 +37,7 @@ public class Discord4JCommands extends Commands<Message, Member, Channel>
 	 */
 	public void onMessageReceivedEvent(final MessageCreateEvent event)
 	{
-		this.onMessage(event.getMessage().getContent().orElse(null), event.getMessage(), event.getMember().orElse(null), event.getMessage().getChannel().block());
+		this.onMessage(event.getMessage().getContent(), event.getMessage(), event.getMember().orElse(null), event.getMessage().getChannel().block());
 	}
 
 	/**When the someone uses a command they don't have permission for, want to give them some feedback

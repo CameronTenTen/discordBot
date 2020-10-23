@@ -5,10 +5,10 @@ import java.util.List;
 import core.DiscordBot;
 import core.GatherObject;
 import core.PlayerObjectManager;
-import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin command for clearing the current player cache of all unused player objects. Must be used in command channel. 
  * @author cameron

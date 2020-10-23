@@ -11,9 +11,9 @@ import core.GatherObject;
 import core.PlayerObject;
 import core.SubManager;
 import core.SubstitutionObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Command for subbing into a game. Must be used in command channel. Player must be linked and not already playing a game.
  * <p>

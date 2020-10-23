@@ -4,16 +4,16 @@ import java.util.List;
 
 import core.DiscordBot;
 import core.GatherDB;
-import discord4j.core.object.entity.Channel;
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.Channel;
 
-/**Command for showing player account info in the channel. Shows KAG username, Discord ID, Nick, Name and Discriminator as stored in the database. 
+/**Command for showing player account info in the channel. Shows KAG username, Discord ID, Nick, Name and Discriminator as stored in the database.
  * <p>
- * Useful for checking the link status of a player. 
+ * Useful for checking the link status of a player.
  * @author cameron
  * @see GatherDB#getKagName(long)
  * @see GatherDB#getDiscordID(String)

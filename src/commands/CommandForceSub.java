@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import core.DiscordBot;
 import core.GatherObject;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.Channel;
 
 /**Admin only command for subbing a player from the game. Must be used in command channel. 
  * Gets a list of all the mentions in the command and subs those players from the game if they are in it. 
