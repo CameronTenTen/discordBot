@@ -60,8 +60,6 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.PresenceUpdateEvent;
 import discord4j.core.event.domain.guild.MemberLeaveEvent;
-import discord4j.core.event.domain.lifecycle.ConnectEvent;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -78,6 +76,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.presence.Status;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**The main bot class. Contains most of the interaction with the Discord bot client. Contains various helper functions and objects.
  * @author cameron
@@ -219,12 +218,7 @@ public class DiscordBot
 		GatherObject gather = itr.next();
 		if(gather == null) return;
 		gather.clearQueueRole();
-	
-		//wait until the bot connects to update the channel caption (doesn't work before then)
-		client.getEventDispatcher().on(ConnectEvent.class).subscribe((ConnectEvent event) ->
-		{
-			gather.updateChannelCaption();
-		});
+		gather.updateChannelCaption();
 	}
 
 	/**Initial bot setup goes here.
@@ -295,18 +289,13 @@ public class DiscordBot
 			commands.registerCommand(new CommandClearPlayerCache(commands));
 			commands.registerCommand(new CommandSuspend(commands));
 
-			
-			//wait until the bot connects to update the channel caption (doesn't work before then)
-			client.getEventDispatcher().on(ReadyEvent.class).subscribe((readyEvent)->{
-				//hack to put the initialisation in a different thread
-				//better fix would be to make initialisation not block
-				Mono.empty().subscribe((a) -> {
-					this.initGatherObjects();
-				});
+			//need to run init in a thread that allows blocking, real fix is to make init not use blocking
+			Mono.just("").subscribeOn(Schedulers.boundedElastic()).subscribe((a) -> {
+				LOGGER.info("Initialising gather objects");
+				this.initGatherObjects();
 			});
 	
 			LOGGER.info("logging in");
-			//client.login().block();
 			return client.onDisconnect();
 		}).block();
 	}
